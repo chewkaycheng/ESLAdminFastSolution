@@ -4,13 +4,12 @@ using ESLAdmin.Logging.Interface;
 namespace ESLAdmin.Features.Repositories;
 
 public partial class RepositoryBase<ReadT, WriteT> :
-  IRepositoryBaseEFCore<ReadT, WriteT>,
-  IRepositoryBaseDapper<ReadT, WriteT>
+  IRepositoryBase<ReadT, WriteT>
   where ReadT : class
   where WriteT : class
 {
   protected IDbContextDapper? _dbContextDapper;
-  protected IDbContextEF? _dbContextEF;
+  //protected IDbContextEF? _dbContextEF;
   protected IMessageLogger _messageLogger;
 
   // =================================================
@@ -20,11 +19,11 @@ public partial class RepositoryBase<ReadT, WriteT> :
   // ==================================================
   public RepositoryBase(
     IDbContextDapper? dbContextDapper,
-    IDbContextEF? dbContextEF,
+    //IDbContextEF? dbContextEF,
     IMessageLogger messageLogger)
   {
     _dbContextDapper = dbContextDapper;
-    _dbContextEF = dbContextEF;
+    //_dbContextEF = dbContextEF;
     _messageLogger = messageLogger;
   }
 }

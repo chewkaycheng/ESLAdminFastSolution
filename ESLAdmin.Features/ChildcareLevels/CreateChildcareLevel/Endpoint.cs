@@ -1,26 +1,62 @@
-﻿using ESLAdmin.Features;
-using ESLAdmin.Features.ChildcareLevels.Repositories.Interfaces;
+﻿using Dapper;
+using ESLAdmin.Domain.Entities;
+using ESLAdmin.Features.Repositories.Interfaces;
+using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 
 namespace ESLAdmin.Features.ChildcareLevels.CreateChildcareLevel;
 
-public class Endpoint : Endpoint<Request, OperationResult, Mapper>
+public class Endpoint : Endpoint<Request, APIResponse<OperationResult>, Mapper>
 {
-  private readonly IChildcareLevelRepositoryManager _manager;
-
-  public Endpoint(IChildcareLevelRepositoryManager manager)
+  private readonly IRepositoryBase<Request, OperationResult> _repository;
+  private readonly IMessageLogger _messageLogger;
+  public Endpoint(
+    IRepositoryBase<Request, OperationResult> repository,
+    IMessageLogger messageLogger)
   {
-    _manager = manager;
+    _repository = repository;
+    _messageLogger = messageLogger;
   }
 
   public override void Configure()
   {
-    Post("route");
+    Post("/api/childcarelevels");
   }
 
   public override async Task HandleAsync(Request r, CancellationToken c)
   {
-    var result = await _manager.ChildcareLevel.CreateChildcareLevelAsync(Map, r);
-    await SendAsync(result);
+    try
+    {
+      DynamicParameters parameters = Map.ToEntity(r);
+      var sql = DbConstsChildcareLevel.SP_CHILDCARELEVEL_ADD;
+
+      await _repository.DapExecWithTransAsync(sql, parameters);
+      var result = Map.FromEntity(parameters);
+
+      if (result.DbApiError == 0)
+      {
+        var response = new APIResponse<OperationResult>();
+        response.IsSuccess = true;
+        response.Data = result;
+      }
+      else
+      {
+        var response = new APIResponse<OperationResult>();
+
+        response.IsSuccess = false;
+        response.Error = $"Another record with the childcare level name: {r.ChildcareLevelName} already exists.";
+        await SendAsync(response, 409, c);
+      }
+    }
+    catch (Exception ex)
+    {
+      _messageLogger.LogDatabaseException(nameof(HandleAsync), ex);
+
+      var response = new APIResponse<OperationResult>();
+
+      response.IsSuccess = false;
+      response.Error = "Internal Server Error";
+      await SendAsync(response, 500, c);
+    }
   }
 }

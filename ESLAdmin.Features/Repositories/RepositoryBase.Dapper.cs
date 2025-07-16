@@ -7,8 +7,7 @@ using System.Data;
 namespace ESLAdmin.Features.Repositories;
 
 public partial class RepositoryBase<ReadT, WriteT> :
-  IRepositoryBaseEFCore<ReadT, WriteT>,
-  IRepositoryBaseDapper<ReadT, WriteT>
+  IRepositoryBase<ReadT, WriteT>
   where ReadT : class
   where WriteT : class
 {

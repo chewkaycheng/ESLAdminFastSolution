@@ -1,6 +1,4 @@
 ﻿using ESLAdmin.Domain.Entities;
-using ESLAdmin.Features.ChildcareLevels.Repositories;
-using ESLAdmin.Features.ChildcareLevels.Repositories.Interfaces;
 using ESLAdmin.Features.Repositories;
 using ESLAdmin.Features.Repositories.Interfaces;
 using ESLAdmin.Features.Users.Repository;
@@ -75,18 +73,6 @@ public static class ServiceExtensions
           configuration.GetConnectionString("ESLAdminConnection")));
 
     services.AddSingleton<IDbContextDapper, DbContextDapper>();
-  }
-
-  // =================================================
-  // 
-  // ConfigureRepositoryManagers
-  //
-  // ==================================================
-  public static void ConfigureRepositoryManagers(
-  this IServiceCollection services)
-  {
-    services.AddScoped<IChildcareLevelRepositoryManager,
-      ChildcareLevelRepositoryManager>();
-  }
-
+    services.AddScoped(typeof(IRepositoryBase<,>), typeof(RepositoryBase<,>));
+  } 
 }

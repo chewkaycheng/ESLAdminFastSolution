@@ -1,10 +1,22 @@
 ﻿using ESLAdmin.Domain.Entities;
+using ESLAdmin.Features.Repositories.Interfaces;
+using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 
 namespace ESLAdmin.Features.ChildcareLevels.GetChildcareLevels;
 
-public class Endpoint : Endpoint<EmptyRequest, IEnumerable<Response>, Mapper>
+public class Endpoint : Endpoint<EmptyRequest, APIResponse<IEnumerable<Response>>, Mapper>
 {
+  private readonly IRepositoryBase<ChildcareLevel, OperationResult> _repository;
+  private readonly IMessageLogger _messageLogger;
+  public Endpoint(
+    IRepositoryBase<ChildcareLevel, OperationResult> repository,
+    IMessageLogger messageLogger)
+  {
+    _repository = repository;
+    _messageLogger = messageLogger;
+  }
+
   public override void Configure()
   {
     Get("/api/childcarelevels");
@@ -13,36 +25,30 @@ public class Endpoint : Endpoint<EmptyRequest, IEnumerable<Response>, Mapper>
 
   public override async Task HandleAsync(EmptyRequest req, CancellationToken c)
   {
-    var models = new List<ChildcareLevel>();
-    var ch = new ChildcareLevel();
-    ch.Id = 1;
-    ch.ChildcareLevelName = "Infant";
-    ch.MaxCapacity = 22;
-    ch.DisplayOrder = 1;
-    ch.PlacesAssigned = 12;
-    ch.InitUser = 0;
-    ch.InitDate = DateTime.Now;
-    ch.UserCode = 1;
-    ch.UserStamp = DateTime.Now;
-    ch.Guid = Guid.NewGuid().ToString();
-    models.Add(ch);
+    try
+    {
+      var sql = DbConstsChildcareLevel.SQL_GETALL;
 
-    ch = new ChildcareLevel();
-    ch.Id = 2;
-    ch.ChildcareLevelName = "Toddler";
-    ch.MaxCapacity = 24;
-    ch.DisplayOrder = 2;
-    ch.PlacesAssigned = 12;
-    ch.InitUser = 0;
-    ch.InitDate = DateTime.Now;
-    ch.UserCode = 1;
-    ch.UserStamp = DateTime.Now;
-    ch.Guid = Guid.NewGuid().ToString();
-    models.Add(ch);
+      var childcareLevels = await _repository.DapQueryMultipleAsync(sql, null);
+      IEnumerable<Response> childcareLevelsResponse = childcareLevels.Select(
+        childcareLevel => Map.FromEntity(
+          childcareLevel)).ToList();
 
-    var response = models.Select(childcareLevel => Map.FromEntity(
-      childcareLevel)).ToList();
+      var response = new APIResponse<IEnumerable<Response>>();
+      response.IsSuccess = true;
+      response.Data = childcareLevelsResponse;
 
-    await SendAsync(response);
+      await SendAsync(response);
+    }
+    catch (Exception ex)
+    {
+      _messageLogger.LogDatabaseException(nameof(HandleAsync), ex);
+
+      var response = new APIResponse<IEnumerable<Response>>();
+
+      response.IsSuccess = false;
+      response.Error = "Internal Server Error";
+      await SendAsync(response, 500, c);
+    }
   }
 }

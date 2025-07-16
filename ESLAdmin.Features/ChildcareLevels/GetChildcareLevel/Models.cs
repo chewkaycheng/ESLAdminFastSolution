@@ -1,4 +1,6 @@
-﻿namespace ESLAdmin.Features.ChildcareLevels.GetChildcareLevels;
+﻿using FastEndpoints;
+
+namespace ESLAdmin.Features.ChildcareLevels.GetChildcareLevel;
 
 public class Response
 {

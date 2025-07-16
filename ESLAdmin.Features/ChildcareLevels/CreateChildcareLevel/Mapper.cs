@@ -1,6 +1,4 @@
 ﻿using Dapper;
-using ESLAdmin.Features.ChildcareLevels.GetChildcareLevels;
-using ESLAdmin.Features.ChildcareLevels.Repositories;
 using FastEndpoints;
 
 namespace ESLAdmin.Features.ChildcareLevels.CreateChildcareLevel
@@ -11,17 +9,17 @@ namespace ESLAdmin.Features.ChildcareLevels.CreateChildcareLevel
     {
       DynamicParameters parameters = new DynamicParameters();
       parameters.AddStringInputParam(
-        ChildcareLevelConsts.PARAM_CHILDCARELEVELNAME,
+        DbConstsChildcareLevel.PARAM_CHILDCARELEVELNAME,
         r.ChildcareLevelName,
         32);
       parameters.AddInt32InputParam(
-        ChildcareLevelConsts.PARAM_MAXCAPACITY,
+        DbConstsChildcareLevel.PARAM_MAXCAPACITY,
         r.MaxCapacity);
       parameters.AddInt32InputParam(
-        ChildcareLevelConsts.PARAM_DISPLAYORDER,
+        DbConstsChildcareLevel.PARAM_DISPLAYORDER,
         r.DisplayOrder);
       parameters.AddInt64InputParam(
-        ChildcareLevelConsts.PARAM_INITUSER,
+        DbConstsChildcareLevel.PARAM_INITUSER,
         r.InitUser);
 
       // Output parameters
@@ -31,7 +29,7 @@ namespace ESLAdmin.Features.ChildcareLevels.CreateChildcareLevel
         OperationResultConsts.DUPFIELDNAME,
         128);
       parameters.AddInt64OutputParam(
-        ChildcareLevelConsts.CHILDCARELEVELID);
+        DbConstsChildcareLevel.CHILDCARELEVELID);
       parameters.AddStringOutputParam(
         OperationResultConsts.GUID,
         38);
@@ -46,7 +44,7 @@ namespace ESLAdmin.Features.ChildcareLevels.CreateChildcareLevel
       DupFieldName = parameters.Get<String?>(
         OperationResultConsts.DUPFIELDNAME),
       Id = parameters.Get<long?>(
-        ChildcareLevelConsts.CHILDCARELEVELID),
+        DbConstsChildcareLevel.CHILDCARELEVELID),
       Guid = parameters.Get<String?>(
         OperationResultConsts.GUID),
     };

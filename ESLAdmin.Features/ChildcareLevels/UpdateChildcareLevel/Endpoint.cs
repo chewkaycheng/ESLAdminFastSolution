@@ -7,11 +7,11 @@ public class Endpoint : Endpoint<Request, OperationResult, Mapper>
 {
   public override void Configure()
   {
-    Post("route");
+    Put("/api/childcarelevels");
   }
 
   public override async Task HandleAsync(Request r, CancellationToken c)
   {
-    await SendAsync(new Response());
+    await SendAsync(new OperationResult());
   }
 }

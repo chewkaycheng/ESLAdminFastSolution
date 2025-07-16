@@ -1,6 +1,6 @@
-﻿namespace ESLAdmin.Features
+﻿namespace ESLAdmin.Features.ChildcareLevels
 {
-  public static class DbConsts
+  public static class DbConstsChildcareLevel
   {
     public const string PARAM_CHILDCARELEVELID = "pchildcarelevelid";
     public const string PARAM_CHILDCARELEVELNAME = "pchildcareLevelName";

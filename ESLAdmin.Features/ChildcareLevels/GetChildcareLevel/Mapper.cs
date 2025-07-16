@@ -1,7 +1,8 @@
 ﻿using ESLAdmin.Domain.Entities;
 using FastEndpoints;
+using System;
 
-namespace ESLAdmin.Features.ChildcareLevels.GetChildcareLevels;
+namespace ESLAdmin.Features.ChildcareLevels.GetChildcareLevel;
 
 public class Mapper : Mapper<EmptyRequest, Response, ChildcareLevel>
 {

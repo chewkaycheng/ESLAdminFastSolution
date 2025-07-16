@@ -33,6 +33,7 @@ public class OperationResult
     Id = operationResult.Id;
     Guid = operationResult.Guid;
   }
+
   public int DbApiError { get; set; }
   public string? DupFieldName { get; set; }
   public string? ReferenceTable { get; set; }

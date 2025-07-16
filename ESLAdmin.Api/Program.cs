@@ -1,5 +1,4 @@
 global using FastEndpoints;
-global using FluentValidation;
 using ESLAdmin.Api.Extensions;
 using ESLAdmin.Logging.Extensions;
 using FastEndpoints.Swagger;
@@ -10,18 +9,16 @@ builder.Services.ConfigureCors();
 builder.Services.ConfigureIISIntegration();
 builder.Services.ConfigureIdentity();
 builder.Services.ConfigureFirebirdDbContexts(builder.Configuration);
-builder.Services.ConfigureRepositoryManagers();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-
 builder.Services.AddFastEndpoints(options =>
 {
   options.Assemblies = new[] { typeof(
-    ESLAdmin.Features.FeatureAssemblyMarker).Assembly };
+    ESLAdmin.Features.FeatureAssemblyMarker).Assembly};
 });
-builder.Services.AddSwaggerDocument();
+builder.Services.AddOpenApi();
+builder.Services.SwaggerDocument();
 
 var app = builder.Build();
 
@@ -32,7 +29,10 @@ var app = builder.Build();
 //}
 
 //app.UseHttpsRedirection();
-
+  
 app.UseFastEndpoints();
-app.UseSwaggerGen();
+if (app.Environment.IsDevelopment())
+{
+  app.UseSwaggerGen();
+}
 app.Run();
