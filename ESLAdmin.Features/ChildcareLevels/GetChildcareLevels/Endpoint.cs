@@ -5,7 +5,7 @@ using FastEndpoints;
 
 namespace ESLAdmin.Features.ChildcareLevels.GetChildcareLevels;
 
-public class Endpoint : Endpoint<EmptyRequest, APIResponse<IEnumerable<Response>>, Mapper>
+public class Endpoint : EndpointWithoutRequest<APIResponse<IEnumerable<Response>>, Mapper>
 {
   private readonly IRepositoryBase<ChildcareLevel, OperationResult> _repository;
   private readonly IMessageLogger _messageLogger;
@@ -23,7 +23,7 @@ public class Endpoint : Endpoint<EmptyRequest, APIResponse<IEnumerable<Response>
     AllowAnonymous();
   }
 
-  public override async Task HandleAsync(EmptyRequest req, CancellationToken c)
+  public override async Task HandleAsync(CancellationToken c)
   {
     try
     {
