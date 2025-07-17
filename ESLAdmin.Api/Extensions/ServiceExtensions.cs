@@ -1,7 +1,7 @@
 ﻿using ESLAdmin.Domain.Entities;
 using ESLAdmin.Features.Repositories;
 using ESLAdmin.Features.Repositories.Interfaces;
-using ESLAdmin.Features.Users.Repository;
+using ESLAdmin.Features.Users.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -74,8 +74,13 @@ public static class ServiceExtensions
 
     services.AddSingleton<IDbContextDapper, DbContextDapper>();
     services.AddScoped(typeof(IRepositoryBase<,>), typeof(RepositoryBase<,>));
-  } 
+  }
 
+  // =================================================
+  // 
+  // ConfigureRepositoryManager
+  //
+  // ==================================================
   public static void ConfigureRepositoryManager(
     this IServiceCollection services)
   {

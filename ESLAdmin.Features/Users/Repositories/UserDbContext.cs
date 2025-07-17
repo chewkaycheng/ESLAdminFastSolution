@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace ESLAdmin.Features.Users.Repository;
+namespace ESLAdmin.Features.Users.Repositories;
 
 public class UserDbContext : IdentityDbContext<User>
 {
