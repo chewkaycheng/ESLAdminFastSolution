@@ -9,13 +9,13 @@ namespace ESLAdmin.Features.ChildcareLevels.GetChildcareLevel;
 
 public class Endpoint : Endpoint<EmptyRequest, APIResponse<Response>, Mapper>
 {
-  private readonly IRepositoryBase<ChildcareLevel, OperationResult> _repository;
+  private readonly IRepositoryManager _manager;
   private readonly IMessageLogger _messageLogger;
   public Endpoint(
-    IRepositoryBase<ChildcareLevel, OperationResult> repository,
+    IRepositoryManager manager,
     IMessageLogger messageLogger)
   {
-    _repository = repository;
+    _manager = manager;
     _messageLogger = messageLogger;
   }
 
@@ -30,31 +30,12 @@ public class Endpoint : Endpoint<EmptyRequest, APIResponse<Response>, Mapper>
     try
     {
       var id = Route<int>("id");
-      var sql = DbConstsChildcareLevel.SQL_GETBYID;
+      var response = await _manager.ChildcareLevelRepository.GetChildcareLevel(
+        id,
+        Map);
+      await SendAsync(
+       response, response.IsSuccess ? 200 : 404, c);
 
-      DynamicParameters parameters = new DynamicParameters();
-      parameters.AddInt64InputParam(
-        OperationResultConsts.ID,
-        id);
-      
-      ChildcareLevel? childcareLevel = await _repository.DapQuerySingleAsync(
-        sql,
-        parameters);
-      if (childcareLevel == null)
-      {
-        var apiResponse = new APIResponse<Response>();
-        apiResponse.IsSuccess = false;
-        apiResponse.Error = $"A childcare level with Id: {id} does not exist.";
-        await SendAsync(apiResponse, 404, c);
-      }
-      else
-      {
-        Response childcareLevelResponse = Map.FromEntity(childcareLevel);
-        var apiResponse = new APIResponse<Response>();
-        apiResponse.IsSuccess = true;
-        apiResponse.Data = childcareLevelResponse;
-        await SendAsync(apiResponse);
-      }
     }
     catch (Exception ex)
     {

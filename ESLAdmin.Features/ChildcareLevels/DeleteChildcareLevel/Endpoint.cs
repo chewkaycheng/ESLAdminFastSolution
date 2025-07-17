@@ -1,10 +1,9 @@
 ﻿using Dapper;
-using ESLAdmin.Domain.Entities;
 using ESLAdmin.Features.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 
-namespace ESLAdmin.Features.ChildcareLevels.CreateChildcareLevel;
+namespace ESLAdmin.Features.ChildcareLevels.DeleteChildcareLevel;
 
 public class Endpoint : Endpoint<Request, APIResponse<OperationResult>, Mapper>
 {
@@ -20,14 +19,15 @@ public class Endpoint : Endpoint<Request, APIResponse<OperationResult>, Mapper>
 
   public override void Configure()
   {
-    Post("/api/childcarelevels");
+    Delete("/api/childcarelevels/{id}");
   }
 
   public override async Task HandleAsync(Request r, CancellationToken c)
   {
     try
     {
-      var response = await _manager.ChildcareLevelRepository.CreateChildcareLevel(r, Map);
+      var id = Route<int>("id");
+      var response = await _manager.ChildcareLevelRepository.DeleteChildcareLevel(id, Map);
       await SendAsync(
         response, response.Data.DbApiError == 0 ? 200 : 409, c);
     }

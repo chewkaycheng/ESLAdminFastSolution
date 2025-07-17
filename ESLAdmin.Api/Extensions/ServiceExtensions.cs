@@ -75,4 +75,10 @@ public static class ServiceExtensions
     services.AddSingleton<IDbContextDapper, DbContextDapper>();
     services.AddScoped(typeof(IRepositoryBase<,>), typeof(RepositoryBase<,>));
   } 
+
+  public static void ConfigureRepositoryManager(
+    this IServiceCollection services)
+  {
+    services.AddScoped<IRepositoryManager, RepositoryManager>();
+  }
 }

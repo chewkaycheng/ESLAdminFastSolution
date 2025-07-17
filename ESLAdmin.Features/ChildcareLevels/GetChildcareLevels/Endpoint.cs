@@ -7,13 +7,13 @@ namespace ESLAdmin.Features.ChildcareLevels.GetChildcareLevels;
 
 public class Endpoint : EndpointWithoutRequest<APIResponse<IEnumerable<Response>>, Mapper>
 {
-  private readonly IRepositoryBase<ChildcareLevel, OperationResult> _repository;
+  private readonly IRepositoryManager _manager;
   private readonly IMessageLogger _messageLogger;
   public Endpoint(
-    IRepositoryBase<ChildcareLevel, OperationResult> repository,
+    IRepositoryManager manager,
     IMessageLogger messageLogger)
   {
-    _repository = repository;
+    _manager = manager;
     _messageLogger = messageLogger;
   }
 
@@ -27,17 +27,7 @@ public class Endpoint : EndpointWithoutRequest<APIResponse<IEnumerable<Response>
   {
     try
     {
-      var sql = DbConstsChildcareLevel.SQL_GETALL;
-
-      var childcareLevels = await _repository.DapQueryMultipleAsync(sql, null);
-      IEnumerable<Response> childcareLevelsResponse = childcareLevels.Select(
-        childcareLevel => Map.FromEntity(
-          childcareLevel)).ToList();
-
-      var response = new APIResponse<IEnumerable<Response>>();
-      response.IsSuccess = true;
-      response.Data = childcareLevelsResponse;
-
+      var response = await _manager.ChildcareLevelRepository.GetChildcareLevels(Map);
       await SendAsync(response);
     }
     catch (Exception ex)
