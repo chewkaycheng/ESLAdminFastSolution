@@ -7,8 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.ConfigureLogging(builder);
 builder.Services.ConfigureCors();
 builder.Services.ConfigureIISIntegration();
-//builder.Services.AddAuthentication();
-//builder.Services.AddAuthorization();
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
 builder.Services.ConfigureIdentity();
 builder.Services.ConfigureFirebirdDbContexts(builder.Configuration);
 builder.Services.ConfigureRepositoryManager();
@@ -38,6 +38,6 @@ if (app.Environment.IsDevelopment())
 {
   app.UseSwaggerGen();
 }
-//app.UseAuthentication();
-//app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 app.Run();

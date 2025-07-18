@@ -4,7 +4,7 @@ namespace ESLAdmin.Features.Users.Repositories.Interfaces;
 
 public interface IAuthenticationRepository
 {
-  Task<APIResponse<IdentityResult>> RegisterUser(
+  Task<APIResponse<IdentityResultExtended>> RegisterUser(
     RegisterUser.Request request,
     RegisterUser.Mapper mapper);
 }

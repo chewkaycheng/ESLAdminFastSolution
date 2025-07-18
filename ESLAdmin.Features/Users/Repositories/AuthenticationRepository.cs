@@ -25,7 +25,7 @@ public class AuthenticationRepository : IAuthenticationRepository
     _configuration = configuration;
   }
 
-  public async Task<APIResponse<IdentityResult>> RegisterUser(
+  public async Task<APIResponse<IdentityResultExtended>> RegisterUser(
     Request request, 
     Mapper mapper)
   {
@@ -42,9 +42,13 @@ public class AuthenticationRepository : IAuthenticationRepository
           user, 
           request.Roles);
 
-      var response = new APIResponse<IdentityResult>();
+      IdentityResultExtended resultExtended = new IdentityResultExtended();
+      resultExtended.IdentityResult = result;
+      resultExtended.User = user;
+
+      var response = new APIResponse<IdentityResultExtended>();
       response.IsSuccess = result.Succeeded;
-      response.Data = result;
+      response.Data = resultExtended;
       return response;
     }
     catch (Exception ex)

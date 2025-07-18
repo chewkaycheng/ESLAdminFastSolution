@@ -27,4 +27,8 @@
     <ProjectReference Include="..\ESLAdmin.Logging\ESLAdmin.Logging.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Users\GetUser\" />
+  </ItemGroup>
+
 </Project>
