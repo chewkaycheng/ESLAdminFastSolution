@@ -3,6 +3,11 @@ using ESLAdmin.Logging.Interface;
 
 namespace ESLAdmin.Features.Repositories;
 
+//------------------------------------------------------------------------------
+//
+//                       class RepositoryBase
+//
+//------------------------------------------------------------------------------
 public partial class RepositoryBase<ReadT, WriteT> :
   IRepositoryBase<ReadT, WriteT>
   where ReadT : class
@@ -12,11 +17,11 @@ public partial class RepositoryBase<ReadT, WriteT> :
   //protected IDbContextEF? _dbContextEF;
   protected IMessageLogger _messageLogger;
 
-  // =================================================
-  // 
-  // RepositoryBase
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                       RepositoryBase
+  //
+  //------------------------------------------------------------------------------
   public RepositoryBase(
     IDbContextDapper? dbContextDapper,
     //IDbContextEF? dbContextEF,

@@ -9,16 +9,21 @@ using System.Text.Json;
 
 namespace ESLAdmin.Features.Repositories;
 
+//------------------------------------------------------------------------------
+//
+//                       class DbContextDapper
+//
+//------------------------------------------------------------------------------
 public class DbContextDapper : IDbContextDapper
 {
   private readonly IMessageLogger _messageLogger;
   private readonly string _connectionString;
 
-  // =================================================
-  // 
-  // DbContextDapper
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                       DbContextDapper
+  //
+  //------------------------------------------------------------------------------
   public DbContextDapper(
     IMessageLogger messageLogger,
     IConfiguration configuration)
@@ -32,21 +37,21 @@ public class DbContextDapper : IDbContextDapper
       throw new NullOrEmptyException("Connection string", nameof(DbContextDapper));
   }
 
-  // =================================================
-  // 
-  // GetConnection
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                       GetConnection
+  //
+  //------------------------------------------------------------------------------
   public IDbConnection GetConnection()
   {
     return new FbConnection(_connectionString);
   }
 
-  // =================================================
-  // 
-  // GetConnectionAsync
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                       GetConnectionAsync
+  //
+  //------------------------------------------------------------------------------
   public async Task<IDbConnection> GetConnectionAsync()
   {
     var connection = new FbConnection(_connectionString);
@@ -54,11 +59,11 @@ public class DbContextDapper : IDbContextDapper
     return connection;
   }
 
-  // =================================================
-  // 
-  // GetTransactionAsync
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                       GetTransactionAsync
+  //
+  //------------------------------------------------------------------------------
   public async Task<IDbTransaction> GetTransactionAsync(
     IDbConnection connection)
   {
@@ -75,11 +80,11 @@ public class DbContextDapper : IDbContextDapper
     return await ((FbConnection)connection).BeginTransactionAsync();
   }
 
-  // =================================================
-  // 
-  // SerializeDynamicParameters
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                       SerializeDynamicParameters
+  //
+  //------------------------------------------------------------------------------
   public string SerializeDynamicParameters(
     DynamicParameters parameters)
   {

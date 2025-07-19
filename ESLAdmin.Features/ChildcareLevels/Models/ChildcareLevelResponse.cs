@@ -1,6 +1,11 @@
-﻿namespace ESLAdmin.Features.ChildcareLevels.GetChildcareLevels;
+﻿namespace ESLAdmin.Features.ChildcareLevels.Models;
 
-public class Response
+//------------------------------------------------------------------------------
+//
+//                        class ChildcareLevelResponse 
+//
+//------------------------------------------------------------------------------
+public class ChildcareLevelResponse
 {
   public long Id { get; set; }
   public string ChildcareLevelName { get; set; } = string.Empty;

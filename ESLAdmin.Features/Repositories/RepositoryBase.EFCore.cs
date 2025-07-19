@@ -1,11 +1,15 @@
 ﻿using ESLAdmin.Features.Repositories.Interfaces;
 
-namespace ESLAdmin.Features.Repositories
+namespace ESLAdmin.Features.Repositories;
+
+//------------------------------------------------------------------------------
+//
+//                       class RepositoryBase
+//
+//------------------------------------------------------------------------------
+public partial class RepositoryBase<ReadT, WriteT> :
+  IRepositoryBase<ReadT, WriteT>
+  where ReadT : class
+  where WriteT : class
 {
-  public partial class RepositoryBase<ReadT, WriteT> :
-    IRepositoryBase<ReadT, WriteT>
-    where ReadT : class
-    where WriteT : class
-  {
-  }
 }

@@ -1,12 +1,19 @@
 ﻿using Dapper;
-using ESLAdmin.Features;
 using FastEndpoints;
 
-namespace ESLAdmin.Features.ChildcareLevels.UpdateChildcareLevel;
+namespace ESLAdmin.Features.ChildcareLevels.Endpoints.UpdateChildcareLevel;
 
-public class Mapper : Mapper<Request, OperationResult, DynamicParameters>
+//------------------------------------------------------------------------------
+//
+//                           ToEntity
+//
+//------------------------------------------------------------------------------
+public class UpdateChildcareLevelMapper : Mapper<
+  UpdateChildcareLevelRequest, 
+  OperationResult, 
+  DynamicParameters>
 {
-  public override DynamicParameters ToEntity(Request r)
+  public override DynamicParameters ToEntity(UpdateChildcareLevelRequest r)
   {
     DynamicParameters parameters = new DynamicParameters();
 
@@ -44,13 +51,18 @@ public class Mapper : Mapper<Request, OperationResult, DynamicParameters>
     return parameters;
   }
 
+  //------------------------------------------------------------------------------
+  //
+  //                           FromEntity
+  //
+  //------------------------------------------------------------------------------
   public override OperationResult FromEntity(DynamicParameters parameters) => new()
   {
-    DbApiError = parameters.Get<Int32>(
+    DbApiError = parameters.Get<int>(
       OperationResultConsts.DBAPIERROR),
-    DupFieldName = parameters.Get<String?>(
+    DupFieldName = parameters.Get<string?>(
       OperationResultConsts.DUPFIELDNAME),
-    Guid = parameters.Get<String?>(
+    Guid = parameters.Get<string?>(
       OperationResultConsts.GUID),
   };
 

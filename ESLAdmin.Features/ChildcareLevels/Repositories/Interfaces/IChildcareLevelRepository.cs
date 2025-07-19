@@ -1,20 +1,26 @@
-﻿namespace ESLAdmin.Features.ChildcareLevels.Repositories.Interfaces
+﻿using ESLAdmin.Features.ChildcareLevels.Endpoints.CreateChildcareLevel;
+using ESLAdmin.Features.ChildcareLevels.Endpoints.DeleteChildcareLevel;
+using ESLAdmin.Features.ChildcareLevels.Endpoints.UpdateChildcareLevel;
+using ESLAdmin.Features.ChildcareLevels.Mappers;
+using ESLAdmin.Features.ChildcareLevels.Models;
+
+namespace ESLAdmin.Features.ChildcareLevels.Repositories.Interfaces
 {
   public interface IChildcareLevelRepository
   {
-    Task<APIResponse<IEnumerable<GetChildcareLevels.Response>>> GetChildcareLevels(
-      GetChildcareLevels.Mapper mapper);
-    Task<APIResponse<GetChildcareLevel.Response>> GetChildcareLevel(
+    Task<APIResponse<IEnumerable<ChildcareLevelResponse>>> GetChildcareLevels(
+      ChildcareLevelMapper mapper);
+    Task<APIResponse<ChildcareLevelResponse>> GetChildcareLevel(
       long id,
-      GetChildcareLevel.Mapper mapper);
-    Task<APIResponse<OperationResult>> CreateChildcareLevel(
-      CreateChildcareLevel.Request request,
-      CreateChildcareLevel.Mapper mapper);
-    Task<APIResponse<OperationResult>> UpdateChildcareLevel(
-      UpdateChildcareLevel.Request request,
-      UpdateChildcareLevel.Mapper mapper);
+      ChildcareLevelMapper mapper);
+    Task<APIResponse<OperationResult>> CreateChildcareLevelAsync(
+      CreateChildcareLevelRequest request,
+      CreateChildcareLevelMapper mapper);
+    Task<APIResponse<OperationResult>> UpdateChildcareLevelAsync(
+      UpdateChildcareLevelRequest request,
+      UpdateChildcareLevelMapper mapper);
     Task<APIResponse<OperationResult>> DeleteChildcareLevel(
       long id,
-      DeleteChildcareLevel.Mapper mapper);
+      DeleteChildcareLevelMapper mapper);
   }
 }

@@ -3,35 +3,40 @@ using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Logging;
 
+//------------------------------------------------------------------------------
+//
+//                     class MessageLogger
+//
+//------------------------------------------------------------------------------
 public class MessageLogger : IMessageLogger
 {
   ILogger<MessageLogger> _logger;
 
-  // =================================================
-  // 
-  // MessageLogger
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                     MessageLogger
+  //
+  //------------------------------------------------------------------------------
   public MessageLogger(ILogger<MessageLogger> logger)
   {
     _logger = logger;
   }
 
-  // =================================================
-  // 
-  // LogController
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                     LogController
+  //
+  //------------------------------------------------------------------------------
   public void LogController(string funcName)
   {
     throw new NotImplementedException();
   }
 
-  // =================================================
-  // 
-  // LogController
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                     LogController
+  //
+  //------------------------------------------------------------------------------
   public void LogController<T>(string funcName, T dto)
   {
     throw new NotImplementedException();
@@ -47,11 +52,11 @@ public class MessageLogger : IMessageLogger
       ex);
   }
 
-  // =================================================
-  // 
-  // LogDatabaseExec
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                     LogDatabaseExec
+  //
+  //------------------------------------------------------------------------------
   public void LogDatabaseExec(
     string funcName,
     string sql,
@@ -64,11 +69,11 @@ public class MessageLogger : IMessageLogger
       parameters);
   }
 
-  // =================================================
-  // 
-  // LogSqlQuery
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                     LogSqlQuery
+  //
+  //------------------------------------------------------------------------------
   public void LogSqlQuery(
     string funcName, 
     string sql, 
@@ -80,11 +85,11 @@ public class MessageLogger : IMessageLogger
       parameters);
   }
 
-  // =================================================
-  // 
-  // LogSerializationFailure
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                     LogSerializationFailure
+  //
+  //------------------------------------------------------------------------------
   public void LogSerializationFailure(
       string funcName,
       Exception ex)
@@ -95,11 +100,11 @@ public class MessageLogger : IMessageLogger
         ex);
   }
 
-  // =================================================
-  // 
-  //   LogDatabaseExecSuccess
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                     LogDatabaseExecSuccess
+  //
+  //------------------------------------------------------------------------------
   public void LogDatabaseExecSuccess(
     string funcName,
     string sql,
@@ -112,11 +117,11 @@ public class MessageLogger : IMessageLogger
       parameters);
   }
 
-  // =================================================
-  // 
-  // LogDatabaseExecFailure
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                     LogDatabaseExecFailure
+  //
+  //------------------------------------------------------------------------------
   public void LogDatabaseExecFailure(
     string funcName,
     string sql,
@@ -129,11 +134,11 @@ public class MessageLogger : IMessageLogger
       parameters);
   }
 
-  // =================================================
-  // 
-  // LogDatabaseException
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                     LogDatabaseException
+  //
+  //------------------------------------------------------------------------------
   public void LogDatabaseException(
     string funcName,
     string sql,
@@ -148,6 +153,11 @@ public class MessageLogger : IMessageLogger
         ex);
   }
 
+  //------------------------------------------------------------------------------
+  //
+  //                     LogDatabaseException
+  //
+  //------------------------------------------------------------------------------
   public void LogDatabaseException(
   string funcName,
   Exception ex)

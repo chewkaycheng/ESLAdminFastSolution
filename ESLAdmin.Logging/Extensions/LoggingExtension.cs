@@ -6,8 +6,18 @@ using System.IO.Compression;
 
 namespace ESLAdmin.Logging.Extensions;
 
+//------------------------------------------------------------------------------
+//
+//                      static class LoggingExtension
+//
+//------------------------------------------------------------------------------
 public static class LoggingExtension
 {
+  //------------------------------------------------------------------------------
+  //
+  //                     ConfigureLogging
+  //
+  //------------------------------------------------------------------------------
   public static void ConfigureLogging(
     this IServiceCollection services,
     IHostApplicationBuilder builder)
@@ -33,15 +43,30 @@ public static class LoggingExtension
   }
 }
 
+//------------------------------------------------------------------------------
+//
+//                     class ZipFileHook
+//
+//------------------------------------------------------------------------------
 public class ZipFileHook : Serilog.Sinks.File.FileLifecycleHooks
 {
   private readonly string _zipDirectory;
 
+  //------------------------------------------------------------------------------
+  //
+  //                     ZipFileHook
+  //
+  //------------------------------------------------------------------------------
   public ZipFileHook(string zipDirectory)
   {
     _zipDirectory = zipDirectory;
   }
 
+  //------------------------------------------------------------------------------
+  //
+  //                     OnFileDeleting
+  //
+  //------------------------------------------------------------------------------
   public override void OnFileDeleting(string path)
   {
     try

@@ -3,6 +3,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ESLAdmin.Domain.Entities;
 
+//------------------------------------------------------------------------------
+//
+//                        Class ChildcareLevel
+//
+//------------------------------------------------------------------------------
 [Table("CHILDCARELEVELS")]
 public class ChildcareLevel
 {

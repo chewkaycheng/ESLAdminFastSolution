@@ -6,16 +6,21 @@ using System.Data;
 
 namespace ESLAdmin.Features.Repositories;
 
+//------------------------------------------------------------------------------
+//
+//                       class RepositoryBase
+//
+//------------------------------------------------------------------------------
 public partial class RepositoryBase<ReadT, WriteT> :
   IRepositoryBase<ReadT, WriteT>
   where ReadT : class
   where WriteT : class
 {
-  // =================================================
-  // 
-  // DapQueryMultiple
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                       DapQueryMultiple
+  //
+  //------------------------------------------------------------------------------
   public IEnumerable<ReadT> DapQueryMultiple(
     string sql,
     DynamicParameters? parameters, 
@@ -34,11 +39,11 @@ public partial class RepositoryBase<ReadT, WriteT> :
       commandType: commandType);
   }
 
-  // =================================================
-  // 
-  // DapQueryMultipleAsync
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                       DapQueryMultipleAsync
+  //
+  //------------------------------------------------------------------------------
   public async Task<IEnumerable<ReadT>> DapQueryMultipleAsync(
     string sql, 
     DynamicParameters? parameters, 
@@ -57,11 +62,11 @@ public partial class RepositoryBase<ReadT, WriteT> :
           commandType: commandType);
   }
 
-  // =================================================
-  // 
-  // DapQuerySingle
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                       DapQuerySingle
+  //
+  //------------------------------------------------------------------------------
   public ReadT? DapQuerySingle(
     string sql, 
     DynamicParameters? parameters, 
@@ -80,11 +85,11 @@ public partial class RepositoryBase<ReadT, WriteT> :
           commandType: commandType);
   }
 
-  // =================================================
-  // 
-  // DapQuerySingleAsync
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                       DapQuerySingleAsync
+  //
+  //------------------------------------------------------------------------------
   public async Task<ReadT?> DapQuerySingleAsync(
     string sql, 
     DynamicParameters? parameters, 
@@ -102,11 +107,11 @@ public partial class RepositoryBase<ReadT, WriteT> :
           commandType: commandType);
   }
 
-  // =================================================
-  // 
-  // DapExecWithTrans
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                       DapExecWithTrans
+  //
+  //------------------------------------------------------------------------------
   public bool DapExecWithTrans(
     string sql,
     DynamicParameters parameters,
@@ -175,11 +180,11 @@ public partial class RepositoryBase<ReadT, WriteT> :
     }
   }
 
-  // =================================================
-  // 
-  // DapExecWithTransAsync
+  //------------------------------------------------------------------------------
   //
-  // ==================================================
+  //                       DapExecWithTransAsync
+  //
+  //------------------------------------------------------------------------------
   public async Task<bool> DapExecWithTransAsync(
     string sql,
     DynamicParameters parameters,

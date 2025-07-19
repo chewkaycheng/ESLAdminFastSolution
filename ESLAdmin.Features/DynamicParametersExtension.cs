@@ -1,10 +1,20 @@
 ﻿using Dapper;
 using System.Data;
 
-namespace ESLAdmin.Features; 
+namespace ESLAdmin.Features;
 
+//------------------------------------------------------------------------------
+//
+//                      static class DynamicParametersExtension
+//
+//------------------------------------------------------------------------------
 public static class DynamicParametersExtension
 {
+  //------------------------------------------------------------------------------
+  //
+  //                     AddDateTimeOffsetInputParam
+  //
+  //------------------------------------------------------------------------------
   public static void AddDateTimeOffsetInputParam(
     this DynamicParameters parameters,
     string paramName,
@@ -18,6 +28,12 @@ public static class DynamicParametersExtension
       direction: ParameterDirection.Input
       );
   }
+
+  //------------------------------------------------------------------------------
+  //
+  //                     AddDateTimeOffsetOutputParam
+  //
+  //------------------------------------------------------------------------------
   public static void AddDateTimeOffsetOutputParam(
     this DynamicParameters parameters,
     string paramName
@@ -29,6 +45,12 @@ public static class DynamicParametersExtension
       direction: ParameterDirection.Output
       );
   }
+
+  //------------------------------------------------------------------------------
+  //
+  //                     AddDateTimeInputParam
+  //
+  //------------------------------------------------------------------------------
   public static void AddDateTimeInputParam(
     this DynamicParameters parameters,
     string paramName,
@@ -42,6 +64,12 @@ public static class DynamicParametersExtension
       direction: ParameterDirection.Input
       );
   }
+
+  //------------------------------------------------------------------------------
+  //
+  //                     AddDateTimeOutputParam
+  //
+  //------------------------------------------------------------------------------
   public static void AddDateTimeOutputParam(
     this DynamicParameters parameters,
     string paramName
@@ -53,6 +81,12 @@ public static class DynamicParametersExtension
       direction: ParameterDirection.Output
       );
   }
+
+  //------------------------------------------------------------------------------
+  //
+  //                     AddDoubleInputParam
+  //
+  //------------------------------------------------------------------------------
   public static void AddDoubleInputParam(
     this DynamicParameters parameters,
     string paramName,
@@ -66,6 +100,12 @@ public static class DynamicParametersExtension
       direction: ParameterDirection.Input
       );
   }
+
+  //------------------------------------------------------------------------------
+  //
+  //                     AddDoubleOutputParam
+  //
+  //------------------------------------------------------------------------------
   public static void AddDoubleOutputParam(
     this DynamicParameters parameters,
     string paramName
@@ -77,6 +117,12 @@ public static class DynamicParametersExtension
       direction: ParameterDirection.Output
       );
   }
+
+  //------------------------------------------------------------------------------
+  //
+  //                     AddSingleInputParam
+  //
+  //------------------------------------------------------------------------------
   public static void AddSingleInputParam(
     this DynamicParameters parameters,
     string paramName,
@@ -90,6 +136,12 @@ public static class DynamicParametersExtension
       direction: ParameterDirection.Input
       );
   }
+
+  //------------------------------------------------------------------------------
+  //
+  //                     AddSingleOutputParam
+  //
+  //------------------------------------------------------------------------------
   public static void AddSingleOutputParam(
     this DynamicParameters parameters,
     string paramName
@@ -101,6 +153,12 @@ public static class DynamicParametersExtension
       direction: ParameterDirection.Output
       );
   }
+
+  //------------------------------------------------------------------------------
+  //
+  //                     AddInt32InputParam
+  //
+  //------------------------------------------------------------------------------
   public static void AddInt32InputParam(
     this DynamicParameters parameters,
     string paramName,
@@ -114,6 +172,12 @@ public static class DynamicParametersExtension
       direction: ParameterDirection.Input
       );
   }
+
+  //------------------------------------------------------------------------------
+  //
+  //                     AddInt32OutputParam
+  //
+  //------------------------------------------------------------------------------
   public static void AddInt32OutputParam(
     this DynamicParameters parameters,
     string paramName
@@ -125,6 +189,12 @@ public static class DynamicParametersExtension
       direction: ParameterDirection.Output
       );
   }
+
+  //------------------------------------------------------------------------------
+  //
+  //                     AddInt64InputParam
+  //
+  //------------------------------------------------------------------------------
   public static void AddInt64InputParam(
     this DynamicParameters parameters,
     string paramName,
@@ -138,6 +208,12 @@ public static class DynamicParametersExtension
       direction: ParameterDirection.Input
       );
   }
+
+  //------------------------------------------------------------------------------
+  //
+  //                     AddInt64OutputParam
+  //
+  //------------------------------------------------------------------------------
   public static void AddInt64OutputParam(
     this DynamicParameters parameters,
     string paramName
@@ -149,6 +225,12 @@ public static class DynamicParametersExtension
       direction: ParameterDirection.Output
       );
   }
+
+  //------------------------------------------------------------------------------
+  //
+  //                     AddStringInputParam
+  //
+  //------------------------------------------------------------------------------
   public static void AddStringInputParam(
         this DynamicParameters parameters,
         string paramName,
@@ -162,6 +244,12 @@ public static class DynamicParametersExtension
       size: size,
       direction: ParameterDirection.Input);
   }
+
+  //------------------------------------------------------------------------------
+  //
+  //                     AddStringOutputParam
+  //
+  //------------------------------------------------------------------------------
   public static void AddStringOutputParam(
     this DynamicParameters parameters,
     string paramName,      

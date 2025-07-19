@@ -1,12 +1,17 @@
 ﻿namespace ESLAdmin.Features.Exceptions;
 
-// =================================================
-// 
-// DatabaseException
+//------------------------------------------------------------------------------
 //
-// ==================================================
+//                       class DatabaseException
+//
+//------------------------------------------------------------------------------
 public class DatabaseException : Exception
 {
+  //------------------------------------------------------------------------------
+  //
+  //                       DatabaseException
+  //
+  //------------------------------------------------------------------------------
   public DatabaseException(
     string funcName,
     string sql,
@@ -27,6 +32,11 @@ public class DatabaseException : Exception
   {
   }
 
+  //------------------------------------------------------------------------------
+  //
+  //                       DatabaseException
+  //
+  //------------------------------------------------------------------------------
   public DatabaseException(
     string funcName,
     Exception? innerException)

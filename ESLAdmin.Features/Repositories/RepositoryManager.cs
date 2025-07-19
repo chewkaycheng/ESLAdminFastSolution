@@ -10,11 +10,22 @@ using Microsoft.Extensions.Configuration;
 
 namespace ESLAdmin.Features.Repositories;
 
+//------------------------------------------------------------------------------
+//
+//                       class RepositoryManager
+//
+//------------------------------------------------------------------------------
 public class RepositoryManager : IRepositoryManager
 {
   private readonly Lazy<IChildcareLevelRepository> _childcareLevelRepository;
   private readonly Lazy<IAuthenticationRepository>
     _authenticationRespository;
+
+  //------------------------------------------------------------------------------
+  //
+  //                       RepositoryManager
+  //
+  //------------------------------------------------------------------------------
   public RepositoryManager(
     IDbContextDapper dbContextDapper,
     IMessageLogger messageLogger,
@@ -32,9 +43,20 @@ public class RepositoryManager : IRepositoryManager
         userManager,
         configuration));
   }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       ChildcareLevelRepository
+  //
+  //------------------------------------------------------------------------------
   public IChildcareLevelRepository ChildcareLevelRepository => 
     _childcareLevelRepository.Value;
 
+  //------------------------------------------------------------------------------
+  //
+  //                       AuthenticationRepository
+  //
+  //------------------------------------------------------------------------------
   public IAuthenticationRepository AuthenticationRepository =>
     _authenticationRespository.Value;
 }

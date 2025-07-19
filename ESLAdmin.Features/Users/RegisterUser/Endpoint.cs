@@ -1,22 +1,16 @@
-﻿using Dapper;
-using ESLAdmin.Domain.Entities;
-using ESLAdmin.Features.ChildcareLevels;
-using ESLAdmin.Features.ChildcareLevels.CreateChildcareLevel;
-using ESLAdmin.Features.Repositories.Interfaces;
+﻿using ESLAdmin.Features.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using System.Threading;
 
 namespace ESLAdmin.Features.Users.RegisterUser;
 
-public class ReigsterUserEndpoint : Endpoint<Request, Object, Mapper>
+public class RegisterUserEndpoint : Endpoint<Request, Object, Mapper>
 {
   private readonly IRepositoryManager _repositoryManager;
   private readonly IMessageLogger _messageLogger;
  
-  public ReigsterUserEndpoint(
+  public RegisterUserEndpoint(
     IRepositoryManager repositoryManager,
     IMessageLogger messageLogger)
   {

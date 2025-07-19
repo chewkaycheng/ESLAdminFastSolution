@@ -1,6 +1,10 @@
-﻿namespace ESLAdmin.Features
+﻿namespace ESLAdmin.Features;
+
+//------------------------------------------------------------------------------
+//
+//                     class FeatureAssemblyMarker
+//
+//------------------------------------------------------------------------------
+public class FeatureAssemblyMarker
 {
-  public class FeatureAssemblyMarker
-  {
-  }
 }
