@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Users\GetUser\" />
+    <Folder Include="Users\Mappers\" />
   </ItemGroup>
 
 </Project>

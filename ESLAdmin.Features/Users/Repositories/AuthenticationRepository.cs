@@ -1,20 +1,31 @@
 ﻿using ESLAdmin.Domain.Entities;
+using ESLAdmin.Features.Exceptions;
+using ESLAdmin.Features.Users.Endpoints.GetUser;
+using ESLAdmin.Features.Users.Models;
+using ESLAdmin.Features.Users.RegisterUser;
+using ESLAdmin.Features.Users.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using ESLAdmin.Features.Users.Repositories.Interfaces;
-using ESLAdmin.Features.Users.RegisterUser;
-using Microsoft.AspNetCore.Mvc;
-using ESLAdmin.Features.Exceptions;
 
 namespace ESLAdmin.Features.Users.Repositories;
 
+//------------------------------------------------------------------------------
+//
+//                       class AuthenticationRepository
+//
+//-------------------------------------------------------------------------------
 public class AuthenticationRepository : IAuthenticationRepository
 {
   private readonly IMessageLogger _messageLogger;
   private readonly UserManager<User> _userManager;
   private readonly IConfiguration _configuration;
 
+  //------------------------------------------------------------------------------
+  //
+  //                       AuthenticationRepository
+  //
+  //-------------------------------------------------------------------------------
   public AuthenticationRepository(
     IMessageLogger messageLogger,
     UserManager<User> userManager,
@@ -25,40 +36,81 @@ public class AuthenticationRepository : IAuthenticationRepository
     _configuration = configuration;
   }
 
-  public async Task<APIResponse<IdentityResultExtended>> RegisterUser(
-    Request request, 
-    Mapper mapper)
+  //------------------------------------------------------------------------------
+  //
+  //                       RegisterUser
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<IdentityResultEx> RegisterUserAsync(
+    RegisterUserRequest request, 
+    RegisterUserMapper mapper)
   {
     try
     {
       var user = mapper.ToEntity(request);
 
       var result = await _userManager.CreateAsync(
-        user, 
+        user,
         request.Password);
 
-      if (result.Succeeded)
-        await _userManager.AddToRolesAsync(
-          user, 
-          request.Roles);
+      if (!result.Succeeded)
+      {
+        return IdentityResultEx.Failed(result.Errors.ToArray());
+      }
 
-      IdentityResultExtended resultExtended = new IdentityResultExtended();
-      resultExtended.IdentityResult = result;
-      resultExtended.User = user;
+      if (request.Roles != null && request.Roles.Any())
+      {
+        var roleResult = await _userManager.AddToRolesAsync(user, request.Roles);
+        if (!roleResult.Succeeded)
+        {
+          return IdentityResultEx.Failed(roleResult.Errors.ToArray());
+        }
+      }
 
-      var response = new APIResponse<IdentityResultExtended>();
-      response.IsSuccess = result.Succeeded;
-      response.Data = resultExtended;
-      return response;
+      return IdentityResultEx.Success(user.Id);
     }
     catch (Exception ex)
     {
       _messageLogger.LogDatabaseException(
-        nameof(RegisterUser),
+        nameof(RegisterUserAsync),
         ex);
 
       throw new DatabaseException(
-        nameof(RegisterUser), 
+        nameof(RegisterUserAsync), 
+        ex);
+    }
+  }
+  public async Task<UserResponse> GetUserByIdAsync(
+    GetUserRequest request,
+    GetUserMapper mapper)
+  {
+    try
+    {
+      var user = await _userManager.FindByIdAsync(request.Id);
+
+      if (user == null)
+      {
+        return null;
+      }
+
+      var roles = await _userManager.GetRolesAsync(user);
+      if (roles == null)
+      {
+        return mapper.FromEntity(user);
+      }
+      else
+      {
+        return mapper.FromEntityWithRoles(user, roles);
+      }
+    }
+    catch (Exception ex)
+    {
+      _messageLogger.LogDatabaseException(
+        nameof(GetUserByIdAsync),
+        ex);
+
+      throw new DatabaseException(
+        nameof(GetUserByIdAsync),
         ex);
     }
   }
