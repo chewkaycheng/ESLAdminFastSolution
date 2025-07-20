@@ -30,6 +30,7 @@ public class RepositoryManager : IRepositoryManager
     IDbContextDapper dbContextDapper,
     IMessageLogger messageLogger,
     UserManager<User> userManager,
+    RoleManager<IdentityRole> roleManager,
     UserDbContext dbContext,
     IConfiguration configuration)
   {
@@ -42,6 +43,7 @@ public class RepositoryManager : IRepositoryManager
       () => new AuthenticationRepository(
         messageLogger,
         userManager,
+        roleManager,
         dbContext,
         configuration));
   }

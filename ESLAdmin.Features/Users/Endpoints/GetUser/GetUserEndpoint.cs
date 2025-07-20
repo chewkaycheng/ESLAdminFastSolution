@@ -1,7 +1,11 @@
-﻿using ESLAdmin.Features.Repositories.Interfaces;
+﻿using ESLAdmin.Features.Exceptions;
+using ESLAdmin.Features.Repositories.Interfaces;
 using ESLAdmin.Features.Users.Models;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
+using FluentValidation.Results;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ESLAdmin.Features.Users.Endpoints.GetUser;
 
@@ -12,7 +16,9 @@ namespace ESLAdmin.Features.Users.Endpoints.GetUser;
 //-------------------------------------------------------------------------------
 public class GetUserEndpoint : Endpoint<
   GetUserRequest, 
-  APIResponse<UserResponse>, 
+  Results<Ok<UserResponse>, 
+    NotFound<APIErrors>, 
+    InternalServerError>,
   GetUserMapper>
 {
   private readonly IRepositoryManager _repositoryManager;
@@ -38,7 +44,7 @@ public class GetUserEndpoint : Endpoint<
   //-------------------------------------------------------------------------------
   public override void Configure()
   {
-    Get("/api/users/{id}");
+    Get("/api/users/{email}");
     AllowAnonymous();
   }
 
@@ -47,13 +53,13 @@ public class GetUserEndpoint : Endpoint<
   //                       HandleAsync
   //
   //-------------------------------------------------------------------------------
-  public override async Task HandleAsync(
+  public override async Task<Results<Ok<UserResponse>, NotFound<APIErrors>, InternalServerError>> ExecuteAsync(
     GetUserRequest request, 
     CancellationToken cancellationToken)
   {
     try
     {
-      var userResponse = await _repositoryManager.AuthenticationRepository.GetUserByIdAsync(
+      var userResponse = await _repositoryManager.AuthenticationRepository.GetUserByEmailAsync(
         request,
         Map);
 
@@ -61,15 +67,17 @@ public class GetUserEndpoint : Endpoint<
 
       if (userResponse == null)
       {
-        apiResponse.IsSuccess = false;
-        apiResponse.Error = $"The user with Id: {request.Id} is not found.";
-        await SendAsync(apiResponse, 404, cancellationToken);
-        return;
+        APIErrors errors = new APIErrors();
+        ValidationFailures.AddRange(new ValidationFailure
+        {
+          PropertyName = "UserNotFound",
+          ErrorMessage = $"The user with email: {request.Email} is not found."
+        });
+        errors.Errors = ValidationFailures;
+        return TypedResults.NotFound(errors);
       }
 
-      apiResponse.IsSuccess = true;
-      apiResponse.Data = userResponse;
-      await SendAsync(apiResponse, 201, cancellation: cancellationToken);
+      return TypedResults.Ok(userResponse);
     }
     catch (Exception ex)
     {
@@ -77,13 +85,7 @@ public class GetUserEndpoint : Endpoint<
         nameof(HandleAsync),
         ex);
 
-      var apiResponse = new APIResponse<UserResponse>();
-      apiResponse.IsSuccess = false;
-      apiResponse.Error = "Internal Server Error.";
-      await SendAsync(
-        response: apiResponse,
-        statusCode: 500,
-        cancellation: cancellationToken);
+      return TypedResults.InternalServerError();
     }
   }
 }

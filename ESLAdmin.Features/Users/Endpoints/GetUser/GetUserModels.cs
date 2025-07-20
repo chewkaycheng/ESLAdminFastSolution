@@ -8,6 +8,6 @@ namespace ESLAdmin.Features.Users.Endpoints.GetUser
 {
   public class GetUserRequest
   {
-    public string Id  { get; set; }
+    public string Email  { get; set; }
   }
 }

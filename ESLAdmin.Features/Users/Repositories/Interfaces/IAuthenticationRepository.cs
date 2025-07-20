@@ -11,7 +11,7 @@ public interface IAuthenticationRepository
     RegisterUserRequest request,
     RegisterUserMapper mapper);
 
-  Task<UserResponse> GetUserByIdAsync(
+  Task<UserResponse> GetUserByEmailAsync(
     GetUserRequest request,
     GetUserMapper mapper);
 }

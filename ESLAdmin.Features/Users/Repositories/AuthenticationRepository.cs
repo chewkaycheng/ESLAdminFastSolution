@@ -7,6 +7,7 @@ using ESLAdmin.Features.Users.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using System.Transactions;
 
@@ -21,6 +22,7 @@ public class AuthenticationRepository : IAuthenticationRepository
 {
   private readonly IMessageLogger _messageLogger;
   private readonly UserManager<User> _userManager;
+  private readonly RoleManager<IdentityRole> _roleManager;
   private readonly IConfiguration _configuration;
   private readonly UserDbContext _dbContext;
 
@@ -32,12 +34,14 @@ public class AuthenticationRepository : IAuthenticationRepository
   public AuthenticationRepository(
     IMessageLogger messageLogger,
     UserManager<User> userManager,
+    RoleManager<IdentityRole> roleManager,
     UserDbContext dbContext,
     IConfiguration configuration)
   {
     _dbContext = dbContext;
     _messageLogger = messageLogger;
     _userManager = userManager;
+    _roleManager = roleManager;
     _configuration = configuration;
   }
 
@@ -50,11 +54,12 @@ public class AuthenticationRepository : IAuthenticationRepository
     RegisterUserRequest request, 
     RegisterUserMapper mapper)
   {
+    IDbContextTransaction? transaction = null;
     try
     {
       var user = mapper.ToEntity(request);
 
-      using var transaction = await _dbContext.Database.BeginTransactionAsync();
+      transaction = await _dbContext.Database.BeginTransactionAsync();
 
       var result = await _userManager.CreateAsync(
         user,
@@ -68,6 +73,25 @@ public class AuthenticationRepository : IAuthenticationRepository
 
       if (request.Roles != null && request.Roles.Any())
       {
+        var invalidRoles = new List<string>();
+        foreach (var role in request.Roles)
+        {
+          if (!await _roleManager.RoleExistsAsync(role))
+          {
+            invalidRoles.Add(role);
+          }
+        }
+
+        if (invalidRoles.Any())
+        {
+          await transaction.RollbackAsync();
+          return IdentityResultEx.Failed(new IdentityError
+          {
+            Code = "InvalidRole",
+            Description = $"The following roles do not exist: {string.Join(", ", invalidRoles)}"
+          });
+        }
+
         var roleResult = await _userManager.AddToRolesAsync(user, request.Roles);
         if (!roleResult.Succeeded)
         {
@@ -81,6 +105,11 @@ public class AuthenticationRepository : IAuthenticationRepository
     }
     catch (Exception ex)
     {
+      if (transaction != null)
+      {
+        await transaction.RollbackAsync();
+      }
+
       _messageLogger.LogDatabaseException(
         nameof(RegisterUserAsync),
         ex);
@@ -89,14 +118,19 @@ public class AuthenticationRepository : IAuthenticationRepository
         nameof(RegisterUserAsync), 
         ex);
     }
+    finally
+    {
+      transaction?.Dispose();
+    }
   }
-  public async Task<UserResponse> GetUserByIdAsync(
+
+  public async Task<UserResponse> GetUserByEmailAsync(
     GetUserRequest request,
     GetUserMapper mapper)
   {
     try
     {
-      var user = await _userManager.FindByIdAsync(request.Id);
+      var user = await _userManager.FindByEmailAsync(request.Email);
 
       if (user == null)
       {
@@ -116,11 +150,11 @@ public class AuthenticationRepository : IAuthenticationRepository
     catch (Exception ex)
     {
       _messageLogger.LogDatabaseException(
-        nameof(GetUserByIdAsync),
+        nameof(GetUserByEmailAsync),
         ex);
 
       throw new DatabaseException(
-        nameof(GetUserByIdAsync),
+        nameof(GetUserByEmailAsync),
         ex);
     }
   }

@@ -1,4 +1,5 @@
-﻿using ESLAdmin.Features.Repositories.Interfaces;
+﻿using ESLAdmin.Features.Exceptions;
+using ESLAdmin.Features.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using FluentValidation.Results;
@@ -15,7 +16,7 @@ namespace ESLAdmin.Features.Users.Endpoints.RegisterUser;
 public class RegisterUserEndpoint : Endpoint<
   RegisterUserRequest, 
   Results<NoContent,
-    UnprocessableEntity<List<ValidationFailure>>,
+    UnprocessableEntity<APIErrors>,
     InternalServerError>, 
   RegisterUserMapper>
 {
@@ -53,7 +54,7 @@ public class RegisterUserEndpoint : Endpoint<
   //-------------------------------------------------------------------------------
   public override async 
     Task<Results<NoContent,
-      UnprocessableEntity<List<ValidationFailure>>,
+      UnprocessableEntity<APIErrors>,
       InternalServerError>> 
     ExecuteAsync(
       RegisterUserRequest request, 
@@ -72,7 +73,9 @@ public class RegisterUserEndpoint : Endpoint<
             PropertyName = error.Code,
             ErrorMessage = error.Description
           }));
-        return TypedResults.UnprocessableEntity(ValidationFailures);
+        APIErrors errors = new APIErrors();
+        errors.Errors = ValidationFailures;
+        return TypedResults.UnprocessableEntity(errors);
       }
 
       HttpContext.Response.Headers.Append(
