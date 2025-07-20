@@ -4,10 +4,6 @@ using FastEndpoints;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters.Xml;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace ESLAdmin.Features.Users.Endpoints.RegisterUser;
 
@@ -18,7 +14,9 @@ namespace ESLAdmin.Features.Users.Endpoints.RegisterUser;
 //-------------------------------------------------------------------------------
 public class RegisterUserEndpoint : Endpoint<
   RegisterUserRequest, 
-  Results<NoContent, FastEndpoints.ProblemDetails, InternalServerError>, 
+  Results<NoContent,
+    UnprocessableEntity<List<ValidationFailure>>,
+    InternalServerError>, 
   RegisterUserMapper>
 {
   private readonly IRepositoryManager _repositoryManager;
@@ -53,9 +51,13 @@ public class RegisterUserEndpoint : Endpoint<
   //                       HandleAsync
   //
   //-------------------------------------------------------------------------------
-  public override async Task<Results<NoContent, FastEndpoints.ProblemDetails, InternalServerError>> ExecuteAsync(
-    RegisterUserRequest request, 
-    CancellationToken cancellationToken)
+  public override async 
+    Task<Results<NoContent,
+      UnprocessableEntity<List<ValidationFailure>>,
+      InternalServerError>> 
+    ExecuteAsync(
+      RegisterUserRequest request, 
+      CancellationToken cancellationToken)
   {
     try
     {
@@ -70,7 +72,7 @@ public class RegisterUserEndpoint : Endpoint<
             PropertyName = error.Code,
             ErrorMessage = error.Description
           }));
-        return new FastEndpoints.ProblemDetails(ValidationFailures);
+        return TypedResults.UnprocessableEntity(ValidationFailures);
       }
 
       HttpContext.Response.Headers.Append(
