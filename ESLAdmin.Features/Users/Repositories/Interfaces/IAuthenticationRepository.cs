@@ -1,6 +1,6 @@
 ﻿using ESLAdmin.Features.Users.Endpoints.GetUser;
+using ESLAdmin.Features.Users.Endpoints.RegisterUser;
 using ESLAdmin.Features.Users.Models;
-using ESLAdmin.Features.Users.RegisterUser;
 using Microsoft.AspNetCore.Identity;
 
 namespace ESLAdmin.Features.Users.Repositories.Interfaces;

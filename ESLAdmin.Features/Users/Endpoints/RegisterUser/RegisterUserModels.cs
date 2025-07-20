@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ESLAdmin.Features.Users.RegisterUser
+namespace ESLAdmin.Features.Users.Endpoints.RegisterUser
 {
   //------------------------------------------------------------------------------
   //

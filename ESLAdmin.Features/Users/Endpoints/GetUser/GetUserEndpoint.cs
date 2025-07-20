@@ -1,10 +1,7 @@
 ﻿using ESLAdmin.Features.Repositories.Interfaces;
 using ESLAdmin.Features.Users.Models;
-using ESLAdmin.Features.Users.RegisterUser;
-using ESLAdmin.Features.Users.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
-using Microsoft.AspNetCore.Http;
 
 namespace ESLAdmin.Features.Users.Endpoints.GetUser;
 

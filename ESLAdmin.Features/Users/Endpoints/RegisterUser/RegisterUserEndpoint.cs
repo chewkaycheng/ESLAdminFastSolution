@@ -1,11 +1,15 @@
 ﻿using ESLAdmin.Features.Repositories.Interfaces;
-using ESLAdmin.Features.Users.Models;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters.Xml;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace ESLAdmin.Features.Users.RegisterUser;
+namespace ESLAdmin.Features.Users.Endpoints.RegisterUser;
 
 //------------------------------------------------------------------------------
 //
@@ -13,7 +17,9 @@ namespace ESLAdmin.Features.Users.RegisterUser;
 //
 //-------------------------------------------------------------------------------
 public class RegisterUserEndpoint : Endpoint<
-  RegisterUserRequest, APIResponse<IdentityResultEx>, RegisterUserMapper>
+  RegisterUserRequest, 
+  Results<NoContent, FastEndpoints.ProblemDetails, InternalServerError>, 
+  RegisterUserMapper>
 {
   private readonly IRepositoryManager _repositoryManager;
   private readonly IMessageLogger _messageLogger;
@@ -47,61 +53,43 @@ public class RegisterUserEndpoint : Endpoint<
   //                       HandleAsync
   //
   //-------------------------------------------------------------------------------
-  public override async Task HandleAsync(RegisterUserRequest request, CancellationToken cancellationToken)
+  public override async Task<Results<NoContent, FastEndpoints.ProblemDetails, InternalServerError>> ExecuteAsync(
+    RegisterUserRequest request, 
+    CancellationToken cancellationToken)
   {
     try
     {
       var identityResultEx = await _repositoryManager.AuthenticationRepository.RegisterUserAsync(
         request, Map);
-       
-      var apiResponse = new APIResponse<IdentityResultEx>();
-
+      
       if (!identityResultEx.Succeeded)
       {
-        foreach(var error in identityResultEx.Errors)
-        {
-          ValidationFailure validationFailure = new ValidationFailure(error.Code, error.Description);
-          apiResponse.Errors.Add(validationFailure);
-        }
-        apiResponse.IsSuccess = false;
-        await SendAsync(apiResponse, 400, cancellation: cancellationToken);
-        return;
+        ValidationFailures.AddRange(
+          identityResultEx.Errors.Select(error => new ValidationFailure
+          {
+            PropertyName = error.Code,
+            ErrorMessage = error.Description
+          }));
+        return new FastEndpoints.ProblemDetails(ValidationFailures);
       }
 
       HttpContext.Response.Headers.Append(
-        "location", $"/api/GetUser/{identityResultEx.Id}");
+        "location", $"/api/users/{request.Email}");
 
-      apiResponse.IsSuccess = true;
-      apiResponse.Data = identityResultEx;
-      await SendAsync(apiResponse, 201, cancellation: cancellationToken);
+      return TypedResults.NoContent();
+
       //await SendCreatedAtAsync<ReigsterUserEndpoint>(
       //  routeValues: new { id = response.Data.User.Id },
       //  new EmptyResponse(), 
       //  cancellation: c);
     }
-    //catch (ValidationFailureException ex)
-    //{
-    //  _messageLogger.LogControllerException(
-    //    nameof(HandleAsync),
-    //    ex);
-
-
-    //  await SendAsync(ValidationFailures, 400, cancellation: cancellationToken); 
-    //}
     catch (Exception ex)
     {
       _messageLogger.LogControllerException(
         nameof(HandleAsync),
         ex);
 
-      var apiResponse = new APIResponse<IdentityResultEx>();
-      apiResponse.IsSuccess = false;
-      apiResponse.Error = "Internal Server Error.";
-      
-      await SendAsync(
-        response: apiResponse,
-        statusCode: 500,
-        cancellation: cancellationToken);
+      return TypedResults.InternalServerError();
 
     }
   }

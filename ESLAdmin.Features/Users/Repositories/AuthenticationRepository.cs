@@ -1,8 +1,8 @@
 ﻿using ESLAdmin.Domain.Entities;
 using ESLAdmin.Features.Exceptions;
 using ESLAdmin.Features.Users.Endpoints.GetUser;
+using ESLAdmin.Features.Users.Endpoints.RegisterUser;
 using ESLAdmin.Features.Users.Models;
-using ESLAdmin.Features.Users.RegisterUser;
 using ESLAdmin.Features.Users.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
 using Microsoft.AspNetCore.Identity;
