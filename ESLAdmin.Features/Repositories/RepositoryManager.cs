@@ -30,6 +30,7 @@ public class RepositoryManager : IRepositoryManager
     IDbContextDapper dbContextDapper,
     IMessageLogger messageLogger,
     UserManager<User> userManager,
+    UserDbContext dbContext,
     IConfiguration configuration)
   {
     _childcareLevelRepository = new Lazy<IChildcareLevelRepository>(
@@ -41,6 +42,7 @@ public class RepositoryManager : IRepositoryManager
       () => new AuthenticationRepository(
         messageLogger,
         userManager,
+        dbContext,
         configuration));
   }
 

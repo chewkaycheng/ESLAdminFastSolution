@@ -6,7 +6,9 @@ using ESLAdmin.Features.Users.Models;
 using ESLAdmin.Features.Users.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using System.Transactions;
 
 namespace ESLAdmin.Features.Users.Repositories;
 
@@ -20,6 +22,7 @@ public class AuthenticationRepository : IAuthenticationRepository
   private readonly IMessageLogger _messageLogger;
   private readonly UserManager<User> _userManager;
   private readonly IConfiguration _configuration;
+  private readonly UserDbContext _dbContext;
 
   //------------------------------------------------------------------------------
   //
@@ -29,8 +32,10 @@ public class AuthenticationRepository : IAuthenticationRepository
   public AuthenticationRepository(
     IMessageLogger messageLogger,
     UserManager<User> userManager,
+    UserDbContext dbContext,
     IConfiguration configuration)
   {
+    _dbContext = dbContext;
     _messageLogger = messageLogger;
     _userManager = userManager;
     _configuration = configuration;
@@ -49,12 +54,15 @@ public class AuthenticationRepository : IAuthenticationRepository
     {
       var user = mapper.ToEntity(request);
 
+      using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
       var result = await _userManager.CreateAsync(
         user,
         request.Password);
 
       if (!result.Succeeded)
       {
+        await transaction.RollbackAsync();
         return IdentityResultEx.Failed(result.Errors.ToArray());
       }
 
@@ -63,10 +71,12 @@ public class AuthenticationRepository : IAuthenticationRepository
         var roleResult = await _userManager.AddToRolesAsync(user, request.Roles);
         if (!roleResult.Succeeded)
         {
+          await transaction.RollbackAsync();
           return IdentityResultEx.Failed(roleResult.Errors.ToArray());
         }
       }
 
+      await transaction.CommitAsync();
       return IdentityResultEx.Success(user.Id);
     }
     catch (Exception ex)
