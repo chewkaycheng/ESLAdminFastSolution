@@ -6,10 +6,8 @@ using ESLAdmin.Features.Users.Models;
 using ESLAdmin.Features.Users.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
-using System.Transactions;
 
 namespace ESLAdmin.Features.Users.Repositories;
 
@@ -23,7 +21,6 @@ public class AuthenticationRepository : IAuthenticationRepository
   private readonly IMessageLogger _messageLogger;
   private readonly UserManager<User> _userManager;
   private readonly RoleManager<IdentityRole> _roleManager;
-  private readonly IConfiguration _configuration;
   private readonly UserDbContext _dbContext;
 
   //------------------------------------------------------------------------------
@@ -35,14 +32,12 @@ public class AuthenticationRepository : IAuthenticationRepository
     IMessageLogger messageLogger,
     UserManager<User> userManager,
     RoleManager<IdentityRole> roleManager,
-    UserDbContext dbContext,
-    IConfiguration configuration)
+    UserDbContext dbContext)
   {
     _dbContext = dbContext;
     _messageLogger = messageLogger;
     _userManager = userManager;
     _roleManager = roleManager;
-    _configuration = configuration;
   }
 
   //------------------------------------------------------------------------------
@@ -124,6 +119,11 @@ public class AuthenticationRepository : IAuthenticationRepository
     }
   }
 
+  //------------------------------------------------------------------------------
+  //
+  //                       GetUserByEmailAsync
+  //
+  //-------------------------------------------------------------------------------
   public async Task<UserResponse> GetUserByEmailAsync(
     GetUserRequest request,
     GetUserMapper mapper)

@@ -6,7 +6,6 @@ using ESLAdmin.Features.Users.Repositories;
 using ESLAdmin.Features.Users.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 
 namespace ESLAdmin.Features.Repositories;
 
@@ -31,8 +30,7 @@ public class RepositoryManager : IRepositoryManager
     IMessageLogger messageLogger,
     UserManager<User> userManager,
     RoleManager<IdentityRole> roleManager,
-    UserDbContext dbContext,
-    IConfiguration configuration)
+    UserDbContext dbContext)
   {
     _childcareLevelRepository = new Lazy<IChildcareLevelRepository>(
       () => new ChildcareLevelRepository(
@@ -44,8 +42,7 @@ public class RepositoryManager : IRepositoryManager
         messageLogger,
         userManager,
         roleManager,
-        dbContext,
-        configuration));
+        dbContext));
   }
 
   //------------------------------------------------------------------------------
