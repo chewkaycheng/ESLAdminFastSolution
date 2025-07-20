@@ -49,7 +49,7 @@ public class RegisterUserEndpoint : Endpoint<
 
   //------------------------------------------------------------------------------
   //
-  //                       HandleAsync
+  //                       ExecuteAsync
   //
   //-------------------------------------------------------------------------------
   public override async 
@@ -91,7 +91,7 @@ public class RegisterUserEndpoint : Endpoint<
     catch (Exception ex)
     {
       _messageLogger.LogControllerException(
-        nameof(HandleAsync),
+        nameof(ExecuteAsync),
         ex);
 
       return TypedResults.InternalServerError();

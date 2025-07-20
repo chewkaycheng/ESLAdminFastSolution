@@ -50,7 +50,7 @@ public class GetUserEndpoint : Endpoint<
 
   //------------------------------------------------------------------------------
   //
-  //                       HandleAsync
+  //                       ExecuteAsync
   //
   //-------------------------------------------------------------------------------
   public override async Task<Results<Ok<UserResponse>, NotFound<APIErrors>, InternalServerError>> ExecuteAsync(
@@ -70,7 +70,7 @@ public class GetUserEndpoint : Endpoint<
         APIErrors errors = new APIErrors();
         ValidationFailures.AddRange(new ValidationFailure
         {
-          PropertyName = "UserNotFound",
+          PropertyName = "NotFound",
           ErrorMessage = $"The user with email: {request.Email} is not found."
         });
         errors.Errors = ValidationFailures;
@@ -82,7 +82,7 @@ public class GetUserEndpoint : Endpoint<
     catch (Exception ex)
     {
       _messageLogger.LogControllerException(
-        nameof(HandleAsync),
+        nameof(ExecuteAsync),
         ex);
 
       return TypedResults.InternalServerError();

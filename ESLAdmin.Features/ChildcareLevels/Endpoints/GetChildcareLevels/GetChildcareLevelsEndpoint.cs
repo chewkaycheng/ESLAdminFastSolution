@@ -3,6 +3,8 @@ using ESLAdmin.Features.ChildcareLevels.Models;
 using ESLAdmin.Features.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ESLAdmin.Features.ChildcareLevels.Endpoints.GetChildcareLevels;
 
@@ -12,7 +14,7 @@ namespace ESLAdmin.Features.ChildcareLevels.Endpoints.GetChildcareLevels;
 //
 //------------------------------------------------------------------------------
 public class GetChildcareLevelsEndpoint : EndpointWithoutRequest<
-  APIResponse<IEnumerable<ChildcareLevelResponse>>, 
+  Results<Ok<IEnumerable<ChildcareLevelResponse>>, InternalServerError>, 
   ChildcareLevelMapper>
 {
   private readonly IRepositoryManager _manager;
@@ -47,22 +49,18 @@ public class GetChildcareLevelsEndpoint : EndpointWithoutRequest<
   //                        HandleAsync
   //
   //------------------------------------------------------------------------------
-  public override async Task HandleAsync(CancellationToken c)
+  public override async Task<Results<Ok<IEnumerable<ChildcareLevelResponse>>, InternalServerError>> ExecuteAsync(CancellationToken c)
   {
     try
     {
-      var response = await _manager.ChildcareLevelRepository.GetChildcareLevels(Map);
-      await SendAsync(response);
+      var childcarelevels = await _manager.ChildcareLevelRepository.GetChildcareLevels(Map);
+      return TypedResults.Ok(childcarelevels);
     }
     catch (Exception ex)
     {
       _messageLogger.LogDatabaseException(nameof(HandleAsync), ex);
 
-      var response = new APIResponse<IEnumerable<ChildcareLevelResponse>>();
-
-      response.IsSuccess = false;
-      response.Error = "Internal Server Error";
-      await SendAsync(response, 500, c);
+      return TypedResults.InternalServerError();
     }
   }
 }

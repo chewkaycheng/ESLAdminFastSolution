@@ -1,8 +1,12 @@
 ﻿using ESLAdmin.Features.ChildcareLevels.Mappers;
 using ESLAdmin.Features.ChildcareLevels.Models;
+using ESLAdmin.Features.Exceptions;
 using ESLAdmin.Features.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
+using FluentValidation.Results;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ESLAdmin.Features.ChildcareLevels.Endpoints.GetChildcareLevel;
 
@@ -14,7 +18,7 @@ namespace ESLAdmin.Features.ChildcareLevels.Endpoints.GetChildcareLevel;
 public class GetChildcareLevelEndpoint : 
   Endpoint<
     EmptyRequest, 
-    APIResponse<ChildcareLevelResponse>, 
+    Results<Ok<ChildcareLevelResponse>, NotFound<APIErrors>, InternalServerError>,
     ChildcareLevelMapper>
 {
   private readonly IRepositoryManager _manager;
@@ -46,30 +50,38 @@ public class GetChildcareLevelEndpoint :
 
   //------------------------------------------------------------------------------
   //
-  //                        HandleAsync
+  //                        ExecuteAsync
   //
   //------------------------------------------------------------------------------
-  public override async Task HandleAsync(EmptyRequest req, CancellationToken c)
+  public override async Task<Results<Ok<ChildcareLevelResponse>, NotFound<APIErrors>, InternalServerError>> ExecuteAsync(
+    EmptyRequest req, CancellationToken c)
   {
     try
     {
       var id = Route<int>("id");
-      var response = await _manager.ChildcareLevelRepository.GetChildcareLevel(
+      var childcareLevel = await _manager.ChildcareLevelRepository.GetChildcareLevel(
         id,
         Map);
-      await SendAsync(
-       response, response.IsSuccess ? 200 : 404, c);
 
+      if (childcareLevel == null)
+      {
+        APIErrors errors = new APIErrors();
+        ValidationFailures.AddRange(new ValidationFailure
+        {
+          PropertyName = "NotFound",
+          ErrorMessage = $"The childcare level with id: {id} is not found."
+        });
+        errors.Errors = ValidationFailures;
+        return TypedResults.NotFound(errors);
+      }
+      return TypedResults.Ok(childcareLevel);    
+    
     }
     catch (Exception ex)
     {
       _messageLogger.LogDatabaseException(nameof(HandleAsync), ex);
 
-      var apiResponse = new APIResponse<ChildcareLevelResponse>();
-
-      apiResponse.IsSuccess = false;
-      apiResponse.Error = "Internal Server Error";
-      await SendAsync(apiResponse, 500, c);
+      return TypedResults.InternalServerError();
     }
   }
 }

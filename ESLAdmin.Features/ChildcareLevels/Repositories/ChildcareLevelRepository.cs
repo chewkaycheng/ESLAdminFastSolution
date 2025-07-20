@@ -38,7 +38,7 @@ public class ChildcareLevelRepository :
   //                        GetChildcareLevels
   //
   //------------------------------------------------------------------------------
-  public async Task<APIResponse<IEnumerable<ChildcareLevelResponse>>> GetChildcareLevels(ChildcareLevelMapper mapper)
+  public async Task<IEnumerable<ChildcareLevelResponse>> GetChildcareLevels(ChildcareLevelMapper mapper)
   {
     try
     {
@@ -50,11 +50,7 @@ public class ChildcareLevelRepository :
           childcareLevel => mapper.FromEntity(
             childcareLevel)).ToList();
 
-      var response = new APIResponse<IEnumerable<ChildcareLevelResponse>>();
-      response.IsSuccess = true;
-      response.Data = childcareLevelsResponse;
-
-      return response;
+      return childcareLevelsResponse;
     }
     catch (Exception ex)
     {
@@ -73,7 +69,7 @@ public class ChildcareLevelRepository :
   //                        GetChildcareLevel
   //
   //------------------------------------------------------------------------------
-  public async Task<APIResponse<ChildcareLevelResponse>> GetChildcareLevel(
+  public async Task<ChildcareLevelResponse> GetChildcareLevel(
     long id,
     ChildcareLevelMapper mapper)
   {
@@ -91,19 +87,13 @@ public class ChildcareLevelRepository :
         parameters);
       if (childcareLevel == null)
       {
-        var apiResponse = new APIResponse<ChildcareLevelResponse>();
-        apiResponse.IsSuccess = false;
-        apiResponse.Error = $"A childcare level with Id: {id} does not exist.";
-        return apiResponse;
+        return null;
       }
       else
       {
         ChildcareLevelResponse childcareLevelResponse =
           mapper.FromEntity(childcareLevel);
-        var apiResponse = new APIResponse<ChildcareLevelResponse>();
-        apiResponse.IsSuccess = true;
-        apiResponse.Data = childcareLevelResponse;
-        return apiResponse;
+        return childcareLevelResponse;
       }
     }
     catch (Exception ex)

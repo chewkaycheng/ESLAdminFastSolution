@@ -8,9 +8,9 @@ namespace ESLAdmin.Features.ChildcareLevels.Repositories.Interfaces
 {
   public interface IChildcareLevelRepository
   {
-    Task<APIResponse<IEnumerable<ChildcareLevelResponse>>> GetChildcareLevels(
+    Task<IEnumerable<ChildcareLevelResponse>> GetChildcareLevels(
       ChildcareLevelMapper mapper);
-    Task<APIResponse<ChildcareLevelResponse>> GetChildcareLevel(
+    Task<ChildcareLevelResponse> GetChildcareLevel(
       long id,
       ChildcareLevelMapper mapper);
     Task<APIResponse<OperationResult>> CreateChildcareLevelAsync(

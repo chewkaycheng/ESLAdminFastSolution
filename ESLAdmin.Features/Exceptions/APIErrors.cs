@@ -1,14 +1,14 @@
 ﻿using FluentValidation.Results;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ESLAdmin.Features.Exceptions
+namespace ESLAdmin.Features.Exceptions;
+
+//------------------------------------------------------------------------------
+//
+//                       class APIErrors
+//
+//------------------------------------------------------------------------------
+
+public class APIErrors
 {
-  public class APIErrors
-  {
-    public List<ValidationFailure> Errors { get; set; }
-  }
+  public List<ValidationFailure> Errors { get; set; }
 }
