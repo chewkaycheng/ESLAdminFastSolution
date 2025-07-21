@@ -113,7 +113,7 @@ public class ChildcareLevelRepository :
   //                        CreateChildcareLevel
   //
   //------------------------------------------------------------------------------
-  public async Task<APIResponse<OperationResult>> CreateChildcareLevelAsync(
+  public async Task<OperationResult> CreateChildcareLevelAsync(
     CreateChildcareLevelRequest request,
     CreateChildcareLevelMapper mapper)
   {
@@ -123,25 +123,8 @@ public class ChildcareLevelRepository :
       var sql = DbConstsChildcareLevel.SP_CHILDCARELEVEL_ADD;
 
       await DapExecWithTransAsync(sql, parameters);
-      var result = mapper.FromEntity(parameters);
-
-      if (result.DbApiError == 0)
-      {
-        return new APIResponse<OperationResult>
-        {
-          IsSuccess = true,
-          Data = result
-        };
-      }
-      else
-      {
-        return new APIResponse<OperationResult>
-        {
-          IsSuccess = false,
-          Error = $"Another record with the childcare level name: {request.ChildcareLevelName} already exists.",
-          Data = result
-        };
-      }
+      OperationResult operationResult = mapper.FromEntity(parameters);
+      return operationResult;
     }
     catch (Exception ex)
     {
@@ -160,7 +143,7 @@ public class ChildcareLevelRepository :
   //                        UpdateChildcareLevel
   //
   //------------------------------------------------------------------------------
-  public async Task<APIResponse<OperationResult>> UpdateChildcareLevelAsync(
+  public async Task<OperationResult> UpdateChildcareLevelAsync(
     UpdateChildcareLevelRequest request,
     UpdateChildcareLevelMapper mapper)
   {
@@ -170,48 +153,49 @@ public class ChildcareLevelRepository :
     try
     {
       await DapExecWithTransAsync(sql, parameters);
-      var result = mapper.FromEntity(parameters);
+      OperationResult operationResult = mapper.FromEntity(parameters);
+      return operationResult;
 
-      if (result.DbApiError == 100)
-      {
-        return new APIResponse<OperationResult>
-        {
-          IsSuccess = false,
-          Error = $"Another record with the childcare level name: {request.ChildcareLevelName} already exists."
-        };
-      }
-      else if (result.DbApiError == 200)
-      {
-        return new APIResponse<OperationResult>
-        {
-          IsSuccess = false,
-          Error = $"The record has been altered."
-        };
-      }
-      else if (result.DbApiError == 300)
-      {
-        return new APIResponse<OperationResult>
-        {
-          IsSuccess = false,
-          Error = $"The record has been deleted."
-        };
-      }
-      else if (result.DbApiError == 500)
-      {
-        return new APIResponse<OperationResult>
-        {
-          IsSuccess = false,
-          Error = $"The maximum capacity has been reached."
-        };
-      }
-      else
-      {
-        return new APIResponse<OperationResult>
-        {
-          IsSuccess = true,
-          Data = result
-        };
-      }
+      //if (result.DbApiError == 100)
+      //{
+      //  return new APIResponse<OperationResult>
+      //  {
+      //    IsSuccess = false,
+      //    Error = $"Another record with the childcare level name: {request.ChildcareLevelName} already exists."
+      //  };
+      //}
+      //else if (result.DbApiError == 200)
+      //{
+      //  return new APIResponse<OperationResult>
+      //  {
+      //    IsSuccess = false,
+      //    Error = $"The record has been altered."
+      //  };
+      //}
+      //else if (result.DbApiError == 300)
+      //{
+      //  return new APIResponse<OperationResult>
+      //  {
+      //    IsSuccess = false,
+      //    Error = $"The record has been deleted."
+      //  };
+      //}
+      //else if (result.DbApiError == 500)
+      //{
+      //  return new APIResponse<OperationResult>
+      //  {
+      //    IsSuccess = false,
+      //    Error = $"The maximum capacity has been reached."
+      //  };
+      //}
+      //else
+      //{
+      //  return new APIResponse<OperationResult>
+      //  {
+      //    IsSuccess = true,
+      //    Data = result
+      //  };
+      //}
     }
     catch (Exception ex)
     {
@@ -230,7 +214,7 @@ public class ChildcareLevelRepository :
   //                        DeleteChildcareLevel
   //
   //------------------------------------------------------------------------------
-  public async Task<APIResponse<OperationResult>> DeleteChildcareLevel(
+  public async Task<OperationResult> DeleteChildcareLevel(
     long id,
     Endpoints.DeleteChildcareLevel.DeleteChildcareLevelMapper mapper)
   {
@@ -241,24 +225,8 @@ public class ChildcareLevelRepository :
       DynamicParameters parameters = mapper.ToEntity(id);
 
       await DapExecWithTransAsync(sql, parameters);
-      OperationResult result = mapper.FromEntity(parameters);
-
-      if (result.DbApiError == 0)
-      {
-        return new APIResponse<OperationResult>
-        {
-          IsSuccess = true,
-          Data = result
-        };
-      }
-      else
-      {
-        return new APIResponse<OperationResult>
-        {
-          IsSuccess = false,
-          Error = $"Cannot delete Childcare level. It is being used by {result.ReferenceTable}."
-        };
-      }
+      OperationResult operationResult = mapper.FromEntity(parameters);
+      return operationResult;
     }
     catch (Exception ex)
     {

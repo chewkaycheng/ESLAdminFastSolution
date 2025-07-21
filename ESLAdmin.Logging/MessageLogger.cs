@@ -11,7 +11,7 @@ namespace ESLAdmin.Logging;
 public class MessageLogger : IMessageLogger
 {
   ILogger<MessageLogger> _logger;
-
+  public ILogger Logger {  get { return _logger; } }
   //------------------------------------------------------------------------------
   //
   //                     MessageLogger

@@ -13,13 +13,13 @@ namespace ESLAdmin.Features.ChildcareLevels.Repositories.Interfaces
     Task<ChildcareLevelResponse> GetChildcareLevel(
       long id,
       ChildcareLevelMapper mapper);
-    Task<APIResponse<OperationResult>> CreateChildcareLevelAsync(
+    Task<OperationResult> CreateChildcareLevelAsync(
       CreateChildcareLevelRequest request,
       CreateChildcareLevelMapper mapper);
-    Task<APIResponse<OperationResult>> UpdateChildcareLevelAsync(
+    Task<OperationResult> UpdateChildcareLevelAsync(
       UpdateChildcareLevelRequest request,
       UpdateChildcareLevelMapper mapper);
-    Task<APIResponse<OperationResult>> DeleteChildcareLevel(
+    Task<OperationResult> DeleteChildcareLevel(
       long id,
       DeleteChildcareLevelMapper mapper);
   }

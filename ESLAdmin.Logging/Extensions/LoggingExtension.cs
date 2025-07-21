@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using Serilog.Templates;
 using System.IO.Compression;
 
 namespace ESLAdmin.Logging.Extensions;
@@ -31,10 +32,25 @@ public static class LoggingExtension
     Directory.CreateDirectory(_zipDirectory);
 
     Log.Logger = new LoggerConfiguration()
+      .MinimumLevel.Debug()
       .WriteTo.File(
-        path: "",
-        hooks: new ZipFileHook(_zipDirectory))
+        formatter: new ExpressionTemplate(
+                   "[{@t:dd/MM/yyyy HH:mm:ss} [{@l:u3}] {SourceContext}] {@m}\n{@x}"),
+        path: Path.Combine(_logDirectory, "log-.log"),
+        hooks: new ZipFileHook(_zipDirectory),
+        rollingInterval: Serilog.RollingInterval.Day,
+        rollOnFileSizeLimit: true,
+        fileSizeLimitBytes: 2097152,
+        retainedFileCountLimit: 1,
+        buffered: false
+       )
       .ReadFrom.Configuration(builder.Configuration)
+      //.WriteTo.File(
+      //  new ExpressionTemplate(
+      //    "[{@t:dd/mm/yyyy HH:mm:ss} {@l:u3} {SourceContext}] {@m}\n{@x}"),
+      //  path: "/logs/log-.txt",
+      //  hooks: new ZipFileHook(_zipDirectory))
+      //.ReadFrom.Configuration(builder.Configuration)
       .CreateLogger();
 
     services.AddSerilog(Log.Logger, dispose: true);

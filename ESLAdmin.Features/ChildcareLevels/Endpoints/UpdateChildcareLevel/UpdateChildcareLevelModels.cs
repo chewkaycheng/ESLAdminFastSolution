@@ -19,6 +19,16 @@ public class UpdateChildcareLevelRequest
 
 //------------------------------------------------------------------------------
 //
+//                           class UpdateChildcareLevelResponse
+//
+//------------------------------------------------------------------------------
+public class UpdateChildcareLevelResponse
+{
+  public long ChildcareLevelId { get; set; }
+  public string Guid { get; set; }
+}
+//------------------------------------------------------------------------------
+//
 //                           class UpdateChildcareLevelValidator
 //
 //------------------------------------------------------------------------------

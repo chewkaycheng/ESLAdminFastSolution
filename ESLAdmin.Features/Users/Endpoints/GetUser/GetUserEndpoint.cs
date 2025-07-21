@@ -15,9 +15,9 @@ namespace ESLAdmin.Features.Users.Endpoints.GetUser;
 //
 //-------------------------------------------------------------------------------
 public class GetUserEndpoint : Endpoint<
-  GetUserRequest, 
-  Results<Ok<UserResponse>, 
-    NotFound<APIErrors>, 
+  GetUserRequest,
+  Results<Ok<UserResponse>,
+    NotFound<APIErrors>,
     InternalServerError>,
   GetUserMapper>
 {
@@ -75,6 +75,7 @@ public class GetUserEndpoint : Endpoint<
         });
         errors.Errors = ValidationFailures;
         return TypedResults.NotFound(errors);
+        
       }
 
       return TypedResults.Ok(userResponse);

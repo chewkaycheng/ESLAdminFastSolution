@@ -1,6 +1,11 @@
-﻿using ESLAdmin.Features.Repositories.Interfaces;
+﻿using ESLAdmin.Features.Exceptions;
+using ESLAdmin.Features.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
+using FluentValidation.Results;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ESLAdmin.Features.ChildcareLevels.Endpoints.DeleteChildcareLevel;
 
@@ -11,7 +16,7 @@ namespace ESLAdmin.Features.ChildcareLevels.Endpoints.DeleteChildcareLevel;
 //------------------------------------------------------------------------------
 public class DeleteChildcareLevelEndpoint : Endpoint<
   DeleteChildcareLevelRequest, 
-  APIResponse<OperationResult>, 
+  Results<NoContent, Conflict<APIErrors>, InternalServerError>,
   DeleteChildcareLevelMapper>
 {
   private readonly IRepositoryManager _manager;
@@ -42,27 +47,38 @@ public class DeleteChildcareLevelEndpoint : Endpoint<
 
   //------------------------------------------------------------------------------
   //
-  //                           HandleAsync
+  //                           ExecuteAsync
   //
   //------------------------------------------------------------------------------
-  public override async Task HandleAsync(DeleteChildcareLevelRequest r, CancellationToken c)
+  public override async Task<Results<NoContent, Conflict<APIErrors>, InternalServerError>> ExecuteAsync(
+    DeleteChildcareLevelRequest request, CancellationToken cancellationToken)
   {
     try
     {
       var id = Route<int>("id");
-      var response = await _manager.ChildcareLevelRepository.DeleteChildcareLevel(id, Map);
-      await SendAsync(
-        response, response.Data.DbApiError == 0 ? 200 : 409, c);
+      var operationResult = await _manager.ChildcareLevelRepository.DeleteChildcareLevel(
+        id, 
+        Map);
+      if (operationResult.DbApiError == 0)
+      {
+        return TypedResults.NoContent();
+      }
+      else
+      {
+        APIErrors errors = new APIErrors();
+        ValidationFailures.AddRange(new ValidationFailure
+        {
+          PropertyName = "ConcurrencyConflict",
+          ErrorMessage = $"Cannot delete Childcare level. It is being used by {operationResult.ReferenceTable}."
+        });
+        return TypedResults.Conflict(errors);
+      }
     }
     catch (Exception ex)
     {
       _messageLogger.LogDatabaseException(nameof(HandleAsync), ex);
 
-      var response = new APIResponse<OperationResult>();
-
-      response.IsSuccess = false;
-      response.Error = "Internal Server Error";
-      await SendAsync(response, 500, c);
+      return TypedResults.InternalServerError();
     }
   }
 }

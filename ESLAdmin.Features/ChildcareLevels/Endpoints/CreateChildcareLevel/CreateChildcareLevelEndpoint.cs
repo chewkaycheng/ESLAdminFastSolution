@@ -1,6 +1,10 @@
-﻿using ESLAdmin.Features.Repositories.Interfaces;
+﻿using ESLAdmin.Features.Exceptions;
+using ESLAdmin.Features.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
+using FluentValidation.Results;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ESLAdmin.Features.ChildcareLevels.Endpoints.CreateChildcareLevel;
 
@@ -11,7 +15,7 @@ namespace ESLAdmin.Features.ChildcareLevels.Endpoints.CreateChildcareLevel;
 //------------------------------------------------------------------------------
 public class CreateChildcareLevelEndpoint : Endpoint<
   CreateChildcareLevelRequest, 
-  APIResponse<OperationResult>, 
+  Results<NoContent, Conflict<APIErrors>, InternalServerError>, 
   CreateChildcareLevelMapper>
 {
   private readonly IRepositoryManager _manager;
@@ -42,16 +46,31 @@ public class CreateChildcareLevelEndpoint : Endpoint<
 
   //------------------------------------------------------------------------------
   //
-  //                        HandleAsync
+  //                        ExecuteAsync
   //
   //------------------------------------------------------------------------------
-  public override async Task HandleAsync(CreateChildcareLevelRequest r, CancellationToken c)
+  public override async Task<Results<NoContent, Conflict<APIErrors>, InternalServerError> > ExecuteAsync(CreateChildcareLevelRequest request, CancellationToken canellationToken)
   {
     try
     {
-      var response = await _manager.ChildcareLevelRepository.CreateChildcareLevelAsync(r, Map);
-      await SendAsync(
-        response, response.Data.DbApiError == 0 ? 200 : 409, c);
+      var operationResult = await _manager.ChildcareLevelRepository.CreateChildcareLevelAsync(request, Map);
+      if (operationResult.DbApiError == 0)
+      {
+        HttpContext.Response.Headers.Append(
+        "location", $"/api/childcarelevels/{operationResult.Id}");
+        return TypedResults.NoContent();
+      }
+      else
+      {
+        APIErrors errors = new APIErrors();
+        ValidationFailures.AddRange(new ValidationFailure
+        {
+          PropertyName = "ConcurrencyConflict",
+          ErrorMessage = $"Another record with the childcare level name: {request.ChildcareLevelName} already exists."
+        });
+        errors.Errors = ValidationFailures;
+        return TypedResults.Conflict(errors);
+      }
     }
     catch (Exception ex)
     {
@@ -59,9 +78,7 @@ public class CreateChildcareLevelEndpoint : Endpoint<
 
       var response = new APIResponse<OperationResult>();
 
-      response.IsSuccess = false;
-      response.Error = "Internal Server Error";
-      await SendAsync(response, 500, c);
+      return TypedResults.InternalServerError();
     }
   }
 }

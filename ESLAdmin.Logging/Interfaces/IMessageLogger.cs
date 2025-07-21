@@ -1,7 +1,11 @@
-﻿namespace ESLAdmin.Logging.Interface
+﻿using Microsoft.Extensions.Logging;
+
+namespace ESLAdmin.Logging.Interface
 {
   public interface IMessageLogger
   {
+    public ILogger Logger { get; }
+
     public void LogController(
       string funcName);
 

@@ -5,6 +5,8 @@ using FastEndpoints;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace ESLAdmin.Features.Users.Endpoints.RegisterUser;
 
@@ -14,10 +16,10 @@ namespace ESLAdmin.Features.Users.Endpoints.RegisterUser;
 //
 //-------------------------------------------------------------------------------
 public class RegisterUserEndpoint : Endpoint<
-  RegisterUserRequest, 
+  RegisterUserRequest,
   Results<NoContent,
     UnprocessableEntity<APIErrors>,
-    InternalServerError>, 
+    InternalServerError>,
   RegisterUserMapper>
 {
   private readonly IRepositoryManager _repositoryManager;
@@ -52,19 +54,34 @@ public class RegisterUserEndpoint : Endpoint<
   //                       ExecuteAsync
   //
   //-------------------------------------------------------------------------------
-  public override async 
+  public override async
     Task<Results<NoContent,
       UnprocessableEntity<APIErrors>,
-      InternalServerError>> 
+      InternalServerError>>
     ExecuteAsync(
-      RegisterUserRequest request, 
+      RegisterUserRequest request,
       CancellationToken cancellationToken)
   {
+    var Roles = request.Roles != null ? string.Join(", ", request.Roles) : "None";
+    var requestLog = JsonSerializer.Serialize(new
+    {
+      request.UserName,
+      request.FirstName,
+      request.LastName,
+      request.Email,
+      Password = "[Hidden]",
+      request.PhoneNumber,
+      Roles = request.Roles != null ? string.Join(", ", request.Roles) : "None"
+    });
+    var roleLog = Roles = request.Roles != null ? string.Join(", ", request.Roles) : "None";
+    _messageLogger.Logger.LogDebug($"Invocation. \n=>Request: \n    Username: {request.UserName}, FirstName: {request.FirstName}, LastName: {request.LastName}, Email: {request.Email}\n    Password: '[Hidden]', PhoneNumber: {request.PhoneNumber}, Roles: {roleLog}");
+    
     try
     {
-      var identityResultEx = await _repositoryManager.AuthenticationRepository.RegisterUserAsync(
-        request, Map);
       
+      var identityResultEx = await _repositoryManager.AuthenticationRepository.RegisterUserAsync(
+      request, Map);
+
       if (!identityResultEx.Succeeded)
       {
         ValidationFailures.AddRange(
@@ -72,11 +89,21 @@ public class RegisterUserEndpoint : Endpoint<
           {
             PropertyName = error.Code,
             ErrorMessage = error.Description
-          }));
+          })); 
         APIErrors errors = new APIErrors();
         errors.Errors = ValidationFailures;
+
+        var errorList = "";
+        foreach (var error in identityResultEx.Errors)
+        {
+          errorList += $"\n    Code: {error.Code}, Description: {error.Description}";
+        }
+
+        _messageLogger.Logger.LogDebug($"Validation errors.\nErrors:{errorList}");
         return TypedResults.UnprocessableEntity(errors);
       }
+
+      _messageLogger.Logger.LogDebug($"Success. User Id: {identityResultEx.Id}");
 
       HttpContext.Response.Headers.Append(
         "location", $"/api/users/{request.Email}");
