@@ -7,6 +7,7 @@ using ESLAdmin.Features.Users.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Features.Users.Repositories;
 
@@ -18,6 +19,7 @@ namespace ESLAdmin.Features.Users.Repositories;
 public class AuthenticationRepository : IAuthenticationRepository
 {
   private readonly IMessageLogger _messageLogger;
+  private readonly ILogger _logger;
   private readonly UserManager<User> _userManager;
   private readonly RoleManager<IdentityRole> _roleManager;
   private readonly UserDbContext _dbContext;
@@ -28,12 +30,14 @@ public class AuthenticationRepository : IAuthenticationRepository
   //
   //-------------------------------------------------------------------------------
   public AuthenticationRepository(
+    ILogger logger,
     IMessageLogger messageLogger,
     UserManager<User> userManager,
     RoleManager<IdentityRole> roleManager,
     UserDbContext dbContext)
   {
     _dbContext = dbContext;
+    _logger = logger;
     _messageLogger = messageLogger;
     _userManager = userManager;
     _roleManager = roleManager;

@@ -6,6 +6,7 @@ using ESLAdmin.Features.Users.Repositories;
 using ESLAdmin.Features.Users.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Features.Repositories;
 
@@ -28,6 +29,7 @@ public class RepositoryManager : IRepositoryManager
   public RepositoryManager(
     IDbContextDapper dbContextDapper,
     IMessageLogger messageLogger,
+    ILogger<RepositoryManager> logger,
     UserManager<User> userManager,
     RoleManager<IdentityRole> roleManager,
     UserDbContext dbContext)
@@ -39,6 +41,7 @@ public class RepositoryManager : IRepositoryManager
 
     _authenticationRespository = new Lazy<IAuthenticationRepository>(
       () => new AuthenticationRepository(
+        logger,
         messageLogger,
         userManager,
         roleManager,

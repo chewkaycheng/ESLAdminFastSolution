@@ -167,5 +167,4 @@ public class MessageLogger : IMessageLogger
       funcName,
       ex);
   }
-
 }

@@ -52,6 +52,5 @@ namespace ESLAdmin.Logging.Interface
     public void LogDatabaseException(
       string funcName,
       Exception ex);
-
   }
 }

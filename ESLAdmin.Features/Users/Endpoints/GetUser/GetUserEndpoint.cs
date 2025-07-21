@@ -63,6 +63,8 @@ public class GetUserEndpoint : Endpoint<
         request,
         Map);
 
+      throw new NotImplementedException();
+
       var apiResponse = new APIResponse<UserResponse>();
 
       if (userResponse == null)
