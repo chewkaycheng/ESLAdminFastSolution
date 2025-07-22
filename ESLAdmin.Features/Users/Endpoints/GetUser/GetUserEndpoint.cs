@@ -17,7 +17,7 @@ namespace ESLAdmin.Features.Users.Endpoints.GetUser;
 public class GetUserEndpoint : Endpoint<
   GetUserRequest,
   Results<Ok<UserResponse>,
-    NotFound<APIErrors>,
+    ProblemDetails,
     InternalServerError>,
   GetUserMapper>
 {
@@ -53,7 +53,7 @@ public class GetUserEndpoint : Endpoint<
   //                       ExecuteAsync
   //
   //-------------------------------------------------------------------------------
-  public override async Task<Results<Ok<UserResponse>, NotFound<APIErrors>, InternalServerError>> ExecuteAsync(
+  public override async Task<Results<Ok<UserResponse>, ProblemDetails, InternalServerError>> ExecuteAsync(
     GetUserRequest request, 
     CancellationToken cancellationToken)
   {
@@ -62,8 +62,6 @@ public class GetUserEndpoint : Endpoint<
       var userResponse = await _repositoryManager.AuthenticationRepository.GetUserByEmailAsync(
         request,
         Map);
-
-      throw new NotImplementedException();
 
       var apiResponse = new APIResponse<UserResponse>();
 
@@ -75,9 +73,7 @@ public class GetUserEndpoint : Endpoint<
           PropertyName = "NotFound",
           ErrorMessage = $"The user with email: {request.Email} is not found."
         });
-        errors.Errors = ValidationFailures;
-        return TypedResults.NotFound(errors);
-        
+        return new ProblemDetails(ValidationFailures, StatusCodes.Status404NotFound);
       }
 
       return TypedResults.Ok(userResponse);

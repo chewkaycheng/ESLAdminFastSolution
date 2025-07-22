@@ -20,7 +20,7 @@ namespace ESLAdmin.Features.Users.Endpoints.RegisterUser;
 public class RegisterUserEndpoint : Endpoint<
   RegisterUserRequest,
   Results<NoContent,
-    UnprocessableEntity<APIErrors>,
+    ProblemDetails,
     InternalServerError>,
   RegisterUserMapper>
 {
@@ -61,7 +61,7 @@ public class RegisterUserEndpoint : Endpoint<
   //-------------------------------------------------------------------------------
   public override async
     Task<Results<NoContent,
-      UnprocessableEntity<APIErrors>,
+      ProblemDetails,
       InternalServerError>>
     ExecuteAsync(
       RegisterUserRequest request,
@@ -102,12 +102,7 @@ public class RegisterUserEndpoint : Endpoint<
       {
         if (_logger.IsEnabled(LogLevel.Information))
         {
-          var sb = new StringBuilder();
-          foreach (var error in identityResultEx.Errors)
-          {
-            sb.Append($"\n    Code: \"{error.Code}\", Description: \"{error.Description}\"");
-          }
-          _logger.LogValidationErrors(sb.ToString());
+          _logger.LogValidationErrors(LoggingHelpers.FormatIdentityErrors(identityResultEx.Errors));
         }
 
         ValidationFailures.AddRange(
@@ -116,10 +111,8 @@ public class RegisterUserEndpoint : Endpoint<
             PropertyName = error.Code,
             ErrorMessage = error.Description
           }));
-        APIErrors errors = new APIErrors();
-        errors.Errors = ValidationFailures;
 
-        return TypedResults.UnprocessableEntity(errors);
+        return new ProblemDetails(ValidationFailures, StatusCodes.Status422UnprocessableEntity);
       }
 
       _logger.LogFunctionExit($"User Id: {identityResultEx.Id}");
