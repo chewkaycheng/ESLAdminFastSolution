@@ -44,21 +44,6 @@ public static partial class MessageLoggerDefs
 
   //------------------------------------------------------------------------------
   //
-  //                     LogCreateUserRequest
-  //
-  //------------------------------------------------------------------------------
-  [LoggerMessage(EventId = 3, Level = LogLevel.Debug, Message = "Function entry.\n=>Request: \\n    Username: '{userName}', FirstName: '{firstName}', LastName: '{lastName}', Email: '{email}'\\n    Password: '[Hidden]', PhoneNumber: '{phoneNumber}', Roles: '{roles}'", SkipEnabledCheck = true)]
-  public static partial void LogCreateUserRequest(
-    this ILogger logger,
-    string userName,
-    string firstName,
-    string lastName,
-    string email,
-    string phoneNumber,
-    string roles);
-
-  //------------------------------------------------------------------------------
-  //
   //                       LogValidationErrors
   //
   //------------------------------------------------------------------------------
@@ -69,10 +54,21 @@ public static partial class MessageLoggerDefs
 
   //------------------------------------------------------------------------------
   //
+  //                       LogFunctionEntry
+  //
+  //------------------------------------------------------------------------------
+  [LoggerMessage(EventId = 4, Level = LogLevel.Debug, Message = "Function entry. {context}")]
+  public static partial void LogFunctionEntry(
+    this ILogger logger,
+    string? context = null);
+
+
+  //------------------------------------------------------------------------------
+  //
   //                       LogFunctionExit
   //
   //------------------------------------------------------------------------------
-  [LoggerMessage(EventId = 4, Level = LogLevel.Debug, Message = "Exit function. {context}")]
+  [LoggerMessage(EventId = 5, Level = LogLevel.Debug, Message = "Exit function. {context}")]
   public static partial void LogFunctionExit(
     this ILogger logger,
     string? context = null);

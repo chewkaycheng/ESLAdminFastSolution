@@ -59,6 +59,7 @@ public class GetUserEndpoint : Endpoint<
   {
     try
     {
+                  
       var userResponse = await _repositoryManager.AuthenticationRepository.GetUserByEmailAsync(
         request,
         Map);
@@ -73,7 +74,9 @@ public class GetUserEndpoint : Endpoint<
           PropertyName = "NotFound",
           ErrorMessage = $"The user with email: {request.Email} is not found."
         });
-        return new ProblemDetails(ValidationFailures, StatusCodes.Status404NotFound);
+        return new ProblemDetails(
+          ValidationFailures, 
+          StatusCodes.Status404NotFound);
       }
 
       return TypedResults.Ok(userResponse);

@@ -68,33 +68,16 @@ public class RegisterUserEndpoint : Endpoint<
       CancellationToken cancellationToken)
   {
     var Roles = request.Roles != null ? string.Join(", ", request.Roles) : "None";
-    //var requestLog = JsonSerializer.Serialize(new
-    //{
-    //  request.UserName,
-    //  request.FirstName,
-    //  request.LastName,
-    //  request.Email,
-    //  Password = "[Hidden]",
-    //  request.PhoneNumber,
-    //  Roles = request.Roles != null ? string.Join(", ", request.Roles) : "None"
-    //});
-    //_messageLogger.Logger.LogDebug($"Invocation. \n=>Request: \n    Username: {request.UserName}, FirstName: {request.FirstName}, LastName: {request.LastName}, Email: {request.Email}\n    Password: '[Hidden]', PhoneNumber: {request.PhoneNumber}, Roles: {roleLog}");
     
     if (_logger.IsEnabled(LogLevel.Debug))
     {
       var roleLog = Roles = request.Roles != null ? string.Join(", ", request.Roles) : "None";
-      _logger.LogCreateUserRequest(
-        request.UserName,
-        request.FirstName,
-        request.LastName,
-        request.Email,
-        request.PhoneNumber,
-        roleLog);
+      var context = $"\n=>Request: \n    Username: '{request.UserName}', FirstName: '{request.FirstName}', LastName: '{request.LastName}', Email: '{request.Email}'\n    Password: '[Hidden]', PhoneNumber: '{request.PhoneNumber}', Roles: '{roleLog}'";
+      _logger.LogFunctionEntry(context);
     }
 
     try
     {
-      
       var identityResultEx = await _repositoryManager.AuthenticationRepository.RegisterUserAsync(
       request, Map);
 
@@ -102,7 +85,9 @@ public class RegisterUserEndpoint : Endpoint<
       {
         if (_logger.IsEnabled(LogLevel.Information))
         {
-          _logger.LogValidationErrors(LoggingHelpers.FormatIdentityErrors(identityResultEx.Errors));
+          _logger.LogValidationErrors(
+            LoggingHelpers.FormatIdentityErrors(
+              identityResultEx.Errors));
         }
 
         ValidationFailures.AddRange(
@@ -112,7 +97,9 @@ public class RegisterUserEndpoint : Endpoint<
             ErrorMessage = error.Description
           }));
 
-        return new ProblemDetails(ValidationFailures, StatusCodes.Status422UnprocessableEntity);
+        return new ProblemDetails(
+          ValidationFailures, 
+          StatusCodes.Status422UnprocessableEntity);
       }
 
       _logger.LogFunctionExit($"User Id: {identityResultEx.Id}");
@@ -121,11 +108,6 @@ public class RegisterUserEndpoint : Endpoint<
         "location", $"/api/users/{request.Email}");
 
       return TypedResults.NoContent();
-
-      //await SendCreatedAtAsync<ReigsterUserEndpoint>(
-      //  routeValues: new { id = response.Data.User.Id },
-      //  new EmptyResponse(), 
-      //  cancellation: c);
     }
     catch (Exception ex)
     {

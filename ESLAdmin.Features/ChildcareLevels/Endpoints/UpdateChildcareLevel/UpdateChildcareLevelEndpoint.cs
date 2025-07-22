@@ -1,11 +1,9 @@
-﻿using ESLAdmin.Features.Exceptions;
-using ESLAdmin.Features.Repositories.Interfaces;
+﻿using ESLAdmin.Features.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
-using System.Runtime.CompilerServices;
 
 namespace ESLAdmin.Features.ChildcareLevels.Endpoints.UpdateChildcareLevel;
 
@@ -17,9 +15,7 @@ namespace ESLAdmin.Features.ChildcareLevels.Endpoints.UpdateChildcareLevel;
 public class UpdateChildcareLevelEndpoint : Endpoint<
   UpdateChildcareLevelRequest,
   Results<Ok<UpdateChildcareLevelResponse>,
-    Conflict<APIErrors>,
-    NotFound<APIErrors>,
-    UnprocessableEntity<APIErrors>,
+    ProblemDetails,
     InternalServerError>,
   UpdateChildcareLevelMapper>
 {
@@ -55,9 +51,7 @@ public class UpdateChildcareLevelEndpoint : Endpoint<
   //
   //------------------------------------------------------------------------------
   public override async Task<Results<Ok<UpdateChildcareLevelResponse>,
-    Conflict<APIErrors>,
-    NotFound<APIErrors>,
-    UnprocessableEntity<APIErrors>,
+    ProblemDetails,
     InternalServerError>> ExecuteAsync(
       UpdateChildcareLevelRequest request, CancellationToken cancallationToken)
   {
@@ -65,59 +59,62 @@ public class UpdateChildcareLevelEndpoint : Endpoint<
     {
       OperationResult operationResult = await _manager.ChildcareLevelRepository.UpdateChildcareLevelAsync(
         request, Map);
-        
+
+      if (operationResult.DbApiError == 0)
+      {
+        UpdateChildcareLevelResponse response = new UpdateChildcareLevelResponse();
+        response.ChildcareLevelId = request.ChildcareLevelId;
+        response.Guid = operationResult.Guid;
+        return TypedResults.Ok(response);
+      }
+
+      int statusCode;
       switch (operationResult.DbApiError)
       {
         case 100:
           {
-            APIErrors errors = new APIErrors();
             ValidationFailures.AddRange(new ValidationFailure
             {
               PropertyName = "ConcurrencyConflict",
               ErrorMessage = $"Another record with the childcare level name: {request.ChildcareLevelName} already exists."
             });
-            errors.Errors = ValidationFailures;
-            return TypedResults.Conflict(errors);
+            statusCode = StatusCodes.Status409Conflict;
+            break;
           }
         case 200:
           {
-            APIErrors errors = new APIErrors();
             ValidationFailures.AddRange(new ValidationFailure
             {
               PropertyName = "ConcurrencyConflict",
               ErrorMessage = $"The record has been altered by another user."
             });
-            errors.Errors = ValidationFailures;
-            return TypedResults.Conflict(errors);
+            statusCode = StatusCodes.Status409Conflict;
+            break;
           }
         case 300:
           {
-            APIErrors errors = new APIErrors();
             ValidationFailures.AddRange(new ValidationFailure
             {
               PropertyName = "NotFound",
               ErrorMessage = $"The record has does not exist."
             });
-            errors.Errors = ValidationFailures;
-            return TypedResults.NotFound(errors);
+            statusCode = StatusCodes.Status404NotFound;
+            break;
           }
         case 500:
+        default:
           {
-            APIErrors errors = new APIErrors();
             ValidationFailures.AddRange(new ValidationFailure
             {
               PropertyName = "NotProcessed",
               ErrorMessage = $"The maximum capacity has been reached."
             });
-            errors.Errors = ValidationFailures;
-            return TypedResults.UnprocessableEntity(errors);
+            statusCode = StatusCodes.Status422UnprocessableEntity;
+            break;
           }
-        default:
-          UpdateChildcareLevelResponse response = new UpdateChildcareLevelResponse();
-          response.ChildcareLevelId = request.ChildcareLevelId;
-          response.Guid = operationResult.Guid;
-          return TypedResults.Ok(response);
       }
+
+      return new ProblemDetails(ValidationFailures, statusCode);
     }
     catch (Exception ex)
     {
