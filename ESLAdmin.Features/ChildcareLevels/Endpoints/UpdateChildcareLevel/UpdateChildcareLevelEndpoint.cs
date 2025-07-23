@@ -55,72 +55,83 @@ public class UpdateChildcareLevelEndpoint : Endpoint<
     InternalServerError>> ExecuteAsync(
       UpdateChildcareLevelRequest request, CancellationToken cancallationToken)
   {
-    try
+    return await new UpdateChildcareLevelCommand
     {
-      OperationResult operationResult = await _manager.ChildcareLevelRepository.UpdateChildcareLevelAsync(
-        request, Map);
+      ChildcareLevelId = request.ChildcareLevelId,
+      ChildcareLevelName = request.ChildcareLevelName,
+      MaxCapacity = request.MaxCapacity,
+      DisplayOrder = request.DisplayOrder,
+      UserCode = request.UserCode,
+      Guid = request.Guid,
+      mapper = Map
+    }.ExecuteAsync();
 
-      if (operationResult.DbApiError == 0)
-      {
-        UpdateChildcareLevelResponse response = new UpdateChildcareLevelResponse();
-        response.ChildcareLevelId = request.ChildcareLevelId;
-        response.Guid = operationResult.Guid;
-        return TypedResults.Ok(response);
-      }
+    //try
+    //{
+    //  OperationResult operationResult = await _manager.ChildcareLevelRepository.UpdateChildcareLevelAsync(
+    //    request, Map);
 
-      int statusCode;
-      switch (operationResult.DbApiError)
-      {
-        case 100:
-          {
-            ValidationFailures.AddRange(new ValidationFailure
-            {
-              PropertyName = "ConcurrencyConflict",
-              ErrorMessage = $"Another record with the childcare level name: {request.ChildcareLevelName} already exists."
-            });
-            statusCode = StatusCodes.Status409Conflict;
-            break;
-          }
-        case 200:
-          {
-            ValidationFailures.AddRange(new ValidationFailure
-            {
-              PropertyName = "ConcurrencyConflict",
-              ErrorMessage = $"The record has been altered by another user."
-            });
-            statusCode = StatusCodes.Status409Conflict;
-            break;
-          }
-        case 300:
-          {
-            ValidationFailures.AddRange(new ValidationFailure
-            {
-              PropertyName = "NotFound",
-              ErrorMessage = $"The record has does not exist."
-            });
-            statusCode = StatusCodes.Status404NotFound;
-            break;
-          }
-        case 500:
-        default:
-          {
-            ValidationFailures.AddRange(new ValidationFailure
-            {
-              PropertyName = "NotProcessed",
-              ErrorMessage = $"The maximum capacity has been reached."
-            });
-            statusCode = StatusCodes.Status422UnprocessableEntity;
-            break;
-          }
-      }
+    //  if (operationResult.DbApiError == 0)
+    //  {
+    //    UpdateChildcareLevelResponse response = new UpdateChildcareLevelResponse();
+    //    response.ChildcareLevelId = request.ChildcareLevelId;
+    //    response.Guid = operationResult.Guid;
+    //    return TypedResults.Ok(response);
+    //  }
 
-      return new ProblemDetails(ValidationFailures, statusCode);
-    }
-    catch (Exception ex)
-    {
-      _messageLogger.LogDatabaseException(nameof(HandleAsync), ex);
+    //  int statusCode;
+    //  switch (operationResult.DbApiError)
+    //  {
+    //    case 100:
+    //      {
+    //        ValidationFailures.AddRange(new ValidationFailure
+    //        {
+    //          PropertyName = "ConcurrencyConflict",
+    //          ErrorMessage = $"Another record with the childcare level name: {request.ChildcareLevelName} already exists."
+    //        });
+    //        statusCode = StatusCodes.Status409Conflict;
+    //        break;
+    //      }
+    //    case 200:
+    //      {
+    //        ValidationFailures.AddRange(new ValidationFailure
+    //        {
+    //          PropertyName = "ConcurrencyConflict",
+    //          ErrorMessage = $"The record has been altered by another user."
+    //        });
+    //        statusCode = StatusCodes.Status409Conflict;
+    //        break;
+    //      }
+    //    case 300:
+    //      {
+    //        ValidationFailures.AddRange(new ValidationFailure
+    //        {
+    //          PropertyName = "NotFound",
+    //          ErrorMessage = $"The record has does not exist."
+    //        });
+    //        statusCode = StatusCodes.Status404NotFound;
+    //        break;
+    //      }
+    //    case 500:
+    //    default:
+    //      {
+    //        ValidationFailures.AddRange(new ValidationFailure
+    //        {
+    //          PropertyName = "NotProcessed",
+    //          ErrorMessage = $"The maximum capacity has been reached."
+    //        });
+    //        statusCode = StatusCodes.Status422UnprocessableEntity;
+    //        break;
+    //      }
+    //  }
 
-      return TypedResults.InternalServerError();
-    }
+    //  return new ProblemDetails(ValidationFailures, statusCode);
+    //}
+    //catch (Exception ex)
+    //{
+    //  _messageLogger.LogDatabaseException(nameof(HandleAsync), ex);
+
+    //  return TypedResults.InternalServerError();
+    //}
   }
 }

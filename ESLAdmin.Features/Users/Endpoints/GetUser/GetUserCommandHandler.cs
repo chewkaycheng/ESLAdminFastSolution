@@ -65,6 +65,6 @@ namespace ESLAdmin.Features.Users.Endpoints.GetUser
 
         return TypedResults.InternalServerError();
       }
-
     }
   }
+}

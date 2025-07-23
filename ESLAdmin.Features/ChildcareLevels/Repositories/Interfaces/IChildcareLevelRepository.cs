@@ -17,8 +17,7 @@ namespace ESLAdmin.Features.ChildcareLevels.Repositories.Interfaces
       CreateChildcareLevelRequest request,
       CreateChildcareLevelMapper mapper);
     Task<OperationResult> UpdateChildcareLevelAsync(
-      UpdateChildcareLevelRequest request,
-      UpdateChildcareLevelMapper mapper);
+      UpdateChildcareLevelCommand command);
     Task<OperationResult> DeleteChildcareLevel(
       long id,
       DeleteChildcareLevelMapper mapper);

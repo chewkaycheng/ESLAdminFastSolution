@@ -9,33 +9,33 @@ namespace ESLAdmin.Features.ChildcareLevels.Endpoints.UpdateChildcareLevel;
 //
 //------------------------------------------------------------------------------
 public class UpdateChildcareLevelMapper : Mapper<
-  UpdateChildcareLevelRequest, 
+  UpdateChildcareLevelCommand, 
   OperationResult, 
   DynamicParameters>
 {
-  public override DynamicParameters ToEntity(UpdateChildcareLevelRequest r)
+  public override DynamicParameters ToEntity(UpdateChildcareLevelCommand command)
   {
     DynamicParameters parameters = new DynamicParameters();
 
     parameters.AddInt64InputParam(
       DbConstsChildcareLevel.PARAM_CHILDCARELEVELID,
-      r.ChildcareLevelId);
+      command.ChildcareLevelId);
     parameters.AddStringInputParam(
       DbConstsChildcareLevel.PARAM_CHILDCARELEVELNAME,
-      r.ChildcareLevelName,
+      command.ChildcareLevelName,
       32);
     parameters.AddInt32InputParam(
       DbConstsChildcareLevel.PARAM_MAXCAPACITY,
-      r.MaxCapacity);
+      command.MaxCapacity);
     parameters.AddInt32InputParam(
       DbConstsChildcareLevel.PARAM_DISPLAYORDER,
-      r.DisplayOrder);
+      command.DisplayOrder);
     parameters.AddInt64InputParam(
       DbConstsChildcareLevel.PARAM_USERCODE,
-      r.UserCode);
+      command.UserCode);
     parameters.AddStringInputParam(
       DbConstsChildcareLevel.PARAM_GUID,
-      r.Guid,
+      command.Guid,
       38);
 
     // Output parameters

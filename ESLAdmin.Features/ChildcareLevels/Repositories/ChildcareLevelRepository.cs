@@ -144,16 +144,15 @@ public class ChildcareLevelRepository :
   //
   //------------------------------------------------------------------------------
   public async Task<OperationResult> UpdateChildcareLevelAsync(
-    UpdateChildcareLevelRequest request,
-    UpdateChildcareLevelMapper mapper)
+    UpdateChildcareLevelCommand command)
   {
-    DynamicParameters parameters = mapper.ToEntity(request);
+    DynamicParameters parameters = command.mapper.ToEntity(command);
     var sql = DbConstsChildcareLevel.SP_CHILDCARELEVEL_UPD;
 
     try
     {
       await DapExecWithTransAsync(sql, parameters);
-      OperationResult operationResult = mapper.FromEntity(parameters);
+      OperationResult operationResult = command.mapper.FromEntity(parameters);
       return operationResult;
 
       //if (result.DbApiError == 100)
