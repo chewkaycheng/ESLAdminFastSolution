@@ -5,6 +5,7 @@ using ESLAdmin.Features.Users.Endpoints.RegisterUser;
 using ESLAdmin.Features.Users.Models;
 using ESLAdmin.Features.Users.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
+using FastEndpoints;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
@@ -49,19 +50,21 @@ public class AuthenticationRepository : IAuthenticationRepository
   //
   //-------------------------------------------------------------------------------
   public async Task<IdentityResultEx> RegisterUserAsync(
-    RegisterUserRequest request, 
-    RegisterUserMapper mapper)
+    RegisterUserCommand command)
+    //RegisterUserRequest request, 
+    //RegisterUserMapper mapper)
   {
     IDbContextTransaction? transaction = null;
     try
     {
-      var user = mapper.ToEntity(request);
-
+      //var user = mapper.ToEntity(request);
+      var user = command.Mapper.CommandToEntity(command); 
       transaction = await _dbContext.Database.BeginTransactionAsync();
 
       var result = await _userManager.CreateAsync(
         user,
-        request.Password);
+        command.Password);
+        //request.Password);
 
       if (!result.Succeeded)
       {
@@ -69,10 +72,12 @@ public class AuthenticationRepository : IAuthenticationRepository
         return IdentityResultEx.Failed(result.Errors.ToArray());
       }
 
-      if (request.Roles != null && request.Roles.Any())
+      if (command.Roles != null && command.Roles.Any())
+      //if (request.Roles != null && request.Roles.Any())
       {
         var invalidRoles = new List<string>();
-        foreach (var role in request.Roles)
+        foreach (var role in command.Roles)
+        //foreach (var role in request.Roles)
         {
           if (!await _roleManager.RoleExistsAsync(role))
           {
@@ -90,7 +95,8 @@ public class AuthenticationRepository : IAuthenticationRepository
           });
         }
 
-        var roleResult = await _userManager.AddToRolesAsync(user, request.Roles);
+        var roleResult = await _userManager.AddToRolesAsync(user, command.Roles);
+        //var roleResult = await _userManager.AddToRolesAsync(user, request.Roles);
         if (!roleResult.Succeeded)
         {
           await transaction.RollbackAsync();
@@ -128,12 +134,12 @@ public class AuthenticationRepository : IAuthenticationRepository
   //
   //-------------------------------------------------------------------------------
   public async Task<UserResponse> GetUserByEmailAsync(
-    GetUserRequest request,
+    GetUserCommand command,
     GetUserMapper mapper)
   {
     try
     {
-      var user = await _userManager.FindByEmailAsync(request.Email);
+      var user = await _userManager.FindByEmailAsync(command.Email);
 
       if (user == null)
       {

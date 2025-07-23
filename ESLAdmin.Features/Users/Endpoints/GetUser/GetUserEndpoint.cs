@@ -57,37 +57,43 @@ public class GetUserEndpoint : Endpoint<
     GetUserRequest request, 
     CancellationToken cancellationToken)
   {
-    try
+    return await new GetUserCommand
     {
-                  
-      var userResponse = await _repositoryManager.AuthenticationRepository.GetUserByEmailAsync(
-        request,
-        Map);
+      Email = request.Email,
+      Mapper = Map
+    }.ExecuteAsync();
 
-      var apiResponse = new APIResponse<UserResponse>();
+    //try
+    //{
 
-      if (userResponse == null)
-      {
-        APIErrors errors = new APIErrors();
-        ValidationFailures.AddRange(new ValidationFailure
-        {
-          PropertyName = "NotFound",
-          ErrorMessage = $"The user with email: {request.Email} is not found."
-        });
-        return new ProblemDetails(
-          ValidationFailures, 
-          StatusCodes.Status404NotFound);
-      }
+    //  var userResponse = await _repositoryManager.AuthenticationRepository.GetUserByEmailAsync(
+    //    request,
+    //    Map);
 
-      return TypedResults.Ok(userResponse);
-    }
-    catch (Exception ex)
-    {
-      _messageLogger.LogControllerException(
-        nameof(ExecuteAsync),
-        ex);
+    //  var apiResponse = new APIResponse<UserResponse>();
 
-      return TypedResults.InternalServerError();
-    }
+    //  if (userResponse == null)
+    //  {
+    //    APIErrors errors = new APIErrors();
+    //    ValidationFailures.AddRange(new ValidationFailure
+    //    {
+    //      PropertyName = "NotFound",
+    //      ErrorMessage = $"The user with email: {request.Email} is not found."
+    //    });
+    //    return new ProblemDetails(
+    //      ValidationFailures, 
+    //      StatusCodes.Status404NotFound);
+    //  }
+
+    //  return TypedResults.Ok(userResponse);
+    //}
+    //catch (Exception ex)
+    //{
+    //  _messageLogger.LogControllerException(
+    //    nameof(ExecuteAsync),
+    //    ex);
+
+    //  return TypedResults.InternalServerError();
+    //}
   }
 }

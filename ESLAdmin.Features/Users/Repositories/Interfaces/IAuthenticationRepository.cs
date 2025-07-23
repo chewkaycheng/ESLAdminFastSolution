@@ -8,10 +8,11 @@ namespace ESLAdmin.Features.Users.Repositories.Interfaces;
 public interface IAuthenticationRepository
 {
   Task<IdentityResultEx> RegisterUserAsync(
-    RegisterUserRequest request,
-    RegisterUserMapper mapper);
+    RegisterUserCommand command);
+    //RegisterUserRequest request,
+    //RegisterUserMapper mapper);
 
   Task<UserResponse> GetUserByEmailAsync(
-    GetUserRequest request,
+    GetUserCommand command,
     GetUserMapper mapper);
 }

@@ -75,48 +75,68 @@ public class RegisterUserEndpoint : Endpoint<
       var context = $"\n=>Request: \n    Username: '{request.UserName}', FirstName: '{request.FirstName}', LastName: '{request.LastName}', Email: '{request.Email}'\n    Password: '[Hidden]', PhoneNumber: '{request.PhoneNumber}', Roles: '{roleLog}'";
       _logger.LogFunctionEntry(context);
     }
-
-    try
+    var command = new RegisterUserCommand
     {
-      var identityResultEx = await _repositoryManager.AuthenticationRepository.RegisterUserAsync(
-      request, Map);
+      UserName = request.UserName,
+      FirstName = request.FirstName,
+      LastName = request.LastName,
+      Email = request.Email,
+      Password = request.Password,
+      PhoneNumber = request.PhoneNumber,
+      Roles = request.Roles,
+      Mapper = Map
+    };
 
-      if (!identityResultEx.Succeeded)
-      {
-        if (_logger.IsEnabled(LogLevel.Information))
-        {
-          _logger.LogValidationErrors(
-            LoggingHelpers.FormatIdentityErrors(
-              identityResultEx.Errors));
-        }
+    var result = await command.ExecuteAsync(cancellationToken);
 
-        ValidationFailures.AddRange(
-          identityResultEx.Errors.Select(error => new ValidationFailure
-          {
-            PropertyName = error.Code,
-            ErrorMessage = error.Description
-          }));
-
-        return new ProblemDetails(
-          ValidationFailures, 
-          StatusCodes.Status422UnprocessableEntity);
-      }
-
-      _logger.LogFunctionExit($"User Id: {identityResultEx.Id}");
-
-      HttpContext.Response.Headers.Append(
-        "location", $"/api/users/{request.Email}");
-
-      return TypedResults.NoContent();
-    }
-    catch (Exception ex)
+    if (result is NoContent)
     {
-      _messageLogger.LogControllerException(
-        nameof(ExecuteAsync),
-        ex);
-
-      return TypedResults.InternalServerError();
-
+      HttpContext.Response.Headers.Append("location", $"/api/users/{request.Email}");
     }
+
+    return result;
+
+    //try
+    //{
+    //  var identityResultEx = await _repositoryManager.AuthenticationRepository.RegisterUserAsync(
+    //  request, Map);
+
+    //  if (!identityResultEx.Succeeded)
+    //  {
+    //    if (_logger.IsEnabled(LogLevel.Information))
+    //    {
+    //      _logger.LogValidationErrors(
+    //        LoggingHelpers.FormatIdentityErrors(
+    //          identityResultEx.Errors));
+    //    }
+
+    //    ValidationFailures.AddRange(
+    //      identityResultEx.Errors.Select(error => new ValidationFailure
+    //      {
+    //        PropertyName = error.Code,
+    //        ErrorMessage = error.Description
+    //      }));
+
+    //    return new ProblemDetails(
+    //      ValidationFailures, 
+    //      StatusCodes.Status422UnprocessableEntity);
+    //  }
+
+    //  _logger.LogFunctionExit($"User Id: {identityResultEx.Id}");
+
+    //  HttpContext.Response.Headers.Append(
+    //    "location", $"/api/users/{request.Email}");
+
+    //  return TypedResults.NoContent();
+    //}
+    //catch (Exception ex)
+    //{
+    //  _messageLogger.LogControllerException(
+    //    nameof(ExecuteAsync),
+    //    ex);
+
+    //  return TypedResults.InternalServerError();
+
+    //}
   }
 }

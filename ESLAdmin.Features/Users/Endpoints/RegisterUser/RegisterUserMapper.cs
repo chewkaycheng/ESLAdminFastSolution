@@ -28,4 +28,16 @@ public class RegisterUserMapper : Mapper<RegisterUserRequest, UserResponse, User
     };
     return user;
   }
+
+  public User CommandToEntity(RegisterUserCommand command)
+  {
+    return new User
+    {
+      UserName = command.UserName,
+      FirstName = command.FirstName,
+      LastName = command.LastName,
+      Email = command.Email,
+      PhoneNumber = command.PhoneNumber,
+    };
+  }
 }
