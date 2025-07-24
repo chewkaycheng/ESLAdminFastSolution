@@ -63,14 +63,8 @@ public class RegisterUserEndpoint : Endpoint<
       RegisterUserRequest request,
       CancellationToken cancellationToken)
   {
-    var Roles = request.Roles != null ? string.Join(", ", request.Roles) : "None";
+    DebugLogFunctionEntry(request);
 
-    if (_logger.IsEnabled(LogLevel.Debug))
-    {
-      var roleLog = Roles = request.Roles != null ? string.Join(", ", request.Roles) : "None";
-      var context = $"\n=>Request: \n    Username: '{request.UserName}', FirstName: '{request.FirstName}', LastName: '{request.LastName}', Email: '{request.Email}'\n    Password: '[Hidden]', PhoneNumber: '{request.PhoneNumber}', Roles: '{roleLog}'";
-      _logger.LogFunctionEntry(context);
-    }
     var command = new RegisterUserCommand
     {
       UserName = request.UserName,
@@ -90,6 +84,18 @@ public class RegisterUserEndpoint : Endpoint<
       HttpContext.Response.Headers.Append("location", $"/api/users/{request.Email}");
     }
 
+    _logger.LogFunctionExit();
+
     return result;
+  }
+
+  private void DebugLogFunctionEntry(RegisterUserRequest request)
+  {
+    if (_logger.IsEnabled(LogLevel.Debug))
+    {
+      var roleLog = request.Roles != null ? string.Join(", ", request.Roles) : "None";
+      var context = $"\n=>Request: \n    Username: '{request.UserName}', FirstName: '{request.FirstName}', LastName: '{request.LastName}', Email: '{request.Email}'\n    Password: '[Hidden]', PhoneNumber: '{request.PhoneNumber}', Roles: '{roleLog}'";
+      _logger.LogFunctionEntry(context);
+    }
   }
 }

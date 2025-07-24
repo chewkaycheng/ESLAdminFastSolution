@@ -1,11 +1,5 @@
 ﻿using ESLAdmin.Domain.Entities;
-using ESLAdmin.Features.Users.Models;
 using FastEndpoints;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ESLAdmin.Features.Endpoints.Users
 {
@@ -14,7 +8,7 @@ namespace ESLAdmin.Features.Endpoints.Users
   //                          class GetUserMapper
   //
   //-------------------------------------------------------------------------------
-  public class GetUserMapper : Mapper<GetUserRequest, UserResponse, User>
+  public class GetUserMapper : Mapper<GetUserRequest, GetUserResponse, User>
   {
     //------------------------------------------------------------------------------
     //

@@ -33,78 +33,59 @@ public class ChildcareLevelRepository :
 
   //------------------------------------------------------------------------------
   //
-  //                        GetChildcareLevels
+  //                        GetChildcareLevelsAsync
   //
   //------------------------------------------------------------------------------
-  //public async Task<IEnumerable<ChildcareLevelResponse>> GetChildcareLevels(ChildcareLevelMapper mapper)
-  //{
-  //  try
-  //  {
-  //    var sql = DbConstsChildcareLevel.SQL_GETALL;
+  public async Task<IEnumerable<ChildcareLevel>> GetChildcareLevelsAsync()
+  {
+    try
+    {
+      var sql = DbConstsChildcareLevel.SQL_GETALL;
 
-  //    var childcareLevels = await DapQueryMultipleAsync(sql, null);
-  //    IEnumerable<ChildcareLevelResponse> childcareLevelsResponse =
-  //      childcareLevels.Select(
-  //        childcareLevel => mapper.FromEntity(
-  //          childcareLevel)).ToList();
+      var childcareLevels = await DapQueryMultipleAsync(sql, null);
 
-  //    return childcareLevelsResponse;
-  //  }
-  //  catch (Exception ex)
-  //  {
-  //    _messageLogger.LogDatabaseException(
-  //      nameof(GetChildcareLevels),
-  //      ex);
+      return childcareLevels;
+    }
+    catch (Exception ex)
+    {
+      _messageLogger.LogDatabaseException(
+        nameof(GetChildcareLevelsAsync),
+        ex);
 
-  //    throw new DatabaseException(
-  //      nameof(GetChildcareLevels),
-  //      ex);
-  //  }
-  //}
+      throw new DatabaseException(
+        nameof(GetChildcareLevelsAsync),
+        ex);
+    }
+  }
 
   //------------------------------------------------------------------------------
   //
-  //                        GetChildcareLevel
+  //                        GetChildcareLevelAsync
   //
   //------------------------------------------------------------------------------
-  //public async Task<ChildcareLevelResponse> GetChildcareLevel(
-  //  long id,
-  //  ChildcareLevelMapper mapper)
-  //{
-  //  try
-  //  {
-  //    var sql = DbConstsChildcareLevel.SQL_GETBYID;
+  public async Task<ChildcareLevel?> GetChildcareLevelAsync(
+   DynamicParameters parameters)
+  {
+    try
+    {
+      var sql = DbConstsChildcareLevel.SQL_GETBYID;
 
-  //    DynamicParameters parameters = new DynamicParameters();
-  //    parameters.AddInt64InputParam(
-  //      OperationResultConsts.ID,
-  //      id);
+      ChildcareLevel? childcareLevel = await DapQuerySingleAsync(
+        sql,
+        parameters);
+      return childcareLevel;
+    }
+    catch (Exception ex)
+    {
+      _messageLogger.LogDatabaseException(
+        nameof(GetChildcareLevelAsync),
+        ex);
 
-  //    ChildcareLevel? childcareLevel = await DapQuerySingleAsync(
-  //      sql,
-  //      parameters);
-  //    if (childcareLevel == null)
-  //    {
-  //      return null;
-  //    }
-  //    else
-  //    {
-  //      ChildcareLevelResponse childcareLevelResponse =
-  //        mapper.FromEntity(childcareLevel);
-  //      return childcareLevelResponse;
-  //    }
-  //  }
-  //  catch (Exception ex)
-  //  {
-  //    _messageLogger.LogDatabaseException(
-  //      nameof(GetChildcareLevel), 
-  //      ex);
-
-  //    throw new DatabaseException(
-  //      nameof(GetChildcareLevel),
-  //      ex);
-  //  }
-  //}
+      throw new DatabaseException(
+        nameof(GetChildcareLevelAsync),
+        ex);
+    }
+  }
 
   //------------------------------------------------------------------------------
   //
@@ -138,59 +119,53 @@ public class ChildcareLevelRepository :
   //                        UpdateChildcareLevel
   //
   //------------------------------------------------------------------------------
-  //public async Task<OperationResult> UpdateChildcareLevelAsync(
-  //  UpdateChildcareLevelCommand command)
-  //{
-  //  DynamicParameters parameters = command.mapper.ToEntity(command);
-  //  var sql = DbConstsChildcareLevel.SP_CHILDCARELEVEL_UPD;
+  public async Task UpdateChildcareLevelAsync(
+    DynamicParameters parameters)
+  {
+    var sql = DbConstsChildcareLevel.SP_CHILDCARELEVEL_UPD;
 
-  //  try
-  //  {
-  //    await DapExecWithTransAsync(sql, parameters);
-  //    OperationResult operationResult = command.mapper.FromEntity(parameters);
-  //    return operationResult;
-  //  }
-  //  catch (Exception ex)
-  //  {
-  //    _messageLogger.LogDatabaseException(
-  //      nameof(UpdateChildcareLevelAsync),
-  //      ex);
+    try
+    {
+      await DapExecWithTransAsync(sql, parameters);
+      return;
+    }
+    catch (Exception ex)
+    {
+      _messageLogger.LogDatabaseException(
+        nameof(UpdateChildcareLevelAsync),
+        ex);
 
-  //    throw new DatabaseException(
-  //      nameof(UpdateChildcareLevelAsync),
-  //      ex);
-  //  }
-  //}
+      throw new DatabaseException(
+        nameof(UpdateChildcareLevelAsync),
+        ex);
+    }
+  }
 
   //------------------------------------------------------------------------------
   //
   //                        DeleteChildcareLevel
   //
   //------------------------------------------------------------------------------
-  //public async Task<OperationResult> DeleteChildcareLevel(
-  //  long id,
-  //  Endpoints.DeleteChildcareLevel.DeleteChildcareLevelMapper mapper)
-  //{
-  //  try
-  //  {
-  //    var sql = DbConstsChildcareLevel.SP_CHILDCARELEVEL_DEL;
+  public async Task DeleteChildcareLevelAsync(
+    DynamicParameters parameters)
+  {
+    try
+    {
+      var sql = DbConstsChildcareLevel.SP_CHILDCARELEVEL_DEL;
 
-  //    DynamicParameters parameters = mapper.ToEntity(id);
+      await DapExecWithTransAsync(sql, parameters);
+      return;
+    }
+    catch (Exception ex)
+    {
+      _messageLogger.LogDatabaseException(
+        nameof(DeleteChildcareLevelAsync),
+        ex);
 
-  //    await DapExecWithTransAsync(sql, parameters);
-  //    OperationResult operationResult = mapper.FromEntity(parameters);
-  //    return operationResult;
-  //  }
-  //  catch (Exception ex)
-  //  {
-  //    _messageLogger.LogDatabaseException(
-  //      nameof(GetChildcareLevel),
-  //      ex);
-
-  //    throw new DatabaseException(
-  //      nameof(GetChildcareLevel),
-  //      ex);
-  //  }
-  //}
+      throw new DatabaseException(
+        nameof(DeleteChildcareLevelAsync),
+        ex);
+    }
+  }
 
 }

@@ -1,9 +1,4 @@
-﻿using ESLAdmin.Features.Users.Endpoints.GetUser;
-using ESLAdmin.Features.Users.Models;
-using FastEndpoints;
-using Microsoft.AspNetCore.Http.HttpResults;
-
-namespace ESLAdmin.Features.Endpoints.Users;
+﻿namespace ESLAdmin.Features.Endpoints.Users;
 
 //------------------------------------------------------------------------------
 //

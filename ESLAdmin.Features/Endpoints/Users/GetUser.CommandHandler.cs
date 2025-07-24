@@ -1,5 +1,6 @@
-﻿using ESLAdmin.Features.Users.Models;
+﻿using ESLAdmin.Domain.Entities;
 using ESLAdmin.Infrastructure.RepositoryManagers;
+using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using FluentValidation.Results;
@@ -32,6 +33,7 @@ public class GetUserCommandHandler : ICommandHandler<
       GetUserCommand command,
       CancellationToken cancellationToken)
   {
+    _logger.LogFunctionEntry($"Email: {command.Email}");
     try
     {
       var result = await _repositoryManager.AuthenticationRepository.GetUserByEmailAsync(
@@ -40,6 +42,8 @@ public class GetUserCommandHandler : ICommandHandler<
       switch (result)
       {
         case null:
+          _logger.LogNotFound("user", $"email: {command.Email}");
+
           var validationFailures = new List<ValidationFailure>();
           validationFailures.AddRange(new ValidationFailure
           {
@@ -52,16 +56,31 @@ public class GetUserCommandHandler : ICommandHandler<
         default:
           var (user, roles) = result.Value;
           var userResponse = command.Mapper.ToResponse(user, roles?.ToList());
+
+          DebugLogFunctionExit(user, roles);
+
           return TypedResults.Ok(userResponse);
       }
     }
     catch (Exception ex)
     {
-      _messageLogger.LogControllerException(
-        nameof(ExecuteAsync),
-        ex);
+      _logger.LogException(ex);
+      //_messageLogger.LogControllerException(
+      //  nameof(ExecuteAsync),
+      //  ex);
 
       return TypedResults.InternalServerError();
     }
   }
+
+  private void DebugLogFunctionExit(User user, ICollection<string>? roles)
+  {
+    if (_logger.IsEnabled(LogLevel.Debug))
+    {
+      var roleLog = roles != null ? string.Join(", ", roles) : "None";
+      var context = $"\n=>User: \n    Username: '{user.UserName}', FirstName: '{user.FirstName}', LastName: '{user.LastName}', Email: '{user.Email}'\n    Password: '[Hidden]', PhoneNumber: '{user.PhoneNumber}', Roles: '{roleLog}'";
+      _logger.LogFunctionEntry(context);
+    }
+  }
+
 }

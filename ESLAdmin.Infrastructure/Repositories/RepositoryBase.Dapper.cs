@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using ESLAdmin.Common.Exceptions;
 using ESLAdmin.Features.Exceptions;
 using ESLAdmin.Infrastructure.Repositories;
 using ESLAdmin.Infrastructure.Repositories.Interfaces;

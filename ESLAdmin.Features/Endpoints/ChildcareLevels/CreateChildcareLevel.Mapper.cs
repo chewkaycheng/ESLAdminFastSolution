@@ -69,3 +69,4 @@ public class CreateChildcareLevelMapper : Mapper<
       Guid = parameters.Get<string?>(
       OperationResultConsts.GUID),
     };
+}

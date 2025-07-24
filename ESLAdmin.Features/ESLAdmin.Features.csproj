@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Exceptions\**" />
+    <EmbeddedResource Remove="Exceptions\**" />
+    <None Remove="Exceptions\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.66" />
     <PackageReference Include="FastEndpoints" Version="6.2.0" />
     <PackageReference Include="FirebirdSql.Data.FirebirdClient" Version="10.3.3" />
@@ -26,11 +32,6 @@
     <ProjectReference Include="..\ESLAdmin.Domain\ESLAdmin.Domain.csproj" />
     <ProjectReference Include="..\ESLAdmin.Infrastructure\ESLAdmin.Infrastructure.csproj" />
     <ProjectReference Include="..\ESLAdmin.Logging\ESLAdmin.Logging.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Exceptions\" />
-    <Folder Include="Users\Mappers\" />
   </ItemGroup>
 
 </Project>

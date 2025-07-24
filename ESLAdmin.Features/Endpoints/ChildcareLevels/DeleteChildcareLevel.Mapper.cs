@@ -3,7 +3,7 @@ using ESLAdmin.Infrastructure.Data.Consts;
 using ESLAdmin.Infrastructure.Repositories;
 using FastEndpoints;
 
-namespace ESLAdmin.Features.ChildcareLevels.Endpoints.DeleteChildcareLevel;
+namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
 
 //------------------------------------------------------------------------------
 //
@@ -11,8 +11,8 @@ namespace ESLAdmin.Features.ChildcareLevels.Endpoints.DeleteChildcareLevel;
 //
 //------------------------------------------------------------------------------
 public class DeleteChildcareLevelMapper : Mapper<
-  long, 
-  OperationResult, 
+  long,
+  OperationResult,
   DynamicParameters>
 {
   //------------------------------------------------------------------------------
@@ -33,7 +33,7 @@ public class DeleteChildcareLevelMapper : Mapper<
       64);
     parameters.AddInt32OutputParam(
       OperationResultConsts.DBAPIERROR);
-   
+
     return parameters;
   }
 

@@ -10,15 +10,25 @@ using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
 
-public class CreateChildcareLevelCommandHandler : ICommandHandler<
-    CreateChildcareLevelCommand,
+//------------------------------------------------------------------------------
+//
+//                    class DeleteChildcareLevelCommandHandler
+//
+//------------------------------------------------------------------------------
+public class DeleteChildcareLevelCommandHandler :
+  ICommandHandler<DeleteChildcareLevelCommand,
     Results<NoContent, ProblemDetails, InternalServerError>>
 {
   private readonly IRepositoryManager _repositoryManager;
   private readonly ILogger<CreateChildcareLevelCommandHandler> _logger;
   private readonly IMessageLogger _messageLogger;
 
-  public CreateChildcareLevelCommandHandler(
+  //------------------------------------------------------------------------------
+  //
+  //                    DeleteChildcareLevelCommandHandler
+  //
+  //------------------------------------------------------------------------------
+  public DeleteChildcareLevelCommandHandler(
       IRepositoryManager repositoryManager,
       ILogger<CreateChildcareLevelCommandHandler> logger,
       IMessageLogger messageLogger)
@@ -28,29 +38,39 @@ public class CreateChildcareLevelCommandHandler : ICommandHandler<
     _messageLogger = messageLogger;
   }
 
+  //------------------------------------------------------------------------------
+  //
+  //                    DeleteChildcareLevelCommand
+  //
+  //------------------------------------------------------------------------------
   public async Task<Results<NoContent, ProblemDetails, InternalServerError>>
     ExecuteAsync(
-      CreateChildcareLevelCommand command,
+      DeleteChildcareLevelCommand command,
       CancellationToken cancellationToken)
   {
     try
     {
-      DynamicParameters parameters = command.Mapper.ToEntity(command);
-      await _repositoryManager.ChildcareLevelRepository.CreateChildcareLevelAsync(
-        parameters);
+      DynamicParameters parameters = command.Mapper.ToEntity(command.Id);
+      await _repositoryManager
+              .ChildcareLevelRepository
+              .DeleteChildcareLevelAsync(
+                parameters);
 
       OperationResult operationResult = command.Mapper.FromEntity(parameters);
-      if (operationResult.DbApiError != 100)
+      if (operationResult.DbApiError == 0)
+      {
+        return TypedResults.NoContent();
+      }
+      else
       {
         var validationFailures = new List<ValidationFailure>();
         validationFailures.AddRange(new ValidationFailure
         {
-          PropertyName = "Duplicate",
-          ErrorMessage = $"The Childcare level with name {command.ChildcareLevelName} already exists."
+          PropertyName = "ConcurrencyConflict",
+          ErrorMessage = $"Cannot delete Childcare level. It is being used by {operationResult.ReferenceTable}."
         });
         return new ProblemDetails(validationFailures, StatusCodes.Status409Conflict);
       }
-      return TypedResults.NoContent();
     }
     catch (Exception ex)
     {

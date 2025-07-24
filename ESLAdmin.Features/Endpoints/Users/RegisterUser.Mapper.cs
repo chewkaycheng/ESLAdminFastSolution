@@ -1,5 +1,4 @@
 ﻿using ESLAdmin.Domain.Entities;
-using ESLAdmin.Features.Users.Models;
 using FastEndpoints;
 
 namespace ESLAdmin.Features.Endpoints.Users;
@@ -9,7 +8,7 @@ namespace ESLAdmin.Features.Endpoints.Users;
 //                      class RegisterUserMapper
 //
 //-------------------------------------------------------------------------------
-public class RegisterUserMapper : Mapper<RegisterUserRequest, UserResponse, User>
+public class RegisterUserMapper : Mapper<RegisterUserRequest, RegisterUserResponse, User>
 {
   //------------------------------------------------------------------------------
   //

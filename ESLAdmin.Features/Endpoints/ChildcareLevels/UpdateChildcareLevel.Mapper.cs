@@ -3,7 +3,7 @@ using ESLAdmin.Infrastructure.Data.Consts;
 using ESLAdmin.Infrastructure.Repositories;
 using FastEndpoints;
 
-namespace ESLAdmin.Features.ChildcareLevels.Endpoints.UpdateChildcareLevel;
+namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
 
 //------------------------------------------------------------------------------
 //
@@ -11,8 +11,8 @@ namespace ESLAdmin.Features.ChildcareLevels.Endpoints.UpdateChildcareLevel;
 //
 //------------------------------------------------------------------------------
 public class UpdateChildcareLevelMapper : Mapper<
-  UpdateChildcareLevelCommand, 
-  OperationResult, 
+  UpdateChildcareLevelCommand,
+  OperationResult,
   DynamicParameters>
 {
   public override DynamicParameters ToEntity(UpdateChildcareLevelCommand command)
@@ -67,5 +67,4 @@ public class UpdateChildcareLevelMapper : Mapper<
     Guid = parameters.Get<string?>(
       OperationResultConsts.GUID),
   };
-
 }

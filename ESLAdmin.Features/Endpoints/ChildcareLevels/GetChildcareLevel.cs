@@ -1,31 +1,33 @@
-﻿using ESLAdmin.Features.ChildcareLevels.Mappers;
-using ESLAdmin.Features.ChildcareLevels.Models;
+﻿using ESLAdmin.Features.Exceptions;
 using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace ESLAdmin.Features.ChildcareLevels.Endpoints.GetChildcareLevels;
+namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
 
 //------------------------------------------------------------------------------
 //
-//                        class GetChildcareLevelsEndpoint
+//                        class GetChildcareLevelEndpoint
 //
 //------------------------------------------------------------------------------
-public class GetChildcareLevelsEndpoint : EndpointWithoutRequest<
-  Results<Ok<IEnumerable<ChildcareLevelResponse>>, InternalServerError>, 
-  ChildcareLevelMapper>
+public class GetChildcareLevelEndpoint :
+  Endpoint<
+    GetChildcareLevelRequest,
+    Results<Ok<GetChildcareLevelResponse>, ProblemDetails, InternalServerError>,
+    GetChildcareLevelMapper>
 {
   private readonly IRepositoryManager _manager;
   private readonly IMessageLogger _messageLogger;
 
   //------------------------------------------------------------------------------
   //
-  //                        GetChildcareLevelsEndpoint
+  //                        GetChildcareLevelEndpoint
   //
   //------------------------------------------------------------------------------
-  public GetChildcareLevelsEndpoint(
+  public GetChildcareLevelEndpoint(
     IRepositoryManager manager,
     IMessageLogger messageLogger)
   {
@@ -40,27 +42,24 @@ public class GetChildcareLevelsEndpoint : EndpointWithoutRequest<
   //------------------------------------------------------------------------------
   public override void Configure()
   {
-    Get("/api/childcarelevels");
+    Get("/api/childcarelevels/{id}");
     AllowAnonymous();
   }
 
   //------------------------------------------------------------------------------
   //
-  //                        HandleAsync
+  //                        ExecuteAsync
   //
   //------------------------------------------------------------------------------
-  public override async Task<Results<Ok<IEnumerable<ChildcareLevelResponse>>, InternalServerError>> ExecuteAsync(CancellationToken c)
+  public override async Task<Results<Ok<GetChildcareLevelResponse>, ProblemDetails, InternalServerError>> ExecuteAsync(
+    GetChildcareLevelRequest request, CancellationToken c)
   {
-    try
+    var command = new GetChildcareLevelCommand
     {
-      var childcarelevels = await _manager.ChildcareLevelRepository.GetChildcareLevels(Map);
-      return TypedResults.Ok(childcarelevels);
-    }
-    catch (Exception ex)
-    {
-      _messageLogger.LogDatabaseException(nameof(HandleAsync), ex);
+      Id = request.Id,
+      Mapper = Map
+    };
 
-      return TypedResults.InternalServerError();
-    }
+    return await command.ExecuteAsync(c);
   }
 }

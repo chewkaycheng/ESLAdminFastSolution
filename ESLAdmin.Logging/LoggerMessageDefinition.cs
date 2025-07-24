@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using System.Reflection.Metadata;
 
 namespace ESLAdmin.Logging;
 
@@ -71,5 +72,16 @@ public static partial class MessageLoggerDefs
   [LoggerMessage(EventId = 5, Level = LogLevel.Debug, Message = "Exit function. {context}")]
   public static partial void LogFunctionExit(
     this ILogger logger,
+    string? context = null);
+
+  //------------------------------------------------------------------------------
+  //
+  //                       LogNotFound
+  //
+  //------------------------------------------------------------------------------
+  [LoggerMessage(EventId = 6, Level = LogLevel.Information, Message = "The {entity} with {context} is not found.")]
+  public static partial void LogNotFound(
+    this ILogger logger,
+    string entity,
     string? context = null);
 }

@@ -1,5 +1,4 @@
-﻿using ESLAdmin.Features.Users.Endpoints.GetUser;
-using ESLAdmin.Features.Users.Models;
+﻿using Dapper;
 using ESLAdmin.Infrastructure.Repositories;
 using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging.Interface;
@@ -9,21 +8,19 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Features.ChildcareLevels.Endpoints.UpdateChildcareLevel;
+namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
 
 public class UpdateChildcareLevelCommandHandler : ICommandHandler<
-  UpdateChildcareLevelCommand,
-  Results<Ok<UpdateChildcareLevelResponse>,
-  ProblemDetails,
-  InternalServerError>>
+    UpdateChildcareLevelCommand,
+    Results<Ok<UpdateChildcareLevelResponse>, ProblemDetails, InternalServerError>>
 {
   private readonly IRepositoryManager _repositoryManager;
-  private readonly ILogger<GetUserCommandHandler> _logger;
+  private readonly ILogger<CreateChildcareLevelCommandHandler> _logger;
   private readonly IMessageLogger _messageLogger;
 
   public UpdateChildcareLevelCommandHandler(
       IRepositoryManager repositoryManager,
-      ILogger<GetUserCommandHandler> logger,
+      ILogger<CreateChildcareLevelCommandHandler> logger,
       IMessageLogger messageLogger)
   {
     _repositoryManager = repositoryManager;
@@ -32,14 +29,19 @@ public class UpdateChildcareLevelCommandHandler : ICommandHandler<
   }
 
   public async Task<Results<Ok<UpdateChildcareLevelResponse>, ProblemDetails, InternalServerError>>
-   ExecuteAsync(
-     UpdateChildcareLevelCommand command,
-     CancellationToken cancellationToken)
+    ExecuteAsync(
+      UpdateChildcareLevelCommand command,
+      CancellationToken cancellationToken)
   {
     try
     {
-      OperationResult operationResult = await _repositoryManager.ChildcareLevelRepository.UpdateChildcareLevelAsync(
-        command);
+      DynamicParameters parameters = command.Mapper.ToEntity(command);
+      await _repositoryManager
+              .ChildcareLevelRepository
+              .UpdateChildcareLevelAsync(
+                 parameters);
+
+      OperationResult operationResult = command.Mapper.FromEntity(parameters);
 
       if (operationResult.DbApiError == 0)
       {
@@ -54,7 +56,7 @@ public class UpdateChildcareLevelCommandHandler : ICommandHandler<
       switch (operationResult.DbApiError)
       {
         case 100:
-          { 
+          {
             validationFailures.AddRange(new ValidationFailure
             {
               PropertyName = "ConcurrencyConflict",
@@ -95,12 +97,13 @@ public class UpdateChildcareLevelCommandHandler : ICommandHandler<
             break;
           }
       }
-
       return new ProblemDetails(validationFailures, statusCode);
     }
     catch (Exception ex)
     {
-      _messageLogger.LogDatabaseException(nameof(ExecuteAsync), ex);
+      _messageLogger.LogControllerException(
+        nameof(ExecuteAsync),
+        ex);
 
       return TypedResults.InternalServerError();
     }

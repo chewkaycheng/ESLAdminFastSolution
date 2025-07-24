@@ -1,7 +1,7 @@
 ﻿using Dapper;
 using System.Data;
 
-namespace ESLAdmin.Features;
+namespace ESLAdmin.Infrastructure.Repositories;
 
 //------------------------------------------------------------------------------
 //

@@ -1,11 +1,27 @@
-﻿namespace ESLAdmin.Features.ChildcareLevels.Models;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
 
 //------------------------------------------------------------------------------
 //
-//                        class ChildcareLevelResponse 
+//                        class GetChildcareLevelRequest 
 //
 //------------------------------------------------------------------------------
-public class ChildcareLevelResponse
+public class GetChildcareLevelRequest
+{
+  public long Id { get; set; }
+}
+
+//------------------------------------------------------------------------------
+//
+//                        class GetChildcareLevelResponse 
+//
+//------------------------------------------------------------------------------
+public class GetChildcareLevelResponse
 {
   public long Id { get; set; }
   public string ChildcareLevelName { get; set; } = string.Empty;
