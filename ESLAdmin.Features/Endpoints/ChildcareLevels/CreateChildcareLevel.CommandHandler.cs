@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using ESLAdmin.Features.Exceptions;
+using ESLAdmin.Infrastructure.Repositories;
 using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
@@ -12,7 +13,7 @@ namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
 
 public class CreateChildcareLevelCommandHandler : ICommandHandler<
     CreateChildcareLevelCommand,
-    Results<NoContent, Conflict<APIErrors>, InternalServerError>>
+    Results<NoContent, ProblemDetails, InternalServerError>>
 {
   private readonly IRepositoryManager _repositoryManager;
   private readonly ILogger<CreateChildcareLevelCommandHandler> _logger;
@@ -28,7 +29,7 @@ public class CreateChildcareLevelCommandHandler : ICommandHandler<
     _messageLogger = messageLogger;
   }
 
-  public async Task<Results<NoContent, Conflict<APIErrors>, InternalServerError>>
+  public async Task<Results<NoContent, ProblemDetails, InternalServerError>>
     ExecuteAsync(
       CreateChildcareLevelCommand command,
       CancellationToken cancellationToken)
@@ -36,26 +37,21 @@ public class CreateChildcareLevelCommandHandler : ICommandHandler<
     try
     {
       DynamicParameters parameters = command.Mapper.ToEntity(command);
-      var result = await _repositoryManager.AuthenticationRepository.GetUserByEmailAsync(
-        command.Email);
+      await _repositoryManager.ChildcareLevelRepository.CreateChildcareLevelAsync(
+        parameters);
 
-      switch (result)
+      OperationResult operationResult = command.Mapper.FromEntity(parameters);
+      if (operationResult.DbApiError != 100)
       {
-        case null:
-          var validationFailures = new List<ValidationFailure>();
-          validationFailures.AddRange(new ValidationFailure
-          {
-            PropertyName = "NotFound",
-            ErrorMessage = $"The user with email: {command.Email} is not found."
-          });
-          return new ProblemDetails(
-            validationFailures,
-            StatusCodes.Status404NotFound);
-        default:
-          var (user, roles) = result.Value;
-          var userResponse = command.Mapper.ToResponse(user, roles?.ToList());
-          return TypedResults.Ok(userResponse);
+        var validationFailures = new List<ValidationFailure>();
+        validationFailures.AddRange(new ValidationFailure
+        {
+          PropertyName = "Duplicate",
+          ErrorMessage = $"The Childcare level with name {command.ChildcareLevelName} already exists."
+        });
+        return new ProblemDetails(validationFailures, StatusCodes.Status409Conflict);
       }
+      return TypedResults.NoContent();
     }
     catch (Exception ex)
     {

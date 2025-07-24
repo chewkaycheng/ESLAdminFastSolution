@@ -21,9 +21,9 @@ namespace ESLAdmin.Features.Endpoints.Users
     //                          ToResponse
     //
     //-------------------------------------------------------------------------------
-    public UserResponse ToResponse(User user, IList<string>? roles)
+    public GetUserResponse ToResponse(User user, IList<string>? roles)
     {
-      UserResponse response = new GetUserResponse()
+      GetUserResponse response = new GetUserResponse()
       {
         Id = user.Id,
         FirstName = user.FirstName,
