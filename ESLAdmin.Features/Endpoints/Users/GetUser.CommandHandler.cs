@@ -1,7 +1,4 @@
-﻿using ESLAdmin.Domain.Entities;
-using ESLAdmin.Features.Exceptions;
-using ESLAdmin.Features.Users.Endpoints.RegisterUser;
-using ESLAdmin.Features.Users.Models;
+﻿using ESLAdmin.Features.Users.Models;
 using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
@@ -10,11 +7,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Features.Users.Endpoints.GetUser;
+namespace ESLAdmin.Features.Endpoints.Users;
 
 public class GetUserCommandHandler : ICommandHandler<
     GetUserCommand,
-    Results<Ok<UserResponse>, ProblemDetails, InternalServerError>>
+    Results<Ok<GetUserResponse>, ProblemDetails, InternalServerError>>
 {
   private readonly IRepositoryManager _repositoryManager;
   private readonly ILogger<GetUserCommandHandler> _logger;
@@ -30,7 +27,7 @@ public class GetUserCommandHandler : ICommandHandler<
     _messageLogger = messageLogger;
   }
 
-  public async Task<Results<Ok<UserResponse>, ProblemDetails, InternalServerError>>
+  public async Task<Results<Ok<GetUserResponse>, ProblemDetails, InternalServerError>>
     ExecuteAsync(
       GetUserCommand command,
       CancellationToken cancellationToken)
@@ -40,23 +37,23 @@ public class GetUserCommandHandler : ICommandHandler<
       var result = await _repositoryManager.AuthenticationRepository.GetUserByEmailAsync(
         command.Email);
 
-
-      var apiResponse = new APIResponse<UserResponse>();
-
-      if (userResponse == null)
+      switch (result)
       {
-        var validationFailures = new List<ValidationFailure>();
-        validationFailures.AddRange(new ValidationFailure
-        {
-          PropertyName = "NotFound",
-          ErrorMessage = $"The user with email: {command.Email} is not found."
-        });
-        return new ProblemDetails(
-          validationFailures,
-          StatusCodes.Status404NotFound);
+        case null:
+          var validationFailures = new List<ValidationFailure>();
+          validationFailures.AddRange(new ValidationFailure
+          {
+            PropertyName = "NotFound",
+            ErrorMessage = $"The user with email: {command.Email} is not found."
+          });
+          return new ProblemDetails(
+            validationFailures,
+            StatusCodes.Status404NotFound);
+        default:
+          var (user, roles) = result.Value;
+          var userResponse = command.Mapper.ToResponse(user, roles?.ToList());
+          return TypedResults.Ok(userResponse);
       }
-
-      return TypedResults.Ok(userResponse);
     }
     catch (Exception ex)
     {

@@ -1,4 +1,4 @@
-﻿using ESLAdmin.Features.Repositories.Interfaces;
+﻿using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
@@ -41,6 +41,7 @@ namespace ESLAdmin.Features.Users.Endpoints.RegisterUser
       try
       {
         var user = command.Mapper.CommandToEntity(command);
+        
         var identityResultEx = await _repositoryManager.AuthenticationRepository.RegisterUserAsync(command);
 
         if (!identityResultEx.Succeeded)

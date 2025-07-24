@@ -1,4 +1,4 @@
-﻿using ESLAdmin.Features.Repositories.Interfaces;
+﻿using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using FluentValidation.Results;

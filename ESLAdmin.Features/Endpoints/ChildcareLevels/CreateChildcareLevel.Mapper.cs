@@ -3,25 +3,26 @@ using ESLAdmin.Infrastructure.Data.Consts;
 using ESLAdmin.Infrastructure.Repositories;
 using FastEndpoints;
 
-namespace ESLAdmin.Features.ChildcareLevels.Endpoints.UpdateChildcareLevel;
+namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
 
 //------------------------------------------------------------------------------
 //
-//                           ToEntity
+//                        Class CreateChildcareLevelMapper
 //
 //------------------------------------------------------------------------------
-public class UpdateChildcareLevelMapper : Mapper<
-  UpdateChildcareLevelCommand, 
-  OperationResult, 
+public class CreateChildcareLevelMapper : Mapper<
+  CreateChildcareLevelCommand,
+  OperationResult,
   DynamicParameters>
 {
-  public override DynamicParameters ToEntity(UpdateChildcareLevelCommand command)
+  //------------------------------------------------------------------------------
+  //
+  //                           ToEntity
+  //
+  //------------------------------------------------------------------------------
+  public override DynamicParameters ToEntity(CreateChildcareLevelCommand command)
   {
     DynamicParameters parameters = new DynamicParameters();
-
-    parameters.AddInt64InputParam(
-      DbConstsChildcareLevel.PARAM_CHILDCARELEVELID,
-      command.ChildcareLevelId);
     parameters.AddStringInputParam(
       DbConstsChildcareLevel.PARAM_CHILDCARELEVELNAME,
       command.ChildcareLevelName,
@@ -33,12 +34,8 @@ public class UpdateChildcareLevelMapper : Mapper<
       DbConstsChildcareLevel.PARAM_DISPLAYORDER,
       command.DisplayOrder);
     parameters.AddInt64InputParam(
-      DbConstsChildcareLevel.PARAM_USERCODE,
-      command.UserCode);
-    parameters.AddStringInputParam(
-      DbConstsChildcareLevel.PARAM_GUID,
-      command.Guid,
-      38);
+      DbConstsChildcareLevel.PARAM_INITUSER,
+      command.InitUser);
 
     // Output parameters
     parameters.AddInt32OutputParam(
@@ -46,6 +43,8 @@ public class UpdateChildcareLevelMapper : Mapper<
     parameters.AddStringOutputParam(
       OperationResultConsts.DUPFIELDNAME,
       128);
+    parameters.AddInt64OutputParam(
+      DbConstsChildcareLevel.CHILDCARELEVELID);
     parameters.AddStringOutputParam(
       OperationResultConsts.GUID,
       38);
@@ -58,14 +57,15 @@ public class UpdateChildcareLevelMapper : Mapper<
   //                           FromEntity
   //
   //------------------------------------------------------------------------------
-  public override OperationResult FromEntity(DynamicParameters parameters) => new()
-  {
-    DbApiError = parameters.Get<int>(
+  public override OperationResult FromEntity(
+    DynamicParameters parameters) => new()
+    {
+      DbApiError = parameters.Get<int>(
       OperationResultConsts.DBAPIERROR),
-    DupFieldName = parameters.Get<string?>(
+      DupFieldName = parameters.Get<string?>(
       OperationResultConsts.DUPFIELDNAME),
-    Guid = parameters.Get<string?>(
+      Id = parameters.Get<long?>(
+      DbConstsChildcareLevel.CHILDCARELEVELID),
+      Guid = parameters.Get<string?>(
       OperationResultConsts.GUID),
-  };
-
-}
+    };

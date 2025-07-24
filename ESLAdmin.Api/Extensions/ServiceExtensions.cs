@@ -1,7 +1,9 @@
 ﻿using ESLAdmin.Domain.Entities;
 using ESLAdmin.Features.Repositories;
-using ESLAdmin.Features.Repositories.Interfaces;
-using ESLAdmin.Features.Users.Repositories;
+using ESLAdmin.Infrastructure.Data;
+using ESLAdmin.Infrastructure.Data.Interfaces;
+using ESLAdmin.Infrastructure.Repositories.Interfaces;
+using ESLAdmin.Infrastructure.RepositoryManagers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

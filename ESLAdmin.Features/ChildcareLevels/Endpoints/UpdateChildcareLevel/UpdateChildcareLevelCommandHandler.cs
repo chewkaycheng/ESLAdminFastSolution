@@ -1,6 +1,7 @@
-﻿using ESLAdmin.Features.Repositories.Interfaces;
-using ESLAdmin.Features.Users.Endpoints.GetUser;
+﻿using ESLAdmin.Features.Users.Endpoints.GetUser;
 using ESLAdmin.Features.Users.Models;
+using ESLAdmin.Infrastructure.Repositories;
+using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using FluentValidation.Results;

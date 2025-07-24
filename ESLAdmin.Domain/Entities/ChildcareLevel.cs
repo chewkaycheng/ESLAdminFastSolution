@@ -8,39 +8,11 @@ namespace ESLAdmin.Domain.Entities;
 //                        Class ChildcareLevel
 //
 //------------------------------------------------------------------------------
-[Table("CHILDCARELEVELS")]
-public class ChildcareLevel
+public class ChildcareLevel : EntityBase
 {
-  [Key]
-  [Column("CHILDCARELEVELID")]
-  public long Id { get; set; }
-
-  [Column("CHILDCARELEVELNAME")]
-  [StringLength(32)]
+  public long Id { get; set; } = 0;
   public string ChildcareLevelName { get; set; } = string.Empty;
-
-  [Column("MAXCAPACITY")]
-  public int MaxCapacity { get; set; }
-
-  [Column("DISPLAYORDER")]
-  public int DisplayOrder { get; set; }
-
-  [Column("PLACESASSIGNED")]
-  public int PlacesAssigned { get; set; }
-
-  [Column("INITUSER")]
-  public long InitUser { get; set; }
-
-  [Column("INITDATE")]
-  public DateTime InitDate { get; set; }
-
-  [Column("USERCODE")]
-  public long UserCode { get; set; }
-
-  [Column("USERSTAMP")]
-  public DateTime UserStamp { get; set; }
-
-  [Column("GUID")]
-  [MaxLength(38)]
-  public string Guid { get; set; } = string.Empty;
+  public int MaxCapacity { get; set; } = 0;
+  public int DisplayOrder { get; set; } = 0;
+  public int PlacesAssigned { get; set; } = 0;
 }

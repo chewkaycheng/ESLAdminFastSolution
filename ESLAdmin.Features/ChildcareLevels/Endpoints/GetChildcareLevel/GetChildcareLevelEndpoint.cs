@@ -1,7 +1,7 @@
 ﻿using ESLAdmin.Features.ChildcareLevels.Mappers;
 using ESLAdmin.Features.ChildcareLevels.Models;
 using ESLAdmin.Features.Exceptions;
-using ESLAdmin.Features.Repositories.Interfaces;
+using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using FluentValidation.Results;
