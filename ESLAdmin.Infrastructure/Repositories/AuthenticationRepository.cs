@@ -20,6 +20,7 @@ public class AuthenticationRepository : IAuthenticationRepository
   private readonly IMessageLogger _messageLogger;
   private readonly ILogger _logger;
   private readonly UserManager<User> _userManager;
+  private readonly SignInManager<User> _signInManager;  
   private readonly RoleManager<IdentityRole> _roleManager;
   private readonly UserDbContext _dbContext;
 
@@ -32,6 +33,7 @@ public class AuthenticationRepository : IAuthenticationRepository
     ILogger logger,
     IMessageLogger messageLogger,
     UserManager<User> userManager,
+    SignInManager<User> signInManager,
     RoleManager<IdentityRole> roleManager,
     UserDbContext dbContext)
   {
@@ -39,6 +41,7 @@ public class AuthenticationRepository : IAuthenticationRepository
     _logger = logger;
     _messageLogger = messageLogger;
     _userManager = userManager;
+    _signInManager = signInManager;
     _roleManager = roleManager;
   }
 
