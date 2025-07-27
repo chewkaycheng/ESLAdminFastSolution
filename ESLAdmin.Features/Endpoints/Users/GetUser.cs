@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ESLAdmin.Features.Endpoints.Users;
 
-//------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
 //
 //                          class GetUserEndpoint
 //
@@ -20,7 +20,7 @@ public class GetUserEndpoint : Endpoint<
   private readonly IRepositoryManager _repositoryManager;
   private readonly IMessageLogger _messageLogger;
 
-  //------------------------------------------------------------------------------
+  //-------------------------------------------------------------------------------
   //
   //                       GetUserEndpoint
   //
@@ -33,7 +33,7 @@ public class GetUserEndpoint : Endpoint<
     _messageLogger = messageLogger;
   }
 
-  //------------------------------------------------------------------------------
+  //-------------------------------------------------------------------------------
   //
   //                       Configure
   //
@@ -44,7 +44,7 @@ public class GetUserEndpoint : Endpoint<
     AllowAnonymous();
   }
 
-  //------------------------------------------------------------------------------
+  //-------------------------------------------------------------------------------
   //
   //                       ExecuteAsync
   //

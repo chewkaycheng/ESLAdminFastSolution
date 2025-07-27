@@ -10,6 +10,11 @@ using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Features.Endpoints.Users;
 
+//-------------------------------------------------------------------------------
+//
+//                       class LoginUserCommandHandler
+//
+//-------------------------------------------------------------------------------
 public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
     Results<Ok<LoginUserResponse>, ProblemDetails, InternalServerError>>
 {
@@ -17,6 +22,11 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
   private readonly ILogger<LoginUserCommandHandler> _logger;
   private readonly IMessageLogger _messageLogger;
 
+  //-------------------------------------------------------------------------------
+  //
+  //                       LoginUserCommandHandler
+  //
+  //-------------------------------------------------------------------------------
   public LoginUserCommandHandler(
       IRepositoryManager repositoryManager,
       ILogger<LoginUserCommandHandler> logger,
@@ -27,6 +37,11 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
     _messageLogger = messageLogger;
   }
 
+  //-------------------------------------------------------------------------------
+  //
+  //                       ExecuteAsync
+  //
+  //-------------------------------------------------------------------------------
   public async Task<Results<Ok<LoginUserResponse>, ProblemDetails, InternalServerError>>
       ExecuteAsync(
           LoginUserCommand command,
@@ -64,9 +79,7 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
             {
               o.User.Roles.Add(role);
             }
-            ;
           }
-          ;
         });
 
       LoginUserResponse response = new LoginUserResponse

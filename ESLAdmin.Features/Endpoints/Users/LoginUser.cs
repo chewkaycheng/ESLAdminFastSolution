@@ -4,10 +4,20 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ESLAdmin.Features.Endpoints.Users;
 
+//-------------------------------------------------------------------------------
+//
+//                       class LoginUserEndpoint
+//
+//-------------------------------------------------------------------------------
 public class LoginUserEndpoint : Endpoint<LoginUserRequest, 
   Results<Ok<LoginUserResponse>, ProblemDetails, InternalServerError>, 
   LoginUserMapper>
 {
+  //-------------------------------------------------------------------------------
+  //
+  //                       Configure
+  //
+  //-------------------------------------------------------------------------------
   public override void Configure()
   {
     Post("/api/auth/login");
@@ -17,6 +27,11 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest,
       .ProducesProblem(400));
   }
 
+  //-------------------------------------------------------------------------------
+  //
+  //                       ExecuteAsync
+  //
+  //-------------------------------------------------------------------------------
   public override async Task<Results<Ok<LoginUserResponse>, ProblemDetails, InternalServerError>> ExecuteAsync(
     LoginUserRequest request,
     CancellationToken cancellationToken)

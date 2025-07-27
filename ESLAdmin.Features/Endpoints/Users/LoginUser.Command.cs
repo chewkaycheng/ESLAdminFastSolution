@@ -3,6 +3,11 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ESLAdmin.Features.Endpoints.Users;
 
+//-------------------------------------------------------------------------------
+//
+//                       LoginUserCommand
+//
+//-------------------------------------------------------------------------------
 public class LoginUserCommand :
     ICommand<Results<Ok<LoginUserResponse>, ProblemDetails, InternalServerError>>
 {

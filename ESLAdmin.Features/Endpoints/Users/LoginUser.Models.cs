@@ -2,6 +2,11 @@
 
 namespace ESLAdmin.Features.Endpoints.Users;
 
+//-------------------------------------------------------------------------------
+//
+//                       class LoginUserRequest
+//
+//-------------------------------------------------------------------------------
 public class LoginUserRequest
 {
   [Required]
@@ -14,6 +19,11 @@ public class LoginUserRequest
   public bool RememberMe { get; set; }
 }
 
+//-------------------------------------------------------------------------------
+//
+//                      LoginUserResponse
+//
+//-------------------------------------------------------------------------------
 public class LoginUserResponse
 {
   public string Token { get; set; } = string.Empty;

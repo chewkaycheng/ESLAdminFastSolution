@@ -1,7 +1,5 @@
-﻿using ESLAdmin.Features.Endpoints.Users;
-using ESLAdmin.Infrastructure.RepositoryManagers;
+﻿using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging;
-using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -74,6 +72,11 @@ public class CreateChildcareLevelEndpoint : Endpoint<
     return result;
   }
 
+  //------------------------------------------------------------------------------
+  //
+  //                        DebugLogFunctionEntry
+  //
+  //------------------------------------------------------------------------------
   private void DebugLogFunctionEntry(CreateChildcareLevelRequest request)
   {
     if (_logger.IsEnabled(LogLevel.Debug))
