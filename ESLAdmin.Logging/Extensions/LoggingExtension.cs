@@ -87,19 +87,17 @@ public class ZipFileHook : Serilog.Sinks.File.FileLifecycleHooks
   {
     try
     {
-      var date = Path.GetFileNameWithoutExtension(path).Split('-').Last();
-      date = date.Split('_').First();
-      var zipFileName = Path.Combine(_zipDirectory, $"log-{date}.zip");
+      var dateStr = Path.GetFileNameWithoutExtension(path).Split('-').Last();
+      dateStr = dateStr.Split('_').First();
+      var zipFileName = Path.Combine(_zipDirectory, $"log-{dateStr}.zip");
       var fileName = Path.GetFileName(path);
 
       lock (this)
       {
-        using (var zip = File.Exists(zipFileName) ?
-               ZipFile.Open(zipFileName, ZipArchiveMode.Update) :
-               ZipFile.Open(zipFileName, ZipArchiveMode.Create))
-        {
-          zip.CreateEntryFromFile(path, fileName, CompressionLevel.Optimal);
-        }
+        using var zip = File.Exists(zipFileName) ?
+          ZipFile.Open(zipFileName, ZipArchiveMode.Update) :
+          ZipFile.Open(zipFileName, ZipArchiveMode.Create);
+        zip.CreateEntryFromFile(path, fileName, CompressionLevel.Optimal);
       }
     }
     catch (Exception ex)

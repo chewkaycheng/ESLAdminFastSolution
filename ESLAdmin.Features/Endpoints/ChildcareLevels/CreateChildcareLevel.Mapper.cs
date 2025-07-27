@@ -2,6 +2,7 @@
 using ESLAdmin.Infrastructure.Data.Consts;
 using ESLAdmin.Infrastructure.Repositories;
 using FastEndpoints;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
 
@@ -17,10 +18,10 @@ public class CreateChildcareLevelMapper : Mapper<
 {
   //------------------------------------------------------------------------------
   //
-  //                           ToEntity
+  //                           ToParameters
   //
   //------------------------------------------------------------------------------
-  public override DynamicParameters ToEntity(CreateChildcareLevelCommand command)
+  public DynamicParameters ToParameters(CreateChildcareLevelCommand command)
   {
     DynamicParameters parameters = new DynamicParameters();
     parameters.AddStringInputParam(
@@ -54,10 +55,10 @@ public class CreateChildcareLevelMapper : Mapper<
 
   //------------------------------------------------------------------------------
   //
-  //                           FromEntity
+  //                           FromParameters
   //
   //------------------------------------------------------------------------------
-  public override OperationResult FromEntity(
+  public OperationResult FromParameters(
     DynamicParameters parameters) => new()
     {
       DbApiError = parameters.Get<int>(
@@ -69,4 +70,21 @@ public class CreateChildcareLevelMapper : Mapper<
       Guid = parameters.Get<string?>(
       OperationResultConsts.GUID),
     };
+
+  //------------------------------------------------------------------------------
+  //
+  //                           ToResponse
+  //
+  //------------------------------------------------------------------------------
+  public CreateChildcareLevelResponse ToResponse(DynamicParameters parameters)
+  {
+    return new CreateChildcareLevelResponse
+    {
+      ChildcareLevelId = parameters.Get<long>(
+        DbConstsChildcareLevel.CHILDCARELEVELID),
+      Guid = parameters.Get<string>(
+        OperationResultConsts.GUID)
+    };
+
+  }
 }

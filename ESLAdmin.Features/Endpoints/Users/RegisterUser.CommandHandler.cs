@@ -1,5 +1,4 @@
-﻿using Dapper;
-using ESLAdmin.Infrastructure.RepositoryManagers;
+﻿using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;

@@ -1,4 +1,5 @@
 ﻿using FastEndpoints;
+using FluentValidation;
 
 namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
 
@@ -15,6 +16,18 @@ public class CreateChildcareLevelRequest
   public long InitUser { get; set; }
 }
 
+
+//------------------------------------------------------------------------------
+//
+//                           class CreateChildcareLevelResponse
+//
+//------------------------------------------------------------------------------
+public class CreateChildcareLevelResponse
+{
+  public long ChildcareLevelId { get; set; }
+  public string Guid { get; set; }
+}
+
 //------------------------------------------------------------------------------
 //
 //                           class CreateChildcareLevelValidator
@@ -24,6 +37,7 @@ public class CreateChildcareLevelValidator : Validator<CreateChildcareLevelReque
 {
   public CreateChildcareLevelValidator()
   {
-
+    RuleFor(x => x.ChildcareLevelName)
+            .NotEmpty().WithMessage("Childcare level is required.");
   }
 }

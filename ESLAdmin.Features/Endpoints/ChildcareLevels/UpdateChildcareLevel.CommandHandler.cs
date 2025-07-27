@@ -35,13 +35,13 @@ public class UpdateChildcareLevelCommandHandler : ICommandHandler<
   {
     try
     {
-      DynamicParameters parameters = command.Mapper.ToEntity(command);
+      DynamicParameters parameters = command.Mapper.ToParameters(command);
       await _repositoryManager
               .ChildcareLevelRepository
               .UpdateChildcareLevelAsync(
                  parameters);
 
-      OperationResult operationResult = command.Mapper.FromEntity(parameters);
+      OperationResult operationResult = command.Mapper.FromParameters(parameters);
 
       if (operationResult.DbApiError == 0)
       {

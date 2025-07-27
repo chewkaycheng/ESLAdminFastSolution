@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using ESLAdmin.Infrastructure.Repositories;
 using ESLAdmin.Infrastructure.RepositoryManagers;
+using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using FluentValidation.Results;
@@ -20,7 +21,7 @@ public class DeleteChildcareLevelCommandHandler :
     Results<NoContent, ProblemDetails, InternalServerError>>
 {
   private readonly IRepositoryManager _repositoryManager;
-  private readonly ILogger<CreateChildcareLevelCommandHandler> _logger;
+  private readonly ILogger<DeleteChildcareLevelCommandHandler> _logger;
   private readonly IMessageLogger _messageLogger;
 
   //------------------------------------------------------------------------------
@@ -30,7 +31,7 @@ public class DeleteChildcareLevelCommandHandler :
   //------------------------------------------------------------------------------
   public DeleteChildcareLevelCommandHandler(
       IRepositoryManager repositoryManager,
-      ILogger<CreateChildcareLevelCommandHandler> logger,
+      ILogger<DeleteChildcareLevelCommandHandler> logger,
       IMessageLogger messageLogger)
   {
     _repositoryManager = repositoryManager;
@@ -48,17 +49,19 @@ public class DeleteChildcareLevelCommandHandler :
       DeleteChildcareLevelCommand command,
       CancellationToken cancellationToken)
   {
+    _logger.LogFunctionEntry($"\n=>ChildcareLevelId: {command.Id}");
     try
     {
-      DynamicParameters parameters = command.Mapper.ToEntity(command.Id);
+      DynamicParameters parameters = command.Mapper.ToParameters(command.Id);
       await _repositoryManager
               .ChildcareLevelRepository
               .DeleteChildcareLevelAsync(
                 parameters);
 
-      OperationResult operationResult = command.Mapper.FromEntity(parameters);
+      OperationResult operationResult = command.Mapper.FromParameters(parameters);
       if (operationResult.DbApiError == 0)
       {
+        _logger.LogFunctionExit();
         return TypedResults.NoContent();
       }
       else
@@ -69,14 +72,13 @@ public class DeleteChildcareLevelCommandHandler :
           PropertyName = "ConcurrencyConflict",
           ErrorMessage = $"Cannot delete Childcare level. It is being used by {operationResult.ReferenceTable}."
         });
+        _logger.LogFunctionExit();
         return new ProblemDetails(validationFailures, StatusCodes.Status409Conflict);
       }
     }
-    catch (Exception ex)
+    catch (Exception exception)
     {
-      _messageLogger.LogControllerException(
-        nameof(ExecuteAsync),
-        ex);
+      _logger.LogException(exception);
 
       return TypedResults.InternalServerError();
     }

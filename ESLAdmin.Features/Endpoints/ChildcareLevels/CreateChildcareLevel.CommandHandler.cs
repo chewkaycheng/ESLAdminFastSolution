@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using ESLAdmin.Infrastructure.Repositories;
 using ESLAdmin.Infrastructure.RepositoryManagers;
+using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using FluentValidation.Results;
@@ -12,7 +13,7 @@ namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
 
 public class CreateChildcareLevelCommandHandler : ICommandHandler<
     CreateChildcareLevelCommand,
-    Results<NoContent, ProblemDetails, InternalServerError>>
+    Results<Ok<CreateChildcareLevelResponse>, ProblemDetails, InternalServerError>>
 {
   private readonly IRepositoryManager _repositoryManager;
   private readonly ILogger<CreateChildcareLevelCommandHandler> _logger;
@@ -28,19 +29,20 @@ public class CreateChildcareLevelCommandHandler : ICommandHandler<
     _messageLogger = messageLogger;
   }
 
-  public async Task<Results<NoContent, ProblemDetails, InternalServerError>>
+  public async Task<Results<Ok<CreateChildcareLevelResponse>, ProblemDetails, InternalServerError>>
     ExecuteAsync(
       CreateChildcareLevelCommand command,
       CancellationToken cancellationToken)
   {
     try
     {
-      DynamicParameters parameters = command.Mapper.ToEntity(command);
+      DynamicParameters parameters = command.Mapper.ToParameters(command);
       await _repositoryManager.ChildcareLevelRepository.CreateChildcareLevelAsync(
         parameters);
 
-      OperationResult operationResult = command.Mapper.FromEntity(parameters);
-      if (operationResult.DbApiError != 100)
+      OperationResult operationResult = command.Mapper.FromParameters(parameters);
+
+      if (operationResult.DbApiError == 100)
       {
         var validationFailures = new List<ValidationFailure>();
         validationFailures.AddRange(new ValidationFailure
@@ -50,13 +52,13 @@ public class CreateChildcareLevelCommandHandler : ICommandHandler<
         });
         return new ProblemDetails(validationFailures, StatusCodes.Status409Conflict);
       }
-      return TypedResults.NoContent();
+
+      CreateChildcareLevelResponse response = command.Mapper.ToResponse(parameters);
+      return TypedResults.Ok(response);
     }
     catch (Exception ex)
     {
-      _messageLogger.LogControllerException(
-        nameof(ExecuteAsync),
-        ex);
+      _logger.LogException(ex);
 
       return TypedResults.InternalServerError();
     }

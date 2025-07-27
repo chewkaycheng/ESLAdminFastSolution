@@ -34,6 +34,7 @@ namespace ESLAdmin.Features.Endpoints.ChildcareLevels
     public override void Configure()
     {
       Delete("/api/childcarelevels/{id}");
+      AllowAnonymous();
     }
 
     //------------------------------------------------------------------------------
@@ -44,13 +45,11 @@ namespace ESLAdmin.Features.Endpoints.ChildcareLevels
     public override async Task<Results<NoContent, ProblemDetails, InternalServerError>> ExecuteAsync(
       DeleteChildcareLevelRequest request, CancellationToken cancellationToken)
     {
-      var command = new DeleteChildcareLevelCommand
+      return await new DeleteChildcareLevelCommand
       {
         Id = request.Id,
         Mapper = Map
-      };
-
-      return await command.ExecuteAsync(cancellationToken);
+      }.ExecuteAsync(cancellationToken);
     }
   }
 }

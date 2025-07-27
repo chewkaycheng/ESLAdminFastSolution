@@ -8,7 +8,7 @@ namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
 //                           class CreateChildcareLevelCommand
 //
 //------------------------------------------------------------------------------
-public class CreateChildcareLevelCommand : ICommand<Results<NoContent, ProblemDetails, InternalServerError>>
+public class CreateChildcareLevelCommand : ICommand<Results<Ok<CreateChildcareLevelResponse>, ProblemDetails, InternalServerError>>
 {
   public string ChildcareLevelName { get; set; } = string.Empty;
   public int MaxCapacity { get; set; }

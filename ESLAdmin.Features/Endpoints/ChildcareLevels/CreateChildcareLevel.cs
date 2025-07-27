@@ -1,7 +1,11 @@
-﻿using ESLAdmin.Infrastructure.RepositoryManagers;
+﻿using ESLAdmin.Features.Endpoints.Users;
+using ESLAdmin.Infrastructure.RepositoryManagers;
+using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
 
@@ -12,18 +16,18 @@ namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
 //------------------------------------------------------------------------------
 public class CreateChildcareLevelEndpoint : Endpoint<
   CreateChildcareLevelRequest,
-  Results<NoContent, ProblemDetails, InternalServerError>,
+  Results<Ok<CreateChildcareLevelResponse>, ProblemDetails, InternalServerError>,
   CreateChildcareLevelMapper>
 {
   private readonly IRepositoryManager _repositoryManager;
-  private readonly IMessageLogger _messageLogger;
+  private readonly ILogger<CreateChildcareLevelEndpoint> _logger;
 
   public CreateChildcareLevelEndpoint(
     IRepositoryManager  repositoryManager,
-    IMessageLogger messageLogger)
+    ILogger<CreateChildcareLevelEndpoint> logger)
   {
     _repositoryManager = repositoryManager;
-    _messageLogger = messageLogger;
+    _logger = logger;
   }
 
   //------------------------------------------------------------------------------
@@ -34,6 +38,7 @@ public class CreateChildcareLevelEndpoint : Endpoint<
   public override void Configure()
   {
     Post("/api/childcarelevels");
+    AllowAnonymous();
   }
 
   //------------------------------------------------------------------------------
@@ -41,8 +46,12 @@ public class CreateChildcareLevelEndpoint : Endpoint<
   //                        ExecuteAsync
   //
   //------------------------------------------------------------------------------
-  public override async Task<Results<NoContent, ProblemDetails, InternalServerError>> ExecuteAsync(CreateChildcareLevelRequest request, CancellationToken canellationToken)
+  public override async Task<Results<Ok<CreateChildcareLevelResponse>, ProblemDetails, InternalServerError>> ExecuteAsync(
+    CreateChildcareLevelRequest request, 
+    CancellationToken canellationToken)
   {
+    DebugLogFunctionEntry(request);
+
     CreateChildcareLevelCommand command = new CreateChildcareLevelCommand
     {
       ChildcareLevelName = request.ChildcareLevelName,
@@ -52,6 +61,26 @@ public class CreateChildcareLevelEndpoint : Endpoint<
       Mapper = Map
     };
 
-    return await command.ExecuteAsync();
+    var result = await command.ExecuteAsync();
+
+    if (result.Result is Ok<CreateChildcareLevelResponse> okResult)
+    {
+      var res = okResult.Value.ChildcareLevelId;
+
+      HttpContext.Response.Headers.Append("location", $"/api/childcarelevels/{okResult.Value.ChildcareLevelId}");
+    }
+
+    _logger.LogFunctionExit();
+    return result;
   }
+
+  private void DebugLogFunctionEntry(CreateChildcareLevelRequest request)
+  {
+    if (_logger.IsEnabled(LogLevel.Debug))
+    {
+      var context = $"\n=>Request: \n    ChildcareLevelName: '{request.ChildcareLevelName}', DisplayOrder: '{request.DisplayOrder}', MaxCapacity: '{request.MaxCapacity}', InitUser: '{request.InitUser}'";
+      _logger.LogFunctionEntry(context);
+    }
+  }
+
 }

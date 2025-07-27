@@ -41,6 +41,7 @@ public class UpdateChildcareLevelEndpoint : Endpoint<
   public override void Configure()
   {
     Put("/api/childcarelevels");
+    AllowAnonymous();
   }
 
   //------------------------------------------------------------------------------

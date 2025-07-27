@@ -17,10 +17,10 @@ public class DeleteChildcareLevelMapper : Mapper<
 {
   //------------------------------------------------------------------------------
   //
-  //                        ToEntity
+  //                        ToParameters
   //
   //------------------------------------------------------------------------------
-  public override DynamicParameters ToEntity(long id)
+  public DynamicParameters ToParameters(long id)
   {
     DynamicParameters parameters = new DynamicParameters();
     parameters.AddInt64InputParam(
@@ -39,10 +39,10 @@ public class DeleteChildcareLevelMapper : Mapper<
 
   //------------------------------------------------------------------------------
   //
-  //                        FromEntity
+  //                        FromParameters
   //
   //------------------------------------------------------------------------------
-  public override OperationResult FromEntity(DynamicParameters parameters) => new()
+  public OperationResult FromParameters(DynamicParameters parameters) => new()
   {
     DbApiError = parameters.Get<int>(
         OperationResultConsts.DBAPIERROR),

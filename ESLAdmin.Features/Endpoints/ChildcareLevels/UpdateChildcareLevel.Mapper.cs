@@ -15,7 +15,7 @@ public class UpdateChildcareLevelMapper : Mapper<
   OperationResult,
   DynamicParameters>
 {
-  public override DynamicParameters ToEntity(UpdateChildcareLevelCommand command)
+  public DynamicParameters ToParameters(UpdateChildcareLevelCommand command)
   {
     DynamicParameters parameters = new DynamicParameters();
 
@@ -55,10 +55,10 @@ public class UpdateChildcareLevelMapper : Mapper<
 
   //------------------------------------------------------------------------------
   //
-  //                           FromEntity
+  //                           FromParameters
   //
   //------------------------------------------------------------------------------
-  public override OperationResult FromEntity(DynamicParameters parameters) => new()
+  public OperationResult FromParameters(DynamicParameters parameters) => new()
   {
     DbApiError = parameters.Get<int>(
       OperationResultConsts.DBAPIERROR),
