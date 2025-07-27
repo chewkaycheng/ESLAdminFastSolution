@@ -1,6 +1,22 @@
-﻿namespace ESLAdmin.Features.Endpoints.Users;
+﻿using System.ComponentModel.DataAnnotations;
 
-public class LoginUser_Models
+namespace ESLAdmin.Features.Endpoints.Users;
+
+public class LoginUserRequest
 {
-    
+  [Required]
+  public string Email { get; set; } = string.Empty;
+
+  [Required]
+  [DataType(DataType.Password)]
+  public string Password { get; set; } = string.Empty;
+
+  public bool RememberMe { get; set; }
+}
+
+public class LoginUserResponse
+{
+  public string Token { get; set; } = string.Empty;
+  public string UserId { get; set; } = string.Empty;
+  public string Email { get; set; } = string.Empty;
 }

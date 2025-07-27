@@ -1,6 +1,28 @@
-﻿namespace ESLAdmin.Features.Endpoints.Users;
+﻿using FastEndpoints;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 
-public class LoginUser
+namespace ESLAdmin.Features.Endpoints.Users;
+
+public class LoginUserEndpoint : Endpoint<LoginUserRequest, 
+  Results<Ok<LoginUserResponse>, ProblemDetails, InternalServerError>, 
+  LoginUserMapper>
 {
-    
+  public override void Configure()
+  {
+    Post("/api/auth/login");
+    AllowAnonymous();
+    Description(b => b
+      .Produces<LoginUserResponse>(200)
+      .ProducesProblem(400));
+  }
+
+  public override async Task<Results<Ok<LoginUserResponse>, ProblemDetails, InternalServerError>> ExecuteAsync(
+    LoginUserRequest request,
+    CancellationToken cancellationToken)
+  {
+    var command = Map.ToCommand(request);
+    var response = await command.ExecuteAsync(cancellationToken);
+    return response;
+  } 
 }

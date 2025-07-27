@@ -1,6 +1,8 @@
 global using FastEndpoints;
 using ESLAdmin.Api.Extensions;
+using ESLAdmin.Features.Extensions;
 using ESLAdmin.Logging.Extensions;
+using FastEndpoints.Security;
 using FastEndpoints.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +22,8 @@ builder.Services.AddFastEndpoints(options =>
   options.Assemblies = new[] { typeof(
     ESLAdmin.Features.FeatureAssemblyMarker).Assembly};
 });
+
+builder.Services.ConfigureJwtExtensions(builder.Configuration);
 builder.Services.AddOpenApi();
 builder.Services.SwaggerDocument();
 

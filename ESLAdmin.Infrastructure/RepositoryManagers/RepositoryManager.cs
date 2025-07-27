@@ -32,6 +32,7 @@ public class RepositoryManager : IRepositoryManager
     IMessageLogger messageLogger,
     ILogger<RepositoryManager> logger,
     UserManager<User> userManager,
+    SignInManager<User> signInManager,
     RoleManager<IdentityRole> roleManager,
     UserDbContext dbContext)
   {
@@ -45,6 +46,7 @@ public class RepositoryManager : IRepositoryManager
         logger,
         messageLogger,
         userManager,
+        signInManager,
         roleManager,
         dbContext));
   }

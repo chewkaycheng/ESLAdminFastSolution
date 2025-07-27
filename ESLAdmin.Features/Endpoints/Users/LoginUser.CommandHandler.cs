@@ -1,83 +1,89 @@
-﻿using FastEndpoints;
+﻿using ESLAdmin.Infrastructure.RepositoryManagers;
+using ESLAdmin.Logging;
+using ESLAdmin.Logging.Interface;
+using FastEndpoints;
+using FastEndpoints.Security;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
-using ESLAdmin.Infrastructure.RepositoryManagers;
-using ESLAdmin.Logging.Interface;
 
 namespace ESLAdmin.Features.Endpoints.Users;
 
 public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
     Results<Ok<LoginUserResponse>, ProblemDetails, InternalServerError>>
 {
-    private readonly IRepositoryManager _repositoryManager;
-    private readonly ILogger<LoginUserCommandHandler> _logger;
-    private readonly IMessageLogger _messageLogger;
+  private readonly IRepositoryManager _repositoryManager;
+  private readonly ILogger<LoginUserCommandHandler> _logger;
+  private readonly IMessageLogger _messageLogger;
 
-    public LoginUserCommandHandler(
-        IRepositoryManager repositoryManager,
-        ILogger<LoginUserCommandHandler> logger,
-        IMessageLogger messageLogger)
-    {
-        _repositoryManager = repositoryManager;
-        _logger = logger;
-        _messageLogger = messageLogger;
-    }
+  public LoginUserCommandHandler(
+      IRepositoryManager repositoryManager,
+      ILogger<LoginUserCommandHandler> logger,
+      IMessageLogger messageLogger)
+  {
+    _repositoryManager = repositoryManager;
+    _logger = logger;
+    _messageLogger = messageLogger;
+  }
 
-    public async Task<Results<Ok<LoginUserResponse>, ProblemDetails, InternalServerError>>
-        ExecuteAsync(
-            LoginUserCommand command,
-            CancellationToken cancellationToken)
+  public async Task<Results<Ok<LoginUserResponse>, ProblemDetails, InternalServerError>>
+      ExecuteAsync(
+          LoginUserCommand command,
+          CancellationToken cancellationToken)
+  {
+    try
     {
-        try
+      var result = await _repositoryManager.AuthenticationRepository.Login(
+          command.Email, command.Password);
+
+      if (result == null)
+      {
+        var validationFailures = new List<ValidationFailure>();
+        validationFailures.AddRange(new ValidationFailure
         {
-            var result = await _repositoryManager.AuthenticationRepository.GetUserByEmailAsync(
-                command.Email);
+          PropertyName = "LoginFailure",
+          ErrorMessage = "Invalid email or password."
+        });
+        return new ProblemDetails(validationFailures, StatusCodes.Status400BadRequest);
+      }
 
-            switch (result)
+      var (user, roles) = result.Value;
+
+      //Generate JWT token
+      var token = JwtBearer.CreateToken(
+        o =>
+        {
+          o.SigningKey = "RJRKRKJRJRKRJJKR";
+          o.ExpireAt = DateTime.UtcNow.AddDays(1);
+          o.User.Claims.Add(("UserName", user.UserName));
+          o.User["UserId"] = user.Id;
+          if (roles != null && roles.Any())
+          {
+            foreach (var role in roles)
             {
-                case null:
-                    var validationFailures = new List<ValidationFailure>();
-                    validationFailures.AddRange(new ValidationFailure
-                    {
-                        PropertyName = "NotFound",
-                        Description = "The user with email: {command.Email} is not found."
-                    });
-                    LogValidationErrors(validationFailures);
-                    return new ProblemDetails(
-                        validationFailures,
-                        StatusCodes.Status404NotFound);
-                default:
-                    var (user, roles) = result.Value;
-                    var userResponse = command.Mapper.ToResponse(user, roles?.ToList());
-
-                    return TypedResults.Ok(userResponse);
+              o.User.Roles.Add(role);
             }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogException(ex);
-            //_messageLogger.LogControllerException(
-            //  nameof(ExecuteAsync),
-            //  ex);
+            ;
+          }
+          ;
+        });
 
-            return TypedResults.InternalServerError();
-        }
+      LoginUserResponse response = new LoginUserResponse
+      {
+        UserId = user.Id,
+        Email = user.Email,
+        Token = token
+      };
+
+      return TypedResults.Ok(response);
+
     }
-    private void LogValidationErrors(List<ValidationFailure> validationFailures)
+    catch (Exception ex)
     {
-        var validationErrorsStr = "";
-        foreach (var validationFailure in validationFailures)
-        {
-            validationErrorsStr += $"\n    PropertyName: {validationFailure.PropertyName}, ErrorMessage: {validationFailure.ErrorMessage}";
-        }
-        _logger.LogValidationErrors(validationErrorsStr);
+      _logger.LogException(ex);
+
+      return TypedResults.InternalServerError();
     }
-
-}
-
-
-public class LoginUserResponse
-{
+  }
 }

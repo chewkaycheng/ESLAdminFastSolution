@@ -164,4 +164,29 @@ public class AuthenticationRepository : IAuthenticationRepository
         ex);
     }
   }
+
+  public async Task<(User user, ICollection<string>? roles)?> Login(string email, string password)
+  {
+    var user = await _userManager.FindByEmailAsync(email);
+    if (user == null)
+    {
+      return null;
+    }
+
+    var result = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: false);
+    if (!result.Succeeded)
+    {
+      return null;
+    }
+
+    var roles = await _userManager.GetRolesAsync(user);
+    if (roles == null)
+    {
+      return (user, null);
+    }
+    else
+    {
+      return (user, roles);
+    }
+  }
 }
