@@ -4,6 +4,18 @@ namespace ESLAdmin.Infrastructure.Repositories;
 
 //------------------------------------------------------------------------------
 //
+//                       enum IdentityErrors
+//
+//------------------------------------------------------------------------------
+public enum IdentityErrorTypes
+{
+  None = 0,
+  DeleteUserError,
+  RemoveFromRolesError,
+}
+
+//------------------------------------------------------------------------------
+//
 //                       class IdentityResultEx
 //
 //------------------------------------------------------------------------------
@@ -14,6 +26,7 @@ public class IdentityResultEx
   public bool Succeeded => InnerResult.Succeeded;
   public IEnumerable<IdentityError> Errors => InnerResult.Errors;
   public string Id { get; init; }
+  public IdentityErrorTypes ErrorType { get; set; }
 
   //------------------------------------------------------------------------------
   //
@@ -33,9 +46,22 @@ public class IdentityResultEx
   //
   //-------------------------------------------------------------------------------
   // Constructor for failure
-  public IdentityResultEx(IEnumerable<IdentityError> errors)
+  public IdentityResultEx(IEnumerable < IdentityError> errors)
   {
     Id = string.Empty;
+    InnerResult = IdentityResult.Failed(errors.ToArray());
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       class IdentityResultEx
+  //
+  //-------------------------------------------------------------------------------
+  // Constructor for failure with identity error type
+  public IdentityResultEx(IdentityErrorTypes errorType, IEnumerable<IdentityError> errors)
+  {
+    Id = string.Empty;
+    ErrorType = errorType;
     InnerResult = IdentityResult.Failed(errors.ToArray());
   }
 
@@ -56,4 +82,14 @@ public class IdentityResultEx
   // Static failure factory method
   public static IdentityResultEx Failed(params IdentityError[] errors) => 
     new IdentityResultEx(errors);
+
+  //------------------------------------------------------------------------------
+  //
+  //                              Failed
+  //
+  //-------------------------------------------------------------------------------
+  // Static failure factory method
+  public static IdentityResultEx Failed(IdentityErrorTypes errorType, params IdentityError[] errors) =>
+    new IdentityResultEx(errorType, errors);
+
 }

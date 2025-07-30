@@ -8,8 +8,10 @@ using ESLAdmin.Logging.Interface;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Razor.TagHelpers;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace ESLAdmin.Features.Users.Repositories;
 
@@ -207,15 +209,6 @@ public class AuthenticationRepository : IAuthenticationRepository
   {
     try
     {
-      if (string.IsNullOrEmpty(email))
-      {
-        return IdentityResultEx.Failed(new IdentityError
-        {
-          Code = "NullOrEmpty",
-          Description = "Email cannot be null or emtpy"
-        });
-      }
-
       var user = await _userManager.FindByEmailAsync(email);
       if (user == null)
       {
@@ -227,21 +220,23 @@ public class AuthenticationRepository : IAuthenticationRepository
       }
 
       // Optional: Check and remove roles explicity (usually not needed due to cascade delete)
-      var roles = await _userManager.GetRolesAsync(user);
-      if (roles.Any())
-      {
-        var removeRolesResult = await _userManager.RemoveFromRolesAsync(user, roles);
-        if (!removeRolesResult.Succeeded) 
-        {
-          return IdentityResultEx.Failed(removeRolesResult.Errors.ToArray());
-        }
-      }
+      //var roles = await _userManager.GetRolesAsync(user);
+      //if (roles.Any())
+      //{
+      //  var removeRolesResult = await _userManager.RemoveFromRolesAsync(user, roles);
+      //  if (!removeRolesResult.Succeeded) 
+      //  {
+      //    InfoLogIdentityErrors("GetRolesAsync", email, removeRolesResult.Errors);
+      //    return IdentityResultEx.Failed(IdentityErrorTypes.RemoveFromRolesError, removeRolesResult.Errors.ToArray());
+      //  }
+      //}
 
       // Delete the user
-      var result = await _userManager.DeleteAsync(user);
-      if (!result.Succeeded)
+      var deleteUserResult = await _userManager.DeleteAsync(user);
+      if (!deleteUserResult.Succeeded)
       {
-        return IdentityResultEx.Failed(result.Errors.ToArray());
+        InfoLogIdentityErrors("DeleteAsync", email, deleteUserResult.Errors);
+        return IdentityResultEx.Failed(IdentityErrorTypes.DeleteUserError, deleteUserResult.Errors.ToArray());
       }
 
       return IdentityResultEx.Success(user.Id);
@@ -250,11 +245,28 @@ public class AuthenticationRepository : IAuthenticationRepository
     {
       _logger.LogException(ex);
 
-      IdentityResultEx result = IdentityResultEx.Failed(new IdentityError()
+      return IdentityResultEx.Failed(new IdentityError()
       {
         Code = "Exception",
         Description = ex.Message
       });
+    }
+  }
+
+  private void InfoLogIdentityErrors(
+    string identityFunction,
+    string id,
+    IEnumerable<IdentityError> errors)
+  {
+    if (_logger.IsEnabled(LogLevel.Information))
+    {
+      StringBuilder sb = new StringBuilder();
+      sb.AppendLine("  Errors:");
+      foreach(var error in errors)
+      {
+        sb.AppendLine($"    Code: {error.Code}\tDescription: {error.Description}");
+      }
+      _logger.LogIdentityErrors(identityFunction, id, sb.ToString());
     }
   }
 }

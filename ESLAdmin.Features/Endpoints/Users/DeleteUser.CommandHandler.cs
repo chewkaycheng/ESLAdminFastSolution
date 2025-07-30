@@ -1,4 +1,4 @@
-﻿using ESLAdmin.Domain.Entities;
+﻿using ESLAdmin.Infrastructure.Repositories;
 using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
@@ -13,12 +13,12 @@ namespace ESLAdmin.Features.Endpoints.Users;
 
 //------------------------------------------------------------------------------
 //
-//                       class GetUserCommandHandler
+//                        class DeleteUserCommandHandler
 //
 //-------------------------------------------------------------------------------
-public class GetUserCommandHandler : ICommandHandler<
-    GetUserCommand,
-    Results<Ok<GetUserResponse>, ProblemDetails, InternalServerError>>
+public class DeleteUserCommandHandler : ICommandHandler<
+  DeleteUserCommand,
+  Results<Ok<string>, ProblemDetails, InternalServerError>>
 {
   private readonly IRepositoryManager _repositoryManager;
   private readonly ILogger<GetUserCommandHandler> _logger;
@@ -26,10 +26,10 @@ public class GetUserCommandHandler : ICommandHandler<
 
   //------------------------------------------------------------------------------
   //
-  //                       GetUserCommandHandler
+  //                        DeleteUserCommandHandler
   //
   //-------------------------------------------------------------------------------
-  public GetUserCommandHandler(
+  public DeleteUserCommandHandler(
       IRepositoryManager repositoryManager,
       ILogger<GetUserCommandHandler> logger,
       IMessageLogger messageLogger)
@@ -41,26 +41,41 @@ public class GetUserCommandHandler : ICommandHandler<
 
   //------------------------------------------------------------------------------
   //
-  //                       ExecuteAsync
+  //                        ExecuteAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<Results<Ok<GetUserResponse>, ProblemDetails, InternalServerError>>
+  public async Task<Results<Ok<string>, ProblemDetails, InternalServerError>>
     ExecuteAsync(
-      GetUserCommand command,
+      DeleteUserCommand command,
       CancellationToken cancellationToken)
   {
     _logger.LogFunctionEntry($"Email: {command.Email}");
+    if (string.IsNullOrEmpty(command.Email))
+    {
+      var validationFailures = new List<ValidationFailure>();
+      validationFailures.AddRange(new ValidationFailure()
+      {
+        PropertyName = "NullOrEmpty",
+        ErrorMessage = "The email cannot be null or empty"
+      });
+      return new ProblemDetails(validationFailures, StatusCodes.Status400BadRequest);
+    }
+
     try
     {
-      var result = await _repositoryManager.AuthenticationRepository.GetUserByEmailAsync(
+      var result = await _repositoryManager.AuthenticationRepository.DeleteUserByEmailAsync(
         command.Email);
 
-      switch (result)
+      if (result.Succeeded)
       {
-        case null:
-          _logger.LogNotFound("user", $"email: {command.Email}");
+        return TypedResults.Ok(result.Id);
+      }
 
-          var validationFailures = new List<ValidationFailure>();
+      var validationFailures = new List<ValidationFailure>();
+      if (result.Errors.Count() == 1)
+      {
+        if (result.Errors.FirstOrDefault()?.Code == "NotFound")
+        {
           validationFailures.AddRange(new ValidationFailure
           {
             PropertyName = "NotFound",
@@ -69,34 +84,34 @@ public class GetUserCommandHandler : ICommandHandler<
           return new ProblemDetails(
             validationFailures,
             StatusCodes.Status404NotFound);
-        default:
-          var (user, roles) = result.Value;
-          var userResponse = command.Mapper.ToResponse(user, roles?.ToList());
+        }
+        else if (result.Errors.FirstOrDefault()?.Code == "Exception")
+        {
+          return TypedResults.InternalServerError();
+        }
+      }
 
-          DebugLogFunctionExit(user, roles);
-
-          return TypedResults.Ok(userResponse);
+      if (result.ErrorType == IdentityErrorTypes.DeleteUserError)
+      {
+        validationFailures.AddRange(new ValidationFailure
+        {
+          PropertyName = "DeleteUserError",
+          ErrorMessage = "An error occurred while deleting user"
+        });
+        return new ProblemDetails(
+          validationFailures, StatusCodes.Status400BadRequest);
+      }
+      else
+      {
+        // Remove roles error
+        return TypedResults.InternalServerError();
       }
     }
     catch (Exception ex)
     {
       _logger.LogException(ex);
-      //_messageLogger.LogControllerException(
-      //  nameof(ExecuteAsync),
-      //  ex);
 
       return TypedResults.InternalServerError();
     }
   }
-
-  private void DebugLogFunctionExit(User user, ICollection<string>? roles)
-  {
-    if (_logger.IsEnabled(LogLevel.Debug))
-    {
-      var roleLog = roles != null ? string.Join(", ", roles) : "None";
-      var context = $"\n=>User: \n    Username: '{user.UserName}', FirstName: '{user.FirstName}', LastName: '{user.LastName}', Email: '{user.Email}'\n    Password: '[Hidden]', PhoneNumber: '{user.PhoneNumber}', Roles: '{roleLog}'";
-      _logger.LogFunctionEntry(context);
-    }
-  }
-
 }
