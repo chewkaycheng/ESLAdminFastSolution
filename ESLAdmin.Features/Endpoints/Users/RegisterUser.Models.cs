@@ -30,5 +30,5 @@ public class RegisterUserRequest
 //-------------------------------------------------------------------------------
 public class RegisterUserResponse
 {
-  public string Id { get; init; }
+  public required string Id { get; init; }
 }

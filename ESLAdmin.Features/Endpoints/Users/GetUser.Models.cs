@@ -7,7 +7,7 @@
 //-------------------------------------------------------------------------------
 public class GetUserRequest
 {
-  public string Email { get; set; }
+  public string Email { get; set; } = string.Empty;
 }
 
 //------------------------------------------------------------------------------
@@ -17,11 +17,11 @@ public class GetUserRequest
 //-------------------------------------------------------------------------------
 public class GetUserResponse
 {
-  public string Id { get; init; }
+  public required string Id { get; init; }
   public string? FirstName { get; init; }
   public string? LastName { get; init; }
-  public required string UserName { get; init; }
-  public required string Email { get; init; }
+  public string? UserName { get; init; }
+  public string? Email { get; init; }
   public string? PhoneNumber { get; init; }
   public ICollection<string>? Roles { get; init; }
 }

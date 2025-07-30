@@ -61,10 +61,8 @@ public class CreateChildcareLevelEndpoint : Endpoint<
 
     var result = await command.ExecuteAsync();
 
-    if (result.Result is Ok<CreateChildcareLevelResponse> okResult)
+    if (result.Result is Ok<CreateChildcareLevelResponse> okResult && okResult != null && okResult.Value != null)
     {
-      var res = okResult.Value.ChildcareLevelId;
-
       HttpContext.Response.Headers.Append("location", $"/api/childcarelevels/{okResult.Value.ChildcareLevelId}");
     }
 

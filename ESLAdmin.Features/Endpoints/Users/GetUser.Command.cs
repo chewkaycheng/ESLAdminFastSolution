@@ -10,6 +10,6 @@ namespace ESLAdmin.Features.Endpoints.Users;
 //-------------------------------------------------------------------------------
 public class GetUserCommand : ICommand<Results<Ok<GetUserResponse>, ProblemDetails, InternalServerError>>
 {
-  public string Email { get; set; }
-  public GetUserMapper Mapper { get; set; }
+  public string Email { get; set; } = string.Empty;
+  public required GetUserMapper Mapper { get; set; }
 }

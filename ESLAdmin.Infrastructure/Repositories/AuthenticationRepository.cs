@@ -3,8 +3,11 @@ using ESLAdmin.Domain.Entities;
 using ESLAdmin.Infrastructure.Data;
 using ESLAdmin.Infrastructure.Repositories;
 using ESLAdmin.Infrastructure.Repositories.Interfaces;
+using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 
@@ -165,7 +168,12 @@ public class AuthenticationRepository : IAuthenticationRepository
     }
   }
 
-  public async Task<(User user, ICollection<string>? roles)?> Login(string email, string password)
+  //------------------------------------------------------------------------------
+  //
+  //                       LoginAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<(User user, ICollection<string>? roles)?> LoginAsync(string email, string password)
   {
     var user = await _userManager.FindByEmailAsync(email);
     if (user == null)
@@ -187,6 +195,66 @@ public class AuthenticationRepository : IAuthenticationRepository
     else
     {
       return (user, roles);
+    }
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       DeleteUserAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<IdentityResultEx> DeleteUserByEmailAsync(string email)
+  {
+    try
+    {
+      if (string.IsNullOrEmpty(email))
+      {
+        return IdentityResultEx.Failed(new IdentityError
+        {
+          Code = "NullOrEmpty",
+          Description = "Email cannot be null or emtpy"
+        });
+      }
+
+      var user = await _userManager.FindByEmailAsync(email);
+      if (user == null)
+      {
+        return IdentityResultEx.Failed(new IdentityError
+        {
+          Code = "NotFound",
+          Description = $"The user with email {email} is not found."
+        });
+      }
+
+      // Optional: Check and remove roles explicity (usually not needed due to cascade delete)
+      var roles = await _userManager.GetRolesAsync(user);
+      if (roles.Any())
+      {
+        var removeRolesResult = await _userManager.RemoveFromRolesAsync(user, roles);
+        if (!removeRolesResult.Succeeded) 
+        {
+          return IdentityResultEx.Failed(removeRolesResult.Errors.ToArray());
+        }
+      }
+
+      // Delete the user
+      var result = await _userManager.DeleteAsync(user);
+      if (!result.Succeeded)
+      {
+        return IdentityResultEx.Failed(result.Errors.ToArray());
+      }
+
+      return IdentityResultEx.Success(user.Id);
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+
+      IdentityResultEx result = IdentityResultEx.Failed(new IdentityError()
+      {
+        Code = "Exception",
+        Description = ex.Message
+      });
     }
   }
 }

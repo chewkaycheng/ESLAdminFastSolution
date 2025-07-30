@@ -24,28 +24,29 @@ public static class FastEndpointsExtension
     var audience = configuration["Jwt:Audience"] ?? "YourAudience";
 
     services
-      .AddAuthenticationJwtBearer(s => s.SigningKey = jwtKey)
+      .AddAuthenticationJwtBearer(
+        signingOptions: s => s.SigningKey = jwtKey,
+        bearerOptions: o =>
+        {
+          o.ClaimsIssuer = issuer;
+          o.Audience = audience;
+          o.TokenValidationParameters = new TokenValidationParameters
+          {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = issuer,
+            ValidAudience = audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+          };
+        })
       .AddAuthentication(options =>
       {
         options.DefaultAuthenticateScheme =
           JwtBearerDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme =
           JwtBearerDefaults.AuthenticationScheme;
-      })
-      .AddJwtBearer(options =>
-      {
-        options.ClaimsIssuer = issuer;
-        options.Audience = audience;
-        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-        {
-          ValidateIssuer = true,
-          ValidateAudience = true,
-          ValidateLifetime = true,
-          ValidateIssuerSigningKey = true,
-          ValidIssuer = issuer,
-          ValidAudience = audience,
-          IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-        };
       });
   }
 }

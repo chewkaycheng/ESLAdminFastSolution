@@ -25,7 +25,7 @@ public class CreateChildcareLevelRequest
 public class CreateChildcareLevelResponse
 {
   public long ChildcareLevelId { get; set; }
-  public string Guid { get; set; }
+  public required string Guid { get; set; }
 }
 
 //------------------------------------------------------------------------------
