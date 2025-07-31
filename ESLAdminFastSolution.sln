@@ -5,9 +5,8 @@ VisualStudioVersion = 17.14.36212.18
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
-		DeleteUser.md = DeleteUser.md
 		LoginUser.md = LoginUser.md
-		Userlist.md = Userlist.md
+		role.md = role.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESLAdmin.Api", "ESLAdmin.Api\ESLAdmin.Api.csproj", "{A9E83456-65B8-4E9B-8519-02B48C1BF376}"

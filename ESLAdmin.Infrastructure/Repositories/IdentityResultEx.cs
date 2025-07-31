@@ -12,6 +12,9 @@ public enum IdentityErrorTypes
   None = 0,
   DeleteUserError,
   RemoveFromRolesError,
+  CreateRoleError,
+  UpdateRoleError,
+  DeleteRoleError
 }
 
 //------------------------------------------------------------------------------
