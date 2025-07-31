@@ -68,6 +68,7 @@ public class DeleteUserCommandHandler : ICommandHandler<
 
       if (result.Succeeded)
       {
+        _logger.LogFunctionExit($"Id: {result.Id}");
         return TypedResults.Ok(result.Id);
       }
 
@@ -79,7 +80,7 @@ public class DeleteUserCommandHandler : ICommandHandler<
           validationFailures.AddRange(new ValidationFailure
           {
             PropertyName = "NotFound",
-            ErrorMessage = $"The user with email: {command.Email} is not found."
+            ErrorMessage = $"The user with email: '{command.Email}' is not found."
           });
           return new ProblemDetails(
             validationFailures,
