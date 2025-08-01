@@ -18,8 +18,8 @@ public class NullOrEmptyException : Exception
     )
     : base(string.Format(
         "{0} cannot be null or blank. \nFunction: {1}",
-        nullObjectName, 
+        nullObjectName,
         funcName))
-  {    
+  {
   }
 }

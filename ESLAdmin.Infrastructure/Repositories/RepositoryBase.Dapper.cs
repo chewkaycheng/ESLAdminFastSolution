@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using ESLAdmin.Common.Exceptions;
-using ESLAdmin.Features.Exceptions;
 using ESLAdmin.Infrastructure.Repositories;
 using ESLAdmin.Infrastructure.Repositories.Interfaces;
 using FirebirdSql.Data.FirebirdClient;
@@ -25,12 +24,12 @@ public partial class RepositoryBase<ReadT, WriteT> :
   //------------------------------------------------------------------------------
   public IEnumerable<ReadT> DapQueryMultiple(
     string sql,
-    DynamicParameters? parameters, 
+    DynamicParameters? parameters,
     CommandType commandType = CommandType.StoredProcedure)
   {
     if (_dbContextDapper == null)
       throw new NullException(
-        nameof(DapQueryMultiple), 
+        nameof(DapQueryMultiple),
         "_dbcontextDapper");
 
     using IDbConnection connection = _dbContextDapper.GetConnection();
@@ -47,13 +46,13 @@ public partial class RepositoryBase<ReadT, WriteT> :
   //
   //------------------------------------------------------------------------------
   public async Task<IEnumerable<ReadT>> DapQueryMultipleAsync(
-    string sql, 
-    DynamicParameters? parameters, 
+    string sql,
+    DynamicParameters? parameters,
     CommandType commandType = CommandType.StoredProcedure)
   {
     if (_dbContextDapper == null)
       throw new NullException(
-        nameof(DapQueryMultipleAsync), 
+        nameof(DapQueryMultipleAsync),
         "_dbcontextDapper");
 
     using IDbConnection connection = await _dbContextDapper.GetConnectionAsync();
@@ -70,13 +69,13 @@ public partial class RepositoryBase<ReadT, WriteT> :
   //
   //------------------------------------------------------------------------------
   public ReadT? DapQuerySingle(
-    string sql, 
-    DynamicParameters? parameters, 
+    string sql,
+    DynamicParameters? parameters,
     CommandType commandType = CommandType.StoredProcedure)
   {
     if (_dbContextDapper == null)
       throw new NullException(
-        nameof(DapQuerySingle), 
+        nameof(DapQuerySingle),
         "_dbcontextDapper");
 
     using IDbConnection connection = _dbContextDapper.GetConnection();
@@ -93,13 +92,13 @@ public partial class RepositoryBase<ReadT, WriteT> :
   //
   //------------------------------------------------------------------------------
   public async Task<ReadT?> DapQuerySingleAsync(
-    string sql, 
-    DynamicParameters? parameters, 
+    string sql,
+    DynamicParameters? parameters,
     CommandType commandType = CommandType.StoredProcedure)
   {
     if (_dbContextDapper == null)
       throw new NullException(
-        nameof(DapQueryMultipleAsync), 
+        nameof(DapQueryMultipleAsync),
         "_dbcontextDapper");
 
     using IDbConnection connection = await _dbContextDapper.GetConnectionAsync();
@@ -121,7 +120,7 @@ public partial class RepositoryBase<ReadT, WriteT> :
   {
     if (_dbContextDapper == null)
       throw new NullException(
-        nameof(DapExecWithTrans), 
+        nameof(DapExecWithTrans),
         "_dbcontextDapper");
 
     parameters.AddInt32OutputParam(
@@ -163,7 +162,7 @@ public partial class RepositoryBase<ReadT, WriteT> :
           _dbContextDapper.SerializeDynamicParameters(parameters));
 
         return false;
-      } 
+      }
     }
     catch (Exception ex)
     {
@@ -194,12 +193,12 @@ public partial class RepositoryBase<ReadT, WriteT> :
   {
     if (_dbContextDapper == null)
       throw new NullException(
-        nameof(DapExecWithTrans), 
+        nameof(DapExecWithTrans),
         "_dbcontextDapper");
 
-    using IDbConnection connection 
+    using IDbConnection connection
       = await _dbContextDapper.GetConnectionAsync();
-    using IDbTransaction transaction = 
+    using IDbTransaction transaction =
       await _dbContextDapper.GetTransactionAsync(connection);
 
     try
@@ -216,7 +215,7 @@ public partial class RepositoryBase<ReadT, WriteT> :
 
       if (dbApiError == 0)
       {
-        await ((FbTransaction) transaction).CommitAsync();
+        await ((FbTransaction)transaction).CommitAsync();
 
         _messageLogger.LogDatabaseExecSuccess(
           nameof(DapExecWithTransAsync),

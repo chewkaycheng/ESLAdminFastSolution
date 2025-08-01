@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using ESLAdmin.Domain.Entities;
-using ESLAdmin.Infrastructure.Repositories;
 
 namespace ESLAdmin.Features.ChildcareLevels.Repositories.Interfaces
 {

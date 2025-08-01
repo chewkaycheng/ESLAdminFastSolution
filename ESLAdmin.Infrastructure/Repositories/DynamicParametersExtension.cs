@@ -252,7 +252,7 @@ public static class DynamicParametersExtension
   //------------------------------------------------------------------------------
   public static void AddStringOutputParam(
     this DynamicParameters parameters,
-    string paramName,      
+    string paramName,
     int size)
   {
     parameters.Add(

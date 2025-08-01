@@ -38,10 +38,9 @@ public class UpdateRoleCommandHandler : ICommandHandler<
   //                       ExecuteAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<
-    Results<Ok<string>, ProblemDetails, InternalServerError>> 
+  public async Task<Results<Ok<string>, ProblemDetails, InternalServerError>>
     ExecuteAsync(
-      UpdateRoleCommand command, 
+      UpdateRoleCommand command,
       CancellationToken ct)
   {
     try

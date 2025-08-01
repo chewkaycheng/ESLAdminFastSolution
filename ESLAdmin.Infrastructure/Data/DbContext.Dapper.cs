@@ -30,10 +30,10 @@ public class DbContextDapper : IDbContextDapper
   {
     _messageLogger = messageLogger;
 
-    _connectionString = configuration.GetConnectionString("ESLAdminConnection") 
+    _connectionString = configuration.GetConnectionString("ESLAdminConnection")
       ?? throw new NullOrEmptyException("Connection string", nameof(DbContextDapper));
 
-    if (string.IsNullOrEmpty(_connectionString)) 
+    if (string.IsNullOrEmpty(_connectionString))
       throw new NullOrEmptyException("Connection string", nameof(DbContextDapper));
   }
 
@@ -102,7 +102,7 @@ public class DbContextDapper : IDbContextDapper
     try
     {
       return JsonSerializer.Serialize(
-        paramDict, 
+        paramDict,
         new JsonSerializerOptions
         {
           WriteIndented = true,

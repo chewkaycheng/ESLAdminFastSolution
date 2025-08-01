@@ -2,7 +2,6 @@ global using FastEndpoints;
 using ESLAdmin.Api.Extensions;
 using ESLAdmin.Features.Extensions;
 using ESLAdmin.Logging.Extensions;
-using FastEndpoints.Security;
 using FastEndpoints.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,7 +35,7 @@ var app = builder.Build();
 //}
 
 //app.UseHttpsRedirection();
-  
+
 app.UseFastEndpoints();
 if (app.Environment.IsDevelopment())
 {

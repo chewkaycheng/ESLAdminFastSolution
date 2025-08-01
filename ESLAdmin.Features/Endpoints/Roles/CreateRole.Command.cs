@@ -9,8 +9,8 @@ namespace ESLAdmin.Features.Endpoints.Roles;
 //
 //-------------------------------------------------------------------------------
 public class CreateRoleCommand : ICommand<
-  Results<Ok<CreateRoleResponse>, 
-    FastEndpoints.ProblemDetails, 
+  Results<Ok<CreateRoleResponse>,
+    FastEndpoints.ProblemDetails,
     InternalServerError>>
 {
   public required string Name { get; set; }

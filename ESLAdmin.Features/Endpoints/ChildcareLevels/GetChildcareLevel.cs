@@ -1,9 +1,6 @@
-﻿using ESLAdmin.Features.Exceptions;
-using ESLAdmin.Infrastructure.RepositoryManagers;
+﻿using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
-using FluentValidation.Results;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ESLAdmin.Features.Endpoints.ChildcareLevels;

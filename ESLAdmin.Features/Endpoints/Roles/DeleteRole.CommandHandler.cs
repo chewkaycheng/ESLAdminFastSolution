@@ -22,6 +22,7 @@ public class DeleteRoleCommandHandler : ICommandHandler<
 {
   private readonly IRepositoryManager _repositoryManager;
   private readonly ILogger<DeleteRoleCommandHandler> _logger;
+
   //-------------------------------------------------------------------------------
   //
   //                       DeleteRoleCommandHandler
@@ -40,9 +41,9 @@ public class DeleteRoleCommandHandler : ICommandHandler<
   //                       ExecuteAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<Results<NoContent, ProblemDetails, InternalServerError>> 
+  public async Task<Results<NoContent, ProblemDetails, InternalServerError>>
     ExecuteAsync(
-      DeleteRoleCommand command, 
+      DeleteRoleCommand command,
       CancellationToken ct)
   {
     try
@@ -75,6 +76,6 @@ public class DeleteRoleCommandHandler : ICommandHandler<
 
       return TypedResults.InternalServerError();
     }
-    
+
   }
 }

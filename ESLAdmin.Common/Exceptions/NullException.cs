@@ -16,8 +16,8 @@ public class NullException : Exception
     string funcName,
     string nullObjectName)
     : base(
-      string.Format("{0} cannot be null. \nFunction: {1}", 
-        nullObjectName, 
+      string.Format("{0} cannot be null. \nFunction: {1}",
+        nullObjectName,
         funcName))
   {
   }

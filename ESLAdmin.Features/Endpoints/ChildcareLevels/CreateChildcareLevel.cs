@@ -21,7 +21,7 @@ public class CreateChildcareLevelEndpoint : Endpoint<
   private readonly ILogger<CreateChildcareLevelEndpoint> _logger;
 
   public CreateChildcareLevelEndpoint(
-    IRepositoryManager  repositoryManager,
+    IRepositoryManager repositoryManager,
     ILogger<CreateChildcareLevelEndpoint> logger)
   {
     _repositoryManager = repositoryManager;
@@ -45,7 +45,7 @@ public class CreateChildcareLevelEndpoint : Endpoint<
   //
   //------------------------------------------------------------------------------
   public override async Task<Results<Ok<CreateChildcareLevelResponse>, ProblemDetails, InternalServerError>> ExecuteAsync(
-    CreateChildcareLevelRequest request, 
+    CreateChildcareLevelRequest request,
     CancellationToken canellationToken)
   {
     DebugLogFunctionEntry(request);

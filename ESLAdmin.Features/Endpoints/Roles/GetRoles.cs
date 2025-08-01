@@ -8,22 +8,21 @@ namespace ESLAdmin.Features.Endpoints.Roles
 {
   //------------------------------------------------------------------------------
   //
-  //                        DeleteRoleEndpoint
+  //                        class GetRolesEndpoint
   //
   //------------------------------------------------------------------------------
-  public class DeleteRoleEndpoint : Endpoint<
-    DeleteRoleRequest,
-    Results<NoContent, ProblemDetails, InternalServerError>>
+  public class GetRolesEndpoint : EndpointWithoutRequest<
+    Results<Ok<IEnumerable<GetRoleResponse>>, ProblemDetails, InternalServerError>,
+    GetRoleMapper>
   {
-    private readonly ILogger<CreateRoleEndpoint> _logger;
+    private readonly ILogger<GetRolesEndpoint> _logger;
 
     //------------------------------------------------------------------------------
     //
-    //                        DeleteRoleEndpoint
+    //                        GetRolesEndpoint
     //
     //------------------------------------------------------------------------------
-    public DeleteRoleEndpoint(
-      ILogger<CreateRoleEndpoint> logger)
+    public GetRolesEndpoint(ILogger<GetRolesEndpoint> logger)
     {
       _logger = logger;
     }
@@ -35,7 +34,7 @@ namespace ESLAdmin.Features.Endpoints.Roles
     //------------------------------------------------------------------------------
     public override void Configure()
     {
-      Delete("/api/roles/{name}");
+      Get("/api/roles/");
       AllowAnonymous();
     }
 
@@ -44,17 +43,15 @@ namespace ESLAdmin.Features.Endpoints.Roles
     //                        ExecuteAsync
     //
     //------------------------------------------------------------------------------
-    public override async Task<Results<NoContent, ProblemDetails, InternalServerError>>
-      ExecuteAsync(
-        DeleteRoleRequest request,
-        CancellationToken c)
+    public override async Task<Results<Ok<IEnumerable<GetRoleResponse>>, ProblemDetails, InternalServerError>> ExecuteAsync(
+      CancellationToken c)
     {
       try
       {
-        return await new DeleteRoleCommand
+        return await new GetRolesCommand
         {
-          Name = request.Name
-        }.ExecuteAsync();
+          Mapper = Map
+        }.ExecuteAsync(c);
       }
       catch (Exception ex)
       {
@@ -63,5 +60,6 @@ namespace ESLAdmin.Features.Endpoints.Roles
         return TypedResults.InternalServerError();
       }
     }
+
   }
 }

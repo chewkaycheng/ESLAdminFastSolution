@@ -2,7 +2,6 @@
 using ESLAdmin.Infrastructure.Data.Consts;
 using ESLAdmin.Infrastructure.Repositories;
 using FastEndpoints;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
 

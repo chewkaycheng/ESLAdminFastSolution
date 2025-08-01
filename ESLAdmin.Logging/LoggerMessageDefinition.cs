@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using System.Reflection.Metadata;
 
 namespace ESLAdmin.Logging;
 
@@ -17,7 +16,7 @@ public static partial class MessageLoggerDefs
   //------------------------------------------------------------------------------
   [LoggerMessage(EventId = 0, Level = LogLevel.Error, Message = "Exception thrown.")]
   public static partial void LogException(
-    this ILogger logger, 
+    this ILogger logger,
     Exception exception);
 
   //------------------------------------------------------------------------------
@@ -27,8 +26,8 @@ public static partial class MessageLoggerDefs
   //------------------------------------------------------------------------------
   [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Database execute command successful. \n  Sql: {sql}\n  Parameters: {parameters}")]
   public static partial void LogDatabaseExecSuccess(
-    this ILogger logger, 
-    string sql, 
+    this ILogger logger,
+    string sql,
     string parameters);
 
   //------------------------------------------------------------------------------
@@ -36,11 +35,11 @@ public static partial class MessageLoggerDefs
   //                     LogDatabaseExecFailure
   //
   //------------------------------------------------------------------------------
-  [LoggerMessage(EventId = 2, Level = LogLevel.Error, Message ="Database excecute command failed. \n  Sql: {sql}\n  Parameters: {parameters}")]
+  [LoggerMessage(EventId = 2, Level = LogLevel.Error, Message = "Database excecute command failed. \n  Sql: {sql}\n  Parameters: {parameters}")]
   public static partial void LogDatabaseExecFailure(
-    this ILogger logger, 
-    string sql, 
-    string parameters, 
+    this ILogger logger,
+    string sql,
+    string parameters,
     Exception exception);
 
   //------------------------------------------------------------------------------

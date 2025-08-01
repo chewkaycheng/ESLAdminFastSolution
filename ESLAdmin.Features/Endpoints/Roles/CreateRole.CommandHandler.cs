@@ -37,21 +37,21 @@ public class CreateRoleCommandHandler : ICommandHandler<
   //                          ExecuteAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<Results<Ok<CreateRoleResponse>, ProblemDetails, InternalServerError>> 
+  public async Task<Results<Ok<CreateRoleResponse>, ProblemDetails, InternalServerError>>
     ExecuteAsync(
-      CreateRoleCommand command, 
+      CreateRoleCommand command,
       CancellationToken ct)
   {
     var result = await _repositoryManager.AuthenticationRepository.CreateRoleAsync(command.Name);
     if (result.IsError)
     {
-      foreach(var error in result.Errors)
+      foreach (var error in result.Errors)
       {
         if ((error.Code == "Exception") || (error.Code == "Role.CreateFailed"))
         {
           return TypedResults.InternalServerError();
         }
-        
+
         var validationFailures = new List<ValidationFailure>();
         validationFailures.AddRange(new ValidationFailure
         {

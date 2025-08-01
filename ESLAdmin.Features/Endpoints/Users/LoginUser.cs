@@ -9,8 +9,8 @@ namespace ESLAdmin.Features.Endpoints.Users;
 //                       class LoginUserEndpoint
 //
 //-------------------------------------------------------------------------------
-public class LoginUserEndpoint : Endpoint<LoginUserRequest, 
-  Results<Ok<LoginUserResponse>, ProblemDetails, InternalServerError>, 
+public class LoginUserEndpoint : Endpoint<LoginUserRequest,
+  Results<Ok<LoginUserResponse>, ProblemDetails, InternalServerError>,
   LoginUserMapper>
 {
   //-------------------------------------------------------------------------------
@@ -39,5 +39,5 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest,
     var command = Map.ToCommand(request);
     var response = await command.ExecuteAsync(cancellationToken);
     return response;
-  } 
+  }
 }

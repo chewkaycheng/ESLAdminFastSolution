@@ -60,6 +60,6 @@ public static class DbConstsChildcareLevel
       ";
   public const string SP_CHILDCARELEVEL_ADD = "childcarelevel_add";
   public const string SP_CHILDCARELEVEL_UPD = "childcarelevel_upd";
-  public const string SP_CHILDCARELEVEL_DEL = 
+  public const string SP_CHILDCARELEVEL_DEL =
     "childcarelevel_del";
 }

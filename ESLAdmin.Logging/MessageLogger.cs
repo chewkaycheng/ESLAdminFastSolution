@@ -11,7 +11,7 @@ namespace ESLAdmin.Logging;
 public class MessageLogger : IMessageLogger
 {
   ILogger<MessageLogger> _logger;
-  public ILogger Logger {  get { return _logger; } }
+  public ILogger Logger { get { return _logger; } }
   //------------------------------------------------------------------------------
   //
   //                     MessageLogger
@@ -75,8 +75,8 @@ public class MessageLogger : IMessageLogger
   //
   //------------------------------------------------------------------------------
   public void LogSqlQuery(
-    string funcName, 
-    string sql, 
+    string funcName,
+    string sql,
     string? parameters)
   {
     _logger.LogInformation("Calling sql query. \nFunction: {funcName} \nSql: {sql} \nParameters: {parameters}",
@@ -95,8 +95,8 @@ public class MessageLogger : IMessageLogger
       Exception ex)
   {
     _logger.LogError(
-        "Failed to serialize paramaters. \nFunction: {funcName} \nException: {exception}", 
-        funcName, 
+        "Failed to serialize paramaters. \nFunction: {funcName} \nException: {exception}",
+        funcName,
         ex);
   }
 
@@ -111,9 +111,9 @@ public class MessageLogger : IMessageLogger
     string? parameters)
   {
     _logger.LogInformation(
-      "A database execute command was completed successfully. \nFunction: {funcName} \nSql: {sql} \nParameters: {parameters}", 
-      funcName, 
-      sql, 
+      "A database execute command was completed successfully. \nFunction: {funcName} \nSql: {sql} \nParameters: {parameters}",
+      funcName,
+      sql,
       parameters);
   }
 
@@ -128,9 +128,9 @@ public class MessageLogger : IMessageLogger
     string? parameters)
   {
     _logger.LogWarning(
-      "A database execute command failure has occured. \nFunction: {funcName} \nSql: {sql} \nParameters: {parameters}", 
-      funcName, 
-      sql, 
+      "A database execute command failure has occured. \nFunction: {funcName} \nSql: {sql} \nParameters: {parameters}",
+      funcName,
+      sql,
       parameters);
   }
 

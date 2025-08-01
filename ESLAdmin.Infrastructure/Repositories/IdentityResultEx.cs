@@ -49,7 +49,7 @@ public class IdentityResultEx
   //
   //-------------------------------------------------------------------------------
   // Constructor for failure
-  public IdentityResultEx(IEnumerable < IdentityError> errors)
+  public IdentityResultEx(IEnumerable<IdentityError> errors)
   {
     Id = string.Empty;
     InnerResult = IdentityResult.Failed(errors.ToArray());
@@ -74,7 +74,7 @@ public class IdentityResultEx
   //
   //-------------------------------------------------------------------------------
   // Static success factory method
-  public static IdentityResultEx Success(string id) => 
+  public static IdentityResultEx Success(string id) =>
   new IdentityResultEx(id);
 
   //------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ public class IdentityResultEx
   //
   //-------------------------------------------------------------------------------
   // Static failure factory method
-  public static IdentityResultEx Failed(params IdentityError[] errors) => 
+  public static IdentityResultEx Failed(params IdentityError[] errors) =>
     new IdentityResultEx(errors);
 
   //------------------------------------------------------------------------------

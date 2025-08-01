@@ -56,7 +56,7 @@ public class RepositoryManager : IRepositoryManager
   //                       ChildcareLevelRepository
   //
   //------------------------------------------------------------------------------
-  public IChildcareLevelRepository ChildcareLevelRepository => 
+  public IChildcareLevelRepository ChildcareLevelRepository =>
     _childcareLevelRepository.Value;
 
   //------------------------------------------------------------------------------

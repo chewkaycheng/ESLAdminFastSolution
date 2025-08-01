@@ -8,7 +8,8 @@ namespace ESLAdmin.Features.Endpoints.Roles;
 //                          class UpdateRoleCommand
 //
 //-------------------------------------------------------------------------------
-public class UpdateRoleCommand : ICommand<Results<Ok<string>, ProblemDetails, InternalServerError>>
+public class UpdateRoleCommand : 
+  ICommand<Results<Ok<string>, ProblemDetails, InternalServerError>>
 {
   public required string OldName { get; set; }
   public required string NewName { get; set; }

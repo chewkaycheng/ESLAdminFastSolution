@@ -3,7 +3,7 @@ using System.Data;
 
 namespace ESLAdmin.Infrastructure.Repositories.Interfaces;
 
-public interface IRepositoryBaseDapper<ReadT, WriteT> 
+public interface IRepositoryBaseDapper<ReadT, WriteT>
   where ReadT : class
   where WriteT : class
 {

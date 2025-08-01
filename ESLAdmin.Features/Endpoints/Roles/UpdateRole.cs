@@ -13,10 +13,7 @@ namespace ESLAdmin.Features.Endpoints.Roles;
 //------------------------------------------------------------------------------
 public class UpdateRoleEndpoint :
   Endpoint<UpdateRoleRequest,
-    Results<
-      Ok<string>,
-      ProblemDetails,
-      InternalServerError>>
+    Results<Ok<string>, ProblemDetails, InternalServerError>>
 {
   private readonly ILogger<CreateRoleEndpoint> _logger;
   public UpdateRoleEndpoint(ILogger<CreateRoleEndpoint> logger)
@@ -40,8 +37,10 @@ public class UpdateRoleEndpoint :
   //                        ExecuteAsync
   //
   //------------------------------------------------------------------------------
-  public override async Task<Results<Ok<string>, ProblemDetails, InternalServerError>> ExecuteAsync(
-    UpdateRoleRequest request, CancellationToken c)
+  public override async Task<Results<Ok<string>, ProblemDetails, InternalServerError>> 
+    ExecuteAsync(
+      UpdateRoleRequest request, 
+      CancellationToken c)
   {
     try
     {
@@ -53,7 +52,7 @@ public class UpdateRoleEndpoint :
       return await command.ExecuteAsync(c);
 
     }
-    catch(Exception ex)
+    catch (Exception ex)
     {
       _logger.LogException(ex);
 

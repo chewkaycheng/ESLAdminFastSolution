@@ -12,7 +12,7 @@ namespace ESLAdmin.Features.Endpoints.Roles;
 //
 //-------------------------------------------------------------------------------
 public class GetRoleEndpoint : Endpoint<
-  GetRoleRequest, 
+  GetRoleRequest,
   Results<Ok<GetRoleResponse>, ProblemDetails, InternalServerError>,
   GetRoleMapper>
 {
@@ -62,6 +62,4 @@ public class GetRoleEndpoint : Endpoint<
       return TypedResults.InternalServerError();
     }
   }
-
-
 }

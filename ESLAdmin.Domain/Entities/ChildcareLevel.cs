@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace ESLAdmin.Domain.Entities;
+﻿namespace ESLAdmin.Domain.Entities;
 
 //------------------------------------------------------------------------------
 //

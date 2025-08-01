@@ -1,16 +1,16 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
+namespace ESLAdmin.Features.Endpoints.Roles;
+
 //-------------------------------------------------------------------------------
 //
 //                       class GetRoleCommand
 //
 //-------------------------------------------------------------------------------
-namespace ESLAdmin.Features.Endpoints.Roles;
-
 public class GetRoleCommand : ICommand<
-  Results<Ok<GetRoleResponse>, 
-  ProblemDetails, 
+  Results<Ok<GetRoleResponse>,
+  ProblemDetails,
   InternalServerError>>
 {
   public string Name { get; set; }

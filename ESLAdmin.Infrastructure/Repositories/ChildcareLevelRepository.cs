@@ -15,8 +15,8 @@ namespace ESLAdmin.Features.ChildcareLevels.Repositories;
 //                        class ChildcareLevelRepository
 //
 //------------------------------------------------------------------------------
-public class ChildcareLevelRepository : 
-  RepositoryBase<ChildcareLevel, OperationResult>, 
+public class ChildcareLevelRepository :
+  RepositoryBase<ChildcareLevel, OperationResult>,
   IChildcareLevelRepository
 {
   //------------------------------------------------------------------------------

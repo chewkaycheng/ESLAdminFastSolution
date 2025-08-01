@@ -4,7 +4,7 @@
   {
     public static int MapHttpReturnCode(int DbApiError)
     {
-      switch(DbApiError)
+      switch (DbApiError)
       {
 
         case 100:

@@ -26,7 +26,7 @@ public class AuthenticationRepository : IAuthenticationRepository
   private readonly IMessageLogger _messageLogger;
   private readonly ILogger _logger;
   private readonly UserManager<User> _userManager;
-  private readonly SignInManager<User> _signInManager;  
+  private readonly SignInManager<User> _signInManager;
   private readonly RoleManager<IdentityRole> _roleManager;
   private readonly UserDbContext _dbContext;
 
@@ -99,7 +99,7 @@ public class AuthenticationRepository : IAuthenticationRepository
           user.Email,
           result.Errors.ToFormattedString());
 
-        await transaction.RollbackAsync(); 
+        await transaction.RollbackAsync();
         return IdentityResultEx.Failed(result.Errors.ToArray());
       }
 
@@ -235,7 +235,7 @@ public class AuthenticationRepository : IAuthenticationRepository
       if (roles.Any())
       {
         var removeRolesResult = await _userManager.RemoveFromRolesAsync(user, roles);
-        if (!removeRolesResult.Succeeded) 
+        if (!removeRolesResult.Succeeded)
         {
           InfoLogIdentityErrors("GetRolesAsync", email, removeRolesResult.Errors);
           return IdentityResultEx.Failed(IdentityErrorTypes.RemoveFromRolesError, removeRolesResult.Errors.ToArray());
@@ -278,7 +278,7 @@ public class AuthenticationRepository : IAuthenticationRepository
         return Errors.IdentityErrors.RoleExists(roleName);
       }
 
-      
+
       var role = new IdentityRole(roleName);
       var result = await _roleManager.CreateAsync(role);
 
@@ -288,7 +288,7 @@ public class AuthenticationRepository : IAuthenticationRepository
         Errors.IdentityErrors.CreateRoleFailed(roleName, result.Errors);
       }
 
-      return role;  
+      return role;
     }
     catch (Exception ex)
     {
@@ -377,7 +377,7 @@ public class AuthenticationRepository : IAuthenticationRepository
   {
     try
     {
-      var role =  await _roleManager.FindByNameAsync(roleName);
+      var role = await _roleManager.FindByNameAsync(roleName);
       if (role == null)
       {
         return Errors.IdentityErrors.RoleNotFound(roleName);
@@ -425,7 +425,7 @@ public class AuthenticationRepository : IAuthenticationRepository
     {
       StringBuilder sb = new StringBuilder();
       sb.AppendLine("  Errors:");
-      foreach(var error in errors)
+      foreach (var error in errors)
       {
         sb.AppendLine($"    Code: {error.Code}\tDescription: {error.Description}");
       }

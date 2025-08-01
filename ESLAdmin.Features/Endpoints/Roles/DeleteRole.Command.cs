@@ -1,17 +1,17 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
+namespace ESLAdmin.Features.Endpoints.Roles;
+
 //-------------------------------------------------------------------------------
 //
 //                       class DeleteRoleCommand
 //
 //-------------------------------------------------------------------------------
-namespace ESLAdmin.Features.Endpoints.Roles;
-
 public class DeleteRoleCommand : ICommand<
   Results<
-    NoContent, 
-    ProblemDetails, 
+    NoContent,
+    ProblemDetails,
     InternalServerError>>
 {
   public required string Name { get; set; }

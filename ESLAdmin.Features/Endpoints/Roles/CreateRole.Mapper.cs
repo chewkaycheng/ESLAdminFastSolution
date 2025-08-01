@@ -11,7 +11,7 @@ namespace ESLAdmin.Features.Endpoints.Roles;
 public class CreateRoleMapper : Mapper<CreateRoleRequest, CreateRoleResponse, IdentityRole>
 {
   public CreateRoleCommand ToCommand(
-    CreateRoleRequest request, 
+    CreateRoleRequest request,
     CreateRoleMapper mapper)
   {
     return new CreateRoleCommand

@@ -1,6 +1,5 @@
 ﻿using FluentValidation.Results;
 using Microsoft.AspNetCore.Identity;
-using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace ESLAdmin.Logging.Extensions;

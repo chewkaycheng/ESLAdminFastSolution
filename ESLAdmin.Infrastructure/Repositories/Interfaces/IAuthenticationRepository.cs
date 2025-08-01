@@ -1,7 +1,6 @@
 ﻿using ErrorOr;
 using ESLAdmin.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
-using System.Runtime.CompilerServices;
 
 namespace ESLAdmin.Infrastructure.Repositories.Interfaces;
 
@@ -11,7 +10,7 @@ public interface IAuthenticationRepository
     User user,
     string password,
     ICollection<string>? roles);
-    
+
   Task<(User user, ICollection<string>? roles)?> GetUserByEmailAsync(
     string email);
 
