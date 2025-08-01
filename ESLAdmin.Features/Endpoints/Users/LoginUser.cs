@@ -36,8 +36,6 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest,
     LoginUserRequest request,
     CancellationToken cancellationToken)
   {
-    var command = Map.ToCommand(request);
-    var response = await command.ExecuteAsync(cancellationToken);
-    return response;
+    return await Map.ToCommand(request).ExecuteAsync(cancellationToken);
   }
 }
