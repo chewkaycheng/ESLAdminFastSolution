@@ -1,6 +1,7 @@
 ﻿using ErrorOr;
 using ESLAdmin.Common.Errors;
 using ESLAdmin.Common.Exceptions;
+using ESLAdmin.Domain.Dtos;
 using ESLAdmin.Domain.Entities;
 using ESLAdmin.Infrastructure.Data;
 using ESLAdmin.Infrastructure.Repositories;
@@ -56,7 +57,7 @@ public class AuthenticationRepository : IAuthenticationRepository
   //                       RegisterUser
   //
   //-------------------------------------------------------------------------------
-  public async Task<IdentityResultEx> RegisterUserAsync(
+  public async Task<ErrorOr<User>> RegisterUserAsync(
     User user,
     string password,
     ICollection<string>? roles)
@@ -74,13 +75,7 @@ public class AuthenticationRepository : IAuthenticationRepository
       }
 
       if (invalidRoles.Any())
-      {
-        return IdentityResultEx.Failed(new IdentityError
-        {
-          Code = "InvalidRole",
-          Description = $"The following roles do not exist: {string.Join(", ", invalidRoles)}"
-        });
-      }
+        return Errors.IdentityErrors.InvalidRoles(invalidRoles);
     }
 
     IDbContextTransaction? transaction = null;
@@ -100,7 +95,7 @@ public class AuthenticationRepository : IAuthenticationRepository
           result.Errors.ToFormattedString());
 
         await transaction.RollbackAsync();
-        return IdentityResultEx.Failed(result.Errors.ToArray());
+        return Errors.IdentityErrors.CreateUserFailed(user.Email, result.Errors);
       }
 
       if (roles != null && roles.Any())
@@ -114,12 +109,12 @@ public class AuthenticationRepository : IAuthenticationRepository
             result.Errors.ToFormattedString());
 
           await transaction.RollbackAsync();
-          return IdentityResultEx.Failed(roleResult.Errors.ToArray());
+          return Errors.IdentityErrors.AddToRolesFailed(user.Email, result.Errors);
         }
       }
 
       await transaction.CommitAsync();
-      return IdentityResultEx.Success(user.Id);
+      return user;
     }
     catch (Exception ex)
     {
@@ -128,13 +123,9 @@ public class AuthenticationRepository : IAuthenticationRepository
         await transaction.RollbackAsync();
       }
 
-      _messageLogger.LogDatabaseException(
-        nameof(RegisterUserAsync),
-        ex);
+      _logger.LogException(ex);
 
-      throw new DatabaseException(
-        nameof(RegisterUserAsync),
-        ex);
+      return Errors.CommonErrors.Exception(ex.Message);
     }
     finally
     {
@@ -186,28 +177,40 @@ public class AuthenticationRepository : IAuthenticationRepository
   //                       LoginAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<(User user, ICollection<string>? roles)?> LoginAsync(string email, string password)
+  public async Task<ErrorOr<UserLoginDto>> LoginAsync(string email, string password)
   {
-    var user = await _userManager.FindByEmailAsync(email);
-    if (user == null)
+    try
     {
-      return null;
-    }
+      var user = await _userManager.FindByEmailAsync(email);
+      if (user == null)
+      {
+        return Errors.IdentityErrors.UserLoginFailed();
+      }
 
-    var result = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: false);
-    if (!result.Succeeded)
-    {
-      return null;
-    }
+      var result = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: false);
+      if (!result.Succeeded)
+      {
+        return Errors.IdentityErrors.UserLoginFailed();
+      }
 
-    var roles = await _userManager.GetRolesAsync(user);
-    if (roles == null)
-    {
-      return (user, null);
+      var roles = await _userManager.GetRolesAsync(user);
+      UserLoginDto userLoginDto = new UserLoginDto
+      {
+        Id = user.Id,
+        FirstName = user.FirstName,
+        LastName = user.LastName,
+        UserName = user.UserName,
+        Email = user.Email,
+        PhoneNumber = user.PhoneNumber,
+        Roles = roles == null ? null : roles
+      };
+      return userLoginDto;
     }
-    else
+    catch (Exception ex)
     {
-      return (user, roles);
+      _logger.LogException(ex);
+
+      return Errors.CommonErrors.Exception(ex.Message);
     }
   }
 

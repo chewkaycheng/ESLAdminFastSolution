@@ -56,18 +56,24 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
       var result = await _repositoryManager.AuthenticationRepository.LoginAsync(
           command.Email, command.Password);
 
-      if (result == null)
+      if (result.IsError)
       {
-        var validationFailures = new List<ValidationFailure>();
-        validationFailures.AddRange(new ValidationFailure
+        foreach (var error in result.Errors)
         {
-          PropertyName = "LoginFailure",
-          ErrorMessage = "Your email or password is not valid."
-        });
-        return new ProblemDetails(validationFailures, StatusCodes.Status400BadRequest);
-      }
+          if (error.Code == "Exception")
+            return TypedResults.InternalServerError();
 
-      var (user, roles) = result.Value;
+          var validateFailures = new List<ValidationFailure>();
+          validateFailures.AddRange(new ValidationFailure
+          {
+            PropertyName = error.Code,
+            ErrorMessage = error.Description
+          });
+          return new ProblemDetails(validateFailures, StatusCodes.Status401Unauthorized);
+        }
+      }
+        
+      var userLoginDto = result.Value;
 
       //Generate JWT token
       var jwtKey = _config["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not found in configuration.");
@@ -76,21 +82,26 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
         {
           o.SigningKey = jwtKey;
           o.ExpireAt = DateTime.UtcNow.AddDays(1);
-          if (!string.IsNullOrEmpty(user.UserName))
+          if (!string.IsNullOrEmpty(userLoginDto.UserName))
           {
-            o.User.Claims.Add(("UserName", user.UserName));
+            o.User.Claims.Add(("UserName", userLoginDto.UserName));
           }
-          o.User["UserId"] = user.Id;
-          if (roles != null && roles.Any())
+          if (!string.IsNullOrEmpty(userLoginDto.Email))
           {
-            o.User.Roles.Add(string.Join(",", roles));
+            o.User.Claims.Add(("Email", userLoginDto.Email));
+          }
+
+          o.User["UserId"] = userLoginDto.Id;
+          if (userLoginDto.Roles != null && userLoginDto.Roles.Any())
+          {
+            o.User.Roles.Add(string.Join(",", userLoginDto.Roles));
           }
         });
 
       LoginUserResponse response = new LoginUserResponse
       {
-        UserId = user.Id,
-        Email = user.Email,
+        UserId = userLoginDto.Id,
+        Email = userLoginDto.Email,
         Token = token
       };
 

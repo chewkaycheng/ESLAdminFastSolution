@@ -19,13 +19,64 @@ public static partial class Errors
   {
     //-------------------------------------------------------------------------------
     //
+    //                       InvalidRoles
+    //
+    //-------------------------------------------------------------------------------
+    public static Error InvalidRoles(List<string> invalidRoles) =>
+      Error.Validation(
+        code: "User.InvalidRoles",
+        description: $"The following roles do not exist: {string.Join(", ", invalidRoles)}");
+
+
+    //-------------------------------------------------------------------------------
+    //
     //                       UserNotFound
     //
     //-------------------------------------------------------------------------------
     public static Error UserNotFound(string email) =>
       Error.Validation(
         code: "User.NotFound",
-        description: $"The user with email {email} is not found.");
+        description: $"The user with email: '{email}' is not found.");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       UserLoginFailed
+    //
+    //-------------------------------------------------------------------------------
+    public static Error UserLoginFailed() =>
+      Error.Validation(
+        code: "User.LoginFailed",
+        description: $"Username or password is invalid.");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       CreateUserFailed
+    //
+    //-------------------------------------------------------------------------------
+    public static Error CreateUserFailed(string email, IEnumerable<IdentityError> errors)
+    {
+      var error = Error.Failure(
+        code: "User.CreateFailed",
+        description: $"Failed to remove user: '{email}'.");
+
+      AddMetadata(error.Metadata, errors);
+      return error;
+    }
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       AddToRolesFailed
+    //
+    //-------------------------------------------------------------------------------
+    public static Error AddToRolesFailed(string email, IEnumerable<IdentityError> errors)
+    {
+      var error = Error.Failure(
+        code: "User.AddToRolesFailed",
+        description: $"Failed to add roles for user: '{email}'.");
+
+      AddMetadata(error.Metadata, errors);
+      return error;
+    }
 
     //-------------------------------------------------------------------------------
     //

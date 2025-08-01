@@ -1,4 +1,5 @@
 ﻿using ErrorOr;
+using ESLAdmin.Domain.Dtos;
 using ESLAdmin.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 
@@ -6,7 +7,7 @@ namespace ESLAdmin.Infrastructure.Repositories.Interfaces;
 
 public interface IAuthenticationRepository
 {
-  Task<IdentityResultEx> RegisterUserAsync(
+  Task<ErrorOr<User>> RegisterUserAsync(
     User user,
     string password,
     ICollection<string>? roles);
@@ -14,7 +15,7 @@ public interface IAuthenticationRepository
   Task<(User user, ICollection<string>? roles)?> GetUserByEmailAsync(
     string email);
 
-  Task<(User user, ICollection<string>? roles)?> LoginAsync(string email, string password);
+  Task<ErrorOr<UserLoginDto>> LoginAsync(string email, string password);
 
   Task<IdentityResultEx> DeleteUserByEmailAsync(string email);
 

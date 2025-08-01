@@ -20,18 +20,25 @@ public class RegisterUserCommandHandler : ICommandHandler<
 {
   private readonly IRepositoryManager _repositoryManager;
   private readonly ILogger<RegisterUserCommandHandler> _logger;
-  private readonly IMessageLogger _messageLogger;
 
+  //------------------------------------------------------------------------------
+  //
+  //                       RegisterUserCommandHandler
+  //
+  //-------------------------------------------------------------------------------
   public RegisterUserCommandHandler(
       IRepositoryManager repositoryManager,
-      ILogger<RegisterUserCommandHandler> logger,
-      IMessageLogger messageLogger)
+      ILogger<RegisterUserCommandHandler> logger)
   {
     _repositoryManager = repositoryManager;
     _logger = logger;
-    _messageLogger = messageLogger;
   }
 
+  //------------------------------------------------------------------------------
+  //
+  //                       ExecuteAsync
+  //
+  //-------------------------------------------------------------------------------
   public async Task<Results<NoContent, ProblemDetails, InternalServerError>>
     ExecuteAsync(
       RegisterUserCommand command,
@@ -41,34 +48,43 @@ public class RegisterUserCommandHandler : ICommandHandler<
     {
       var user = command.Mapper.CommandToEntity(command);
 
-      var identityResultEx = await _repositoryManager.AuthenticationRepository.RegisterUserAsync(
+      var result = await _repositoryManager.AuthenticationRepository.RegisterUserAsync(
         user,
         command.Password,
         command.Roles);
 
-      if (!identityResultEx.Succeeded)
+      if (result.IsError)
       {
-        if (_logger.IsEnabled(LogLevel.Information))
+        foreach (var error in result.Errors)
         {
-          _logger.LogValidationErrors(LoggingHelpers.FormatIdentityErrors(identityResultEx.Errors));
+          if (error.Code == "User.CreateFailed" ||
+              error.Code == "User.AddToRolesFailed" ||
+              error.Code == "Exception")
+            return TypedResults.InternalServerError();
+
+          if (error.Code == "User.InvalidRoles")
+          {
+            var validationFailures = new List<ValidationFailure>();
+            validationFailures.AddRange(new ValidationFailure
+            {
+              PropertyName = error.Code,
+              ErrorMessage = error.Description
+            });
+            return new ProblemDetails(
+              validationFailures, 
+              StatusCodes.Status400BadRequest);
+          }
         }
-
-        var validationFailures = identityResultEx.Errors.Select(error => new ValidationFailure
-        {
-          PropertyName = error.Code,
-          ErrorMessage = error.Description
-        }).ToList();
-
-        return new ProblemDetails(validationFailures, StatusCodes.Status422UnprocessableEntity);
       }
 
-      _logger.LogFunctionExit($"User Id: {identityResultEx.Id}");
+      _logger.LogFunctionExit($"User Id: {result.Value.Id}");
 
       return TypedResults.NoContent();
     }
     catch (Exception ex)
     {
-      _messageLogger.LogControllerException(nameof(RegisterUserCommandHandler), ex);
+      _logger.LogException(ex);
+      
       return TypedResults.InternalServerError();
     }
   }

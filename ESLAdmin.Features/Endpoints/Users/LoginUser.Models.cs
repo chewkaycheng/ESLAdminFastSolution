@@ -21,7 +21,7 @@ public class LoginUserRequest
 
 //-------------------------------------------------------------------------------
 //
-//                      LoginUserResponse
+//                      class LoginUserResponse
 //
 //-------------------------------------------------------------------------------
 public class LoginUserResponse
