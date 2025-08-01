@@ -1,4 +1,5 @@
-﻿using ESLAdmin.Domain.Entities;
+﻿using ErrorOr;
+using ESLAdmin.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using System.Runtime.CompilerServices;
 
@@ -18,9 +19,9 @@ public interface IAuthenticationRepository
 
   Task<IdentityResultEx> DeleteUserByEmailAsync(string email);
 
-  Task<IdentityResultEx> CreateRoleAsync(string roleName);
-  Task<IdentityResultEx> UpdateRoleAsync(string oldRoleName, string newRoleName);
-  Task<IdentityResultEx> DeleteRoleAsync(string roleName);
-  Task<IdentityRole?> GetRoleAsync(string roleName);
-  Task<IEnumerable<IdentityRole>> GetAllRolesAsync();
+  Task<ErrorOr<IdentityRole>> CreateRoleAsync(string roleName);
+  Task<ErrorOr<string>> UpdateRoleAsync(string oldRoleName, string newRoleName);
+  Task<ErrorOr<string>> DeleteRoleAsync(string roleName);
+  Task<ErrorOr<IdentityRole>> GetRoleAsync(string roleName);
+  Task<ErrorOr<IEnumerable<IdentityRole>>> GetAllRolesAsync();
 }

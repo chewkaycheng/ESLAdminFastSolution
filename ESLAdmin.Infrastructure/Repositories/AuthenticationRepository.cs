@@ -1,19 +1,18 @@
-﻿using ESLAdmin.Common.Exceptions;
+﻿using ErrorOr;
+using ESLAdmin.Common.Errors;
+using ESLAdmin.Common.Exceptions;
 using ESLAdmin.Domain.Entities;
 using ESLAdmin.Infrastructure.Data;
 using ESLAdmin.Infrastructure.Repositories;
 using ESLAdmin.Infrastructure.Repositories.Interfaces;
 using ESLAdmin.Logging;
+using ESLAdmin.Logging.Extensions;
 using ESLAdmin.Logging.Interface;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using System.Text;
-using static Google.Protobuf.Collections.MapField<TKey, TValue>;
 
 namespace ESLAdmin.Features.Users.Repositories;
 
@@ -95,7 +94,12 @@ public class AuthenticationRepository : IAuthenticationRepository
 
       if (!result.Succeeded)
       {
-        await transaction.RollbackAsync();
+        _logger.LogIdentityErrors(
+          "_userManager.CreateAsync",
+          user.Email,
+          result.Errors.ToFormattedString());
+
+        await transaction.RollbackAsync(); 
         return IdentityResultEx.Failed(result.Errors.ToArray());
       }
 
@@ -104,6 +108,11 @@ public class AuthenticationRepository : IAuthenticationRepository
         var roleResult = await _userManager.AddToRolesAsync(user, roles);
         if (!roleResult.Succeeded)
         {
+          _logger.LogIdentityErrors(
+            "_userManager.AddToRolesAsync",
+            user.Email,
+            result.Errors.ToFormattedString());
+
           await transaction.RollbackAsync();
           return IdentityResultEx.Failed(roleResult.Errors.ToArray());
         }
@@ -222,16 +231,16 @@ public class AuthenticationRepository : IAuthenticationRepository
       }
 
       // Optional: Check and remove roles explicity (usually not needed due to cascade delete)
-      //var roles = await _userManager.GetRolesAsync(user);
-      //if (roles.Any())
-      //{
-      //  var removeRolesResult = await _userManager.RemoveFromRolesAsync(user, roles);
-      //  if (!removeRolesResult.Succeeded) 
-      //  {
-      //    InfoLogIdentityErrors("GetRolesAsync", email, removeRolesResult.Errors);
-      //    return IdentityResultEx.Failed(IdentityErrorTypes.RemoveFromRolesError, removeRolesResult.Errors.ToArray());
-      //  }
-      //}
+      var roles = await _userManager.GetRolesAsync(user);
+      if (roles.Any())
+      {
+        var removeRolesResult = await _userManager.RemoveFromRolesAsync(user, roles);
+        if (!removeRolesResult.Succeeded) 
+        {
+          InfoLogIdentityErrors("GetRolesAsync", email, removeRolesResult.Errors);
+          return IdentityResultEx.Failed(IdentityErrorTypes.RemoveFromRolesError, removeRolesResult.Errors.ToArray());
+        }
+      }
 
       // Delete the user
       var deleteUserResult = await _userManager.DeleteAsync(user);
@@ -260,17 +269,13 @@ public class AuthenticationRepository : IAuthenticationRepository
   //                       CreateRoleAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<IdentityResultEx> CreateRoleAsync(string roleName)
+  public async Task<ErrorOr<IdentityRole>> CreateRoleAsync(string roleName)
   {
     try
     {
       if (await _roleManager.RoleExistsAsync(roleName))
       {
-        return IdentityResultEx.Failed(new IdentityError
-        {
-          Code = "RoleExists",
-          Description = $"Role '{roleName}' already exists."
-        });
+        return Errors.IdentityErrors.RoleExists(roleName);
       }
 
       
@@ -279,23 +284,17 @@ public class AuthenticationRepository : IAuthenticationRepository
 
       if (!result.Succeeded)
       {
-        InfoLogIdentityErrors(nameof(CreateRoleAsync), roleName, result.Errors);
-        return IdentityResultEx.Failed(IdentityErrorTypes.CreateRoleError, result.Errors.ToArray());
+        _logger.LogIdentityErrors("_roleManager.CreateAsync", roleName, result.Errors.ToFormattedString());
+        Errors.IdentityErrors.CreateRoleFailed(roleName, result.Errors);
       }
 
-      return IdentityResultEx.Success(roleName);  
-      
-
+      return role;  
     }
     catch (Exception ex)
     {
       _logger.LogException(ex);
 
-      return IdentityResultEx.Failed(new IdentityError()
-      {
-        Code = "Exception",
-        Description = ex.Message
-      });
+      return Errors.CommonErrors.Exception(ex.Message);
     }
   }
 
@@ -304,48 +303,36 @@ public class AuthenticationRepository : IAuthenticationRepository
   //                       UpdateRoleAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<IdentityResultEx> UpdateRoleAsync(string oldRoleName, string newRoleName)
+  public async Task<ErrorOr<string>> UpdateRoleAsync(string oldRoleName, string newRoleName)
   {
     try
     {
       var role = await _roleManager.FindByNameAsync(oldRoleName);
       if (role == null)
       {
-        return IdentityResultEx.Failed(new IdentityError
-        {
-          Code = "RoleNotFound",
-          Description = $"Role '{oldRoleName}' not found."
-        });
+        return Errors.IdentityErrors.RoleNotFound(oldRoleName);
       }
 
       if (await _roleManager.RoleExistsAsync(newRoleName))
       {
-        return IdentityResultEx.Failed(new IdentityError
-        {
-          Code = "RoleExists",
-          Description = $"Role '{newRoleName}' already exists."
-        });
+        return Errors.IdentityErrors.RoleExists(newRoleName);
       }
 
       role.Name = newRoleName;
       var result = await _roleManager.UpdateAsync(role);
       if (!result.Succeeded)
       {
-        InfoLogIdentityErrors(nameof(UpdateRoleAsync), oldRoleName, result.Errors);
-        return IdentityResultEx.Failed(IdentityErrorTypes.UpdateRoleError, result.Errors.ToArray());
+        _logger.LogIdentityErrors("_roleManager.UpdateAsync", newRoleName, result.Errors.ToFormattedString());
+        return Errors.IdentityErrors.UpdateRoleFailed(oldRoleName, newRoleName, result.Errors);
       }
 
-      return IdentityResultEx.Success(newRoleName);
+      return newRoleName;
     }
     catch (Exception ex)
     {
       _logger.LogException(ex);
 
-      return IdentityResultEx.Failed(new IdentityError()
-      {
-        Code = "Exception",
-        Description = ex.Message
-      });
+      return Errors.CommonErrors.Exception(ex.Message);
     }
   }
 
@@ -354,38 +341,30 @@ public class AuthenticationRepository : IAuthenticationRepository
   //                       DeleteRoleAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<IdentityResultEx> DeleteRoleAsync(string roleName)
+  public async Task<ErrorOr<string>> DeleteRoleAsync(string roleName)
   {
     try
     {
       var role = await _roleManager.FindByNameAsync(roleName);
       if (role == null)
       {
-        return IdentityResultEx.Failed(new IdentityError
-        {
-          Code = "RoleNotFound",
-          Description = $"Role '{roleName}' not found."
-        });
+        return Errors.IdentityErrors.RoleNotFound(roleName);
       }
 
       var result = await _roleManager.DeleteAsync(role);
       if (!result.Succeeded)
       {
-        InfoLogIdentityErrors(nameof(UpdateRoleAsync), roleName, result.Errors);
-        return IdentityResultEx.Failed(IdentityErrorTypes.DeleteRoleError, result.Errors.ToArray());
+        _logger.LogIdentityErrors("_roleManager.DeleteAsync", "roleName", result.Errors.ToFormattedString());
+        return Errors.IdentityErrors.DeleteRoleFailed(roleName, result.Errors);
       }
 
-      return IdentityResultEx.Success(roleName);
+      return role.Id;
     }
     catch (Exception ex)
     {
       _logger.LogException(ex);
 
-      return IdentityResultEx.Failed(new IdentityError()
-      {
-        Code = "Exception",
-        Description = ex.Message
-      });
+      return Errors.CommonErrors.Exception(ex.Message);
     }
   }
 
@@ -394,19 +373,22 @@ public class AuthenticationRepository : IAuthenticationRepository
   //                       GetRoleAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<IdentityRole?> GetRoleAsync(string roleName)
+  public async Task<ErrorOr<IdentityRole>> GetRoleAsync(string roleName)
   {
     try
     {
-      return await _roleManager.FindByNameAsync(roleName);
+      var role =  await _roleManager.FindByNameAsync(roleName);
+      if (role == null)
+      {
+        return Errors.IdentityErrors.RoleNotFound(roleName);
+      }
+      return role;
     }
     catch (Exception ex)
     {
       _logger.LogException(ex);
 
-      throw new DatabaseException(
-        nameof(GetRoleAsync),
-        ex);
+      return Errors.CommonErrors.Exception(ex.Message);
     }
   }
 
@@ -415,7 +397,7 @@ public class AuthenticationRepository : IAuthenticationRepository
   //                       GetAllRolesAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<IEnumerable<IdentityRole>> GetAllRolesAsync()
+  public async Task<ErrorOr<IEnumerable<IdentityRole>>> GetAllRolesAsync()
   {
     try
     {
@@ -425,9 +407,7 @@ public class AuthenticationRepository : IAuthenticationRepository
     {
       _logger.LogException(ex);
 
-      throw new DatabaseException(
-        nameof(GetAllRolesAsync),
-        ex);
+      return Errors.CommonErrors.Exception(ex.Message);
     }
   }
 

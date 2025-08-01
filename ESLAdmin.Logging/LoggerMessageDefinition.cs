@@ -94,6 +94,6 @@ public static partial class MessageLoggerDefs
   public static partial void LogIdentityErrors(
     this ILogger logger,
     string identityFunction,
-    string id,
+    string? id,
     string context);
 }
