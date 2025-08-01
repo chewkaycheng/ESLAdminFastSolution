@@ -1,6 +1,4 @@
-﻿using ESLAdmin.Features.Endpoints.ChildcareLevels;
-using ESLAdmin.Infrastructure.RepositoryManagers;
-using ESLAdmin.Logging;
+﻿using ESLAdmin.Logging;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -53,9 +51,7 @@ public class CreateRoleEndpoint :
   {
     try
     {
-      var command = Map.ToCommand(request, Map); ;
-
-      return await command.ExecuteAsync(c);
+      return await Map.ToCommand(request, Map).ExecuteAsync();
     }
     catch (Exception ex)
     {

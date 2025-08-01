@@ -6,6 +6,11 @@ using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Features.Endpoints.Roles;
 
+//------------------------------------------------------------------------------
+//
+//                        class UpdateRoleEndpoint
+//
+//------------------------------------------------------------------------------
 public class UpdateRoleEndpoint :
   Endpoint<UpdateRoleRequest,
     Results<

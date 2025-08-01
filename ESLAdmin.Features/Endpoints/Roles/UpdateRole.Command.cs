@@ -1,6 +1,5 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
-using System.Diagnostics.CodeAnalysis;
 
 namespace ESLAdmin.Features.Endpoints.Roles;
 

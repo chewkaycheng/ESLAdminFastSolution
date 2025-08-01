@@ -19,6 +19,11 @@ public class CreateRoleCommandHandler : ICommandHandler<
   private readonly IRepositoryManager _repositoryManager;
   private readonly ILogger<CreateRoleCommandHandler> _logger;
 
+  //------------------------------------------------------------------------------
+  //
+  //                          CreateRoleCommandHandler
+  //
+  //-------------------------------------------------------------------------------
   public CreateRoleCommandHandler(
     IRepositoryManager repositoryManager,
     ILogger<CreateRoleCommandHandler> logger)
@@ -27,6 +32,11 @@ public class CreateRoleCommandHandler : ICommandHandler<
     _logger = logger;
   }
 
+  //------------------------------------------------------------------------------
+  //
+  //                          ExecuteAsync
+  //
+  //-------------------------------------------------------------------------------
   public async Task<Results<Ok<CreateRoleResponse>, ProblemDetails, InternalServerError>> 
     ExecuteAsync(
       CreateRoleCommand command, 
