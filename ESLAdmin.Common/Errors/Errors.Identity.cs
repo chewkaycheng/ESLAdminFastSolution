@@ -110,6 +110,34 @@ public static partial class Errors
 
     //-------------------------------------------------------------------------------
     //
+    //                       AssignedRoleFailed
+    //
+    //-------------------------------------------------------------------------------
+    public static Error AssignRoleFailed(
+      string email,
+      string roleName,
+      IEnumerable<IdentityError> errors)
+    {
+      var error = Error.Failure(
+        code: "User.AssignRoleFailed",
+        description: $"Failed to assign role: '{roleName}' to user: '{email}'.");
+
+      AddMetadata(error.Metadata, errors);
+      return error;
+    }
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       UserAlreadyInRole
+    //
+    //-------------------------------------------------------------------------------
+    public static Error UserAlreadyInRole(string email, string roleName) =>
+      Error.Validation(
+        code: "User.UserAlreadyInRole",
+        description: $"The role: '{roleName}' is already assigned to the user: '{email}'.");
+
+    //-------------------------------------------------------------------------------
+    //
     //                       RoleNotFound
     //
     //-------------------------------------------------------------------------------

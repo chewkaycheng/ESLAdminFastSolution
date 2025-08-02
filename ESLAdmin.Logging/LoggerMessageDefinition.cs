@@ -89,7 +89,7 @@ public static partial class MessageLoggerDefs
   //                       LogIdentityErrors
   //
   //------------------------------------------------------------------------------
-  [LoggerMessage(EventId = 6, Level = LogLevel.Information, Message = "Identity Error performing {identityFunction}. Id: {id}. {context}.")]
+  [LoggerMessage(EventId = 6, Level = LogLevel.Information, Message = "Identity Error performing {identityFunction}. Id: {id}. {context}")]
   public static partial void LogIdentityErrors(
     this ILogger logger,
     string identityFunction,

@@ -33,6 +33,7 @@ public class AuthenticationRepository : IAuthenticationRepository
   private readonly RoleManager<IdentityRole> _roleManager;
   private readonly UserDbContext _dbContext;
   private readonly IDbContextDapper _dbContextDapper;
+
   //------------------------------------------------------------------------------
   //
   //                       AuthenticationRepository
@@ -289,6 +290,51 @@ public class AuthenticationRepository : IAuthenticationRepository
     {
       _logger.LogException(ex);
 
+      return Errors.CommonErrors.Exception(ex.Message);
+    }
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       AssignRoleAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<string>> AssignRoleAsync(
+    string email,
+    string roleName)
+  {
+    try
+    {
+      var user = await _userManager.FindByEmailAsync(email);
+      if (user == null)
+      {
+        return Errors.IdentityErrors.UserNotFound(email);
+      }
+
+      var role = await _roleManager.FindByNameAsync(roleName);
+      if (role == null)
+      {
+        return Errors.IdentityErrors.RoleNotFound(roleName);
+      }
+    
+      var result = await _userManager.AddToRoleAsync(user, roleName);
+      if (!result.Succeeded)
+      {
+        _logger.LogIdentityErrors("_userManager.AddToRoleAsync", email, result.Errors.ToFormattedString());
+        foreach (var error in result.Errors)
+        {
+          if (error.Code == "UserAlreadyInRole")
+          {
+            return Errors.IdentityErrors.UserAlreadyInRole(email, roleName);
+          }
+        }
+      }
+
+      return roleName;
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
       return Errors.CommonErrors.Exception(ex.Message);
     }
   }

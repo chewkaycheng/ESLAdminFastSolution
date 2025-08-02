@@ -1,65 +1,68 @@
 ﻿using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging;
-using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Features.Endpoints.Users
+namespace ESLAdmin.Features.Endpoints.Users;
+
+//-------------------------------------------------------------------------------
+//
+//                       class DeleteUserEndpoint
+//
+//-------------------------------------------------------------------------------
+public class DeleteUserEndpoint : Endpoint<
+  DeleteUserRequest,
+  Results<Ok<string>, ProblemDetails, InternalServerError>>
 {
-  public class DeleteUserEndpoint : Endpoint<
-    DeleteUserRequest,
-    Results<Ok<string>, ProblemDetails, InternalServerError>>
+  private readonly IRepositoryManager _repositoryManager;
+  private readonly ILogger<DeleteUserEndpoint> _logger;
+
+  //-------------------------------------------------------------------------------
+  //
+  //                       DeleteUserEndpoint
+  //
+  //-------------------------------------------------------------------------------
+  public DeleteUserEndpoint(
+    IRepositoryManager repositoryManager,
+    ILogger<DeleteUserEndpoint> logger)
   {
-    private readonly IRepositoryManager _repositoryManager;
-    private readonly ILogger<DeleteUserEndpoint> _logger;
+    _repositoryManager = repositoryManager;
+    _logger = logger;
+  }
 
-    //-------------------------------------------------------------------------------
-    //
-    //                       DeleteUserEndpoint
-    //
-    //-------------------------------------------------------------------------------
-    public DeleteUserEndpoint(
-      IRepositoryManager repositoryManager,
-      ILogger<DeleteUserEndpoint> logger)
-    {
-      _repositoryManager = repositoryManager;
-      _logger = logger;
-    }
+  //-------------------------------------------------------------------------------
+  //
+  //                       Configure
+  //
+  //-------------------------------------------------------------------------------
+  public override void Configure()
+  {
+    Delete("/api/users/{email}");
+    AllowAnonymous();
+  }
 
-    //-------------------------------------------------------------------------------
-    //
-    //                       Configure
-    //
-    //-------------------------------------------------------------------------------
-    public override void Configure()
+  //-------------------------------------------------------------------------------
+  //
+  //                       ExecuteAsync
+  //
+  //-------------------------------------------------------------------------------
+  public override async Task<Results<Ok<string>, ProblemDetails, InternalServerError>> ExecuteAsync(
+    DeleteUserRequest request,
+    CancellationToken cancellationToken)
+  {
+    try
     {
-      Delete("/api/users/{email}");
-      AllowAnonymous();
-    }
-
-    //-------------------------------------------------------------------------------
-    //
-    //                       ExecuteAsync
-    //
-    //-------------------------------------------------------------------------------
-    public override async Task<Results<Ok<string>, ProblemDetails, InternalServerError>> ExecuteAsync(
-      DeleteUserRequest request,
-      CancellationToken cancellationToken)
-    {
-      try
+      return await new DeleteUserCommand
       {
-        return await new DeleteUserCommand
-        {
-          Email = request.Email,
-        }.ExecuteAsync();
-      }
-      catch(Exception ex)
-      {
-        _logger.LogException(ex);
-        return TypedResults.InternalServerError();
-      }
+        Email = request.Email,
+      }.ExecuteAsync();
+    }
+    catch(Exception ex)
+    {
+      _logger.LogException(ex);
+      return TypedResults.InternalServerError();
     }
   }
 }
