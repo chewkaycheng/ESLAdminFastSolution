@@ -4,6 +4,7 @@ using ESLAdmin.Common.Exceptions;
 using ESLAdmin.Domain.Dtos;
 using ESLAdmin.Domain.Entities;
 using ESLAdmin.Infrastructure.Data;
+using ESLAdmin.Infrastructure.Data.Interfaces;
 using ESLAdmin.Infrastructure.Repositories;
 using ESLAdmin.Infrastructure.Repositories.Interfaces;
 using ESLAdmin.Logging;
@@ -31,7 +32,7 @@ public class AuthenticationRepository : IAuthenticationRepository
   private readonly SignInManager<User> _signInManager;
   private readonly RoleManager<IdentityRole> _roleManager;
   private readonly UserDbContext _dbContext;
-
+  private readonly IDbContextDapper _dbContextDapper;
   //------------------------------------------------------------------------------
   //
   //                       AuthenticationRepository
@@ -43,7 +44,8 @@ public class AuthenticationRepository : IAuthenticationRepository
     UserManager<User> userManager,
     SignInManager<User> signInManager,
     RoleManager<IdentityRole> roleManager,
-    UserDbContext dbContext)
+    UserDbContext dbContext,
+    IDbContextDapper dbContextDapper)
   {
     _dbContext = dbContext;
     _logger = logger;
@@ -51,6 +53,17 @@ public class AuthenticationRepository : IAuthenticationRepository
     _userManager = userManager;
     _signInManager = signInManager;
     _roleManager = roleManager;
+    _dbContextDapper = dbContextDapper;
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       GetAllUsersAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<IEnumerable<UserDto>>> GetAllUsersAsync()
+  {
+
   }
 
   //------------------------------------------------------------------------------

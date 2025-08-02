@@ -12,6 +12,7 @@ public interface IAuthenticationRepository
     string password,
     ICollection<string>? roles);
 
+  Task<ErrorOr<IEnumerable<UserDto>>> GetAllUsersAsync();
   Task<ErrorOr<UserDto>> GetUserByEmailAsync(
     string email);
 
