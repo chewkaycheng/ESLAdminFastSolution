@@ -17,7 +17,7 @@ public interface IAuthenticationRepository
 
   Task<ErrorOr<UserDto>> LoginAsync(string email, string password);
 
-  Task<IdentityResultEx> DeleteUserByEmailAsync(string email);
+  Task<ErrorOr<string>> DeleteUserByEmailAsync(string email);
 
   Task<ErrorOr<IdentityRole>> CreateRoleAsync(string roleName);
   Task<ErrorOr<string>> UpdateRoleAsync(string oldRoleName, string newRoleName);

@@ -1,7 +1,10 @@
 ﻿using ESLAdmin.Infrastructure.RepositoryManagers;
+using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Features.Endpoints.Users
 {
@@ -10,7 +13,7 @@ namespace ESLAdmin.Features.Endpoints.Users
     Results<Ok<string>, ProblemDetails, InternalServerError>>
   {
     private readonly IRepositoryManager _repositoryManager;
-    private readonly IMessageLogger _messageLogger;
+    private readonly ILogger<DeleteUserEndpoint> _logger;
 
     //-------------------------------------------------------------------------------
     //
@@ -19,10 +22,10 @@ namespace ESLAdmin.Features.Endpoints.Users
     //-------------------------------------------------------------------------------
     public DeleteUserEndpoint(
       IRepositoryManager repositoryManager,
-      IMessageLogger messageLogger)
+      ILogger<DeleteUserEndpoint> logger)
     {
       _repositoryManager = repositoryManager;
-      _messageLogger = messageLogger;
+      _logger = logger;
     }
 
     //-------------------------------------------------------------------------------
@@ -45,10 +48,18 @@ namespace ESLAdmin.Features.Endpoints.Users
       DeleteUserRequest request,
       CancellationToken cancellationToken)
     {
-      return await new DeleteUserCommand
+      try
       {
-        Email = request.Email,
-      }.ExecuteAsync();
+        return await new DeleteUserCommand
+        {
+          Email = request.Email,
+        }.ExecuteAsync();
+      }
+      catch(Exception ex)
+      {
+        _logger.LogException(ex);
+        return TypedResults.InternalServerError();
+      }
     }
   }
 }

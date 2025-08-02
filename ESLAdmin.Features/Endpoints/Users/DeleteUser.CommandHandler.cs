@@ -66,47 +66,26 @@ public class DeleteUserCommandHandler : ICommandHandler<
       var result = await _repositoryManager.AuthenticationRepository.DeleteUserByEmailAsync(
         command.Email);
 
-      if (result.Succeeded)
+      if (result.IsError)
       {
-        _logger.LogFunctionExit($"Id: {result.Id}");
-        return TypedResults.Ok(result.Id);
-      }
-
-      var validationFailures = new List<ValidationFailure>();
-      if (result.Errors.Count() == 1)
-      {
-        if (result.Errors.FirstOrDefault()?.Code == "NotFound")
+        foreach(var error in result.Errors)
         {
+          if (error.Code == "Exception" || error.Code == "User.DeleteFailed")
+          {
+            return TypedResults.InternalServerError();
+          }
+
+          var validationFailures = new List<ValidationFailure>();
           validationFailures.AddRange(new ValidationFailure
           {
-            PropertyName = "NotFound",
-            ErrorMessage = $"The user with email: '{command.Email}' is not found."
+            PropertyName = error.Code,
+            ErrorMessage = error.Description
           });
-          return new ProblemDetails(
-            validationFailures,
-            StatusCodes.Status404NotFound);
-        }
-        else if (result.Errors.FirstOrDefault()?.Code == "Exception")
-        {
-          return TypedResults.InternalServerError();
+          return new ProblemDetails(validationFailures, StatusCodes.Status404NotFound);
         }
       }
 
-      if (result.ErrorType == IdentityErrorTypes.DeleteUserError)
-      {
-        validationFailures.AddRange(new ValidationFailure
-        {
-          PropertyName = "DeleteUserError",
-          ErrorMessage = "An error occurred while deleting user"
-        });
-        return new ProblemDetails(
-          validationFailures, StatusCodes.Status400BadRequest);
-      }
-      else
-      {
-        // Remove roles error
-        return TypedResults.InternalServerError();
-      }
+      return TypedResults.Ok(command.Email);
     }
     catch (Exception ex)
     {
