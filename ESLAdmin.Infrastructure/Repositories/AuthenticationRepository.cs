@@ -138,7 +138,7 @@ public class AuthenticationRepository : IAuthenticationRepository
   //                       GetUserByEmailAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<(User user, ICollection<string>? roles)?> GetUserByEmailAsync(
+  public async Task<ErrorOr<UserDto>> GetUserByEmailAsync(
     string email)
   {
     try
@@ -147,28 +147,17 @@ public class AuthenticationRepository : IAuthenticationRepository
 
       if (user == null)
       {
-        return null;
+        return Errors.IdentityErrors.UserNotFound(email);
       }
 
       var roles = await _userManager.GetRolesAsync(user);
-      if (roles == null)
-      {
-        return (user, null);
-      }
-      else
-      {
-        return (user, roles);
-      }
+      return MapToDto(user, roles);
     }
     catch (Exception ex)
     {
-      _messageLogger.LogDatabaseException(
-        nameof(GetUserByEmailAsync),
-        ex);
+      _logger.LogException(ex);
 
-      throw new DatabaseException(
-        nameof(GetUserByEmailAsync),
-        ex);
+      return Errors.CommonErrors.Exception(ex.Message);
     }
   }
 
@@ -177,7 +166,7 @@ public class AuthenticationRepository : IAuthenticationRepository
   //                       LoginAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<ErrorOr<UserLoginDto>> LoginAsync(string email, string password)
+  public async Task<ErrorOr<UserDto>> LoginAsync(string email, string password)
   {
     try
     {
@@ -194,17 +183,7 @@ public class AuthenticationRepository : IAuthenticationRepository
       }
 
       var roles = await _userManager.GetRolesAsync(user);
-      UserLoginDto userLoginDto = new UserLoginDto
-      {
-        Id = user.Id,
-        FirstName = user.FirstName,
-        LastName = user.LastName,
-        UserName = user.UserName,
-        Email = user.Email,
-        PhoneNumber = user.PhoneNumber,
-        Roles = roles == null ? null : roles
-      };
-      return userLoginDto;
+      return MapToDto(user, roles);
     }
     catch (Exception ex)
     {
@@ -435,4 +414,20 @@ public class AuthenticationRepository : IAuthenticationRepository
       _logger.LogIdentityErrors(identityFunction, id, sb.ToString());
     }
   }
+
+  private UserDto MapToDto(User user, IList<string> roles)
+  {
+    UserDto userDto = new UserDto
+    {
+      Id = user.Id,
+      FirstName = user.FirstName,
+      LastName = user.LastName,
+      UserName = user.UserName,
+      Email = user.Email,
+      PhoneNumber = user.PhoneNumber,
+      Roles = roles
+    };
+    return userDto;
+  }
 }
+

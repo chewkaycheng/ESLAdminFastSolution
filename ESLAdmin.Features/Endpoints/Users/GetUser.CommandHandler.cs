@@ -55,35 +55,31 @@ public class GetUserCommandHandler : ICommandHandler<
       var result = await _repositoryManager.AuthenticationRepository.GetUserByEmailAsync(
         command.Email);
 
-      switch (result)
+      if (result.IsError)
       {
-        case null:
-          _logger.LogNotFound("user", $"email: {command.Email}");
+        foreach (var error in result.Errors)
+        {
+          if (error.Code == "Exception")
+          {
+            return TypedResults.InternalServerError();
+          }
 
           var validationFailures = new List<ValidationFailure>();
           validationFailures.AddRange(new ValidationFailure
           {
-            PropertyName = "NotFound",
-            ErrorMessage = $"The user with email: {command.Email} is not found."
+            PropertyName = error.Code,
+            ErrorMessage = error.Description
           });
-          return new ProblemDetails(
-            validationFailures,
-            StatusCodes.Status404NotFound);
-        default:
-          var (user, roles) = result.Value;
-          var userResponse = command.Mapper.ToResponse(user, roles?.ToList());
-
-          DebugLogFunctionExit(user, roles);
-
-          return TypedResults.Ok(userResponse);
+          return new ProblemDetails(validationFailures, StatusCodes.Status404NotFound);
+        }
       }
+
+      var response = command.Mapper.DtoToResponse(result.Value);
+      return TypedResults.Ok(response);
     }
     catch (Exception ex)
     {
       _logger.LogException(ex);
-      //_messageLogger.LogControllerException(
-      //  nameof(ExecuteAsync),
-      //  ex);
 
       return TypedResults.InternalServerError();
     }

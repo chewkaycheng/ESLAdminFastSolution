@@ -12,10 +12,10 @@ public interface IAuthenticationRepository
     string password,
     ICollection<string>? roles);
 
-  Task<(User user, ICollection<string>? roles)?> GetUserByEmailAsync(
+  Task<ErrorOr<UserDto>> GetUserByEmailAsync(
     string email);
 
-  Task<ErrorOr<UserLoginDto>> LoginAsync(string email, string password);
+  Task<ErrorOr<UserDto>> LoginAsync(string email, string password);
 
   Task<IdentityResultEx> DeleteUserByEmailAsync(string email);
 

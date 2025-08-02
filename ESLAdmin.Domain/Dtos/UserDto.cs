@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ESLAdmin.Domain.Dtos
 {
-  public class UserLoginDto 
+  public class UserDto 
   {
     public required string Id { get; init; }
     public string? FirstName { get; init; }

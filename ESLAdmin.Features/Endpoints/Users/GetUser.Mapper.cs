@@ -1,4 +1,5 @@
-﻿using ESLAdmin.Domain.Entities;
+﻿using ESLAdmin.Domain.Dtos;
+using ESLAdmin.Domain.Entities;
 using FastEndpoints;
 
 namespace ESLAdmin.Features.Endpoints.Users;
@@ -26,6 +27,26 @@ public class GetUserMapper : Mapper<GetUserRequest, GetUserResponse, User>
       Email = user.Email,
       PhoneNumber = user.PhoneNumber,
       Roles = roles
+    };
+    return response;
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                          DtoToResponse
+  //
+  //-------------------------------------------------------------------------------
+  public GetUserResponse DtoToResponse(UserDto userDto)
+  {
+    GetUserResponse response = new GetUserResponse()
+    {
+      Id = userDto.Id,
+      FirstName = userDto.FirstName,
+      LastName = userDto.LastName,
+      UserName = userDto.UserName,
+      Email = userDto.Email,
+      PhoneNumber = userDto.PhoneNumber,
+      Roles = userDto.Roles
     };
     return response;
   }

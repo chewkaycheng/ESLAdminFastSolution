@@ -1,7 +1,9 @@
 ﻿using ESLAdmin.Infrastructure.RepositoryManagers;
-using ESLAdmin.Logging.Interface;
+using ESLAdmin.Logging;
 using FastEndpoints;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Features.Endpoints.Users;
 
@@ -18,7 +20,7 @@ public class GetUserEndpoint : Endpoint<
   GetUserMapper>
 {
   private readonly IRepositoryManager _repositoryManager;
-  private readonly IMessageLogger _messageLogger;
+  private readonly ILogger<GetUserEndpoint> _logger;
 
   //-------------------------------------------------------------------------------
   //
@@ -27,10 +29,10 @@ public class GetUserEndpoint : Endpoint<
   //-------------------------------------------------------------------------------
   public GetUserEndpoint(
     IRepositoryManager repositoryManager,
-    IMessageLogger messageLogger)
+    ILogger<GetUserEndpoint> logger)
   {
     _repositoryManager = repositoryManager;
-    _messageLogger = messageLogger;
+    _logger = logger;
   }
 
   //-------------------------------------------------------------------------------
@@ -53,10 +55,19 @@ public class GetUserEndpoint : Endpoint<
     GetUserRequest request,
     CancellationToken cancellationToken)
   {
-    return await new GetUserCommand
+    try
     {
-      Email = request.Email,
-      Mapper = Map
-    }.ExecuteAsync();
+      return await new GetUserCommand
+      {
+        Email = request.Email,
+        Mapper = Map
+      }.ExecuteAsync();
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+
+      return TypedResults.InternalServerError();
+    }
   }
 }
