@@ -48,7 +48,8 @@ public class RepositoryManager : IRepositoryManager
         userManager,
         signInManager,
         roleManager,
-        dbContext));
+        dbContext,
+        dbContextDapper));
   }
 
   //------------------------------------------------------------------------------

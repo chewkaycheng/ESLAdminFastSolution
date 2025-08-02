@@ -13,14 +13,14 @@ namespace ESLAdmin.Infrastructure.Data.Consts;
 //------------------------------------------------------------------------------
 public static class DbConstsIdentity
 {
-  const string ID = "id";
-  const string FIRSTNAME = "firstname";
-  const string LASTNAME = "lastName";
-  const string USERNAME = "userName";
-  const string EMAIL = "email";
-  const string PHONENUMBER = "phoneNumber";
+  public const string ID = "id";
+  public const string FIRSTNAME = "firstname";
+  public const string LASTNAME = "lastName";
+  public const string USERNAME = "userName";
+  public const string EMAIL = "email";
+  public const string PHONENUMBER = "phoneNumber";
 
-  const string GETALLUSERS =
+  public const string SQL_GETALL =
     @"select
         ""Id"" AS id,
         ""FirstName"" AS firstname,
@@ -31,15 +31,15 @@ public static class DbConstsIdentity
       from
         ""AspNetUsers""";
 
-  const string GETUSERROLES =
-    @""
-        ur."UserId",
-        ur."RoleId",
-         r."Name"
-      FROM
-        "AspNetUserRoles"  ur
-      JOIN
-        "AspNetRoles" r
-      ON
-        ur."RoleId" = r."Id"
+  public const string SQL_GETUSERROLES =
+    @"select
+        UR.""UserId"",
+        UR.""RoleId"",
+         R.""Name""
+      from
+        ""AspNetUserRoles""  UR
+      join
+        ""AspNetRoles"" R
+      on
+        UR.""RoleId"" = R.""Id""";
 }

@@ -1,20 +1,20 @@
-﻿using ErrorOr;
+﻿using Dapper;
+using ErrorOr;
 using ESLAdmin.Common.Errors;
-using ESLAdmin.Common.Exceptions;
 using ESLAdmin.Domain.Dtos;
 using ESLAdmin.Domain.Entities;
 using ESLAdmin.Infrastructure.Data;
+using ESLAdmin.Infrastructure.Data.Consts;
 using ESLAdmin.Infrastructure.Data.Interfaces;
-using ESLAdmin.Infrastructure.Repositories;
 using ESLAdmin.Infrastructure.Repositories.Interfaces;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Extensions;
 using ESLAdmin.Logging.Interface;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
+using System.Data;
 using System.Text;
 
 namespace ESLAdmin.Features.Users.Repositories;
@@ -63,7 +63,47 @@ public class AuthenticationRepository : IAuthenticationRepository
   //-------------------------------------------------------------------------------
   public async Task<ErrorOr<IEnumerable<UserDto>>> GetAllUsersAsync()
   {
+    try
+    {
+      var sql = DbConstsIdentity.SQL_GETALL;
 
+      using IDbConnection connection = await _dbContextDapper.GetConnectionAsync();
+      var users = await connection.QueryAsync<User>(
+        sql,
+        commandType: CommandType.Text);
+
+      var userRoles = await connection.QueryAsync<UserRole>(
+        DbConstsIdentity.SQL_GETUSERROLES,
+        commandType: CommandType.Text);
+
+      
+      var userDtos = new List<UserDto>();
+      foreach (var user in users)
+      {
+        var userDto = new UserDto
+        {
+          Id = user.Id,
+          FirstName = user.FirstName,
+          LastName = user.LastName,
+          UserName = user.UserName,
+          Email = user.Email,
+          PhoneNumber = user.PhoneNumber,
+          Roles = userRoles == null ? new List<string>() :
+            (IList<string>) userRoles.Where(r => r.UserId == user.Id)
+            .Select(r => r.Name)
+            .ToList()
+        };
+        userDtos.Add(userDto);
+      }
+
+      return userDtos;
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+
+      return Errors.CommonErrors.Exception(ex.Message);
+    }
   }
 
   //------------------------------------------------------------------------------
