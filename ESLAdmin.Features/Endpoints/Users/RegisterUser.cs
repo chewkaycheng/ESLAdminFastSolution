@@ -21,7 +21,6 @@ public class RegisterUserEndpoint : Endpoint<
   RegisterUserMapper>
 {
   private readonly IRepositoryManager _repositoryManager;
-  private readonly IMessageLogger _messageLogger;
   private readonly ILogger<RegisterUserEndpoint> _logger;
 
   //------------------------------------------------------------------------------
@@ -31,12 +30,10 @@ public class RegisterUserEndpoint : Endpoint<
   //-------------------------------------------------------------------------------
   public RegisterUserEndpoint(
     IRepositoryManager repositoryManager,
-    ILogger<RegisterUserEndpoint> logger,
-    IMessageLogger messageLogger)
+    ILogger<RegisterUserEndpoint> logger)
   {
     _repositoryManager = repositoryManager;
     _logger = logger;
-    _messageLogger = messageLogger;
   }
 
   //------------------------------------------------------------------------------

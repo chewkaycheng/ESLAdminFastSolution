@@ -1,5 +1,4 @@
-﻿using ESLAdmin.Infrastructure.Repositories;
-using ESLAdmin.Infrastructure.RepositoryManagers;
+﻿using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
@@ -9,7 +8,6 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Features.Endpoints.Users;
-
 
 //------------------------------------------------------------------------------
 //
@@ -22,7 +20,6 @@ public class DeleteUserCommandHandler : ICommandHandler<
 {
   private readonly IRepositoryManager _repositoryManager;
   private readonly ILogger<GetUserCommandHandler> _logger;
-  private readonly IMessageLogger _messageLogger;
 
   //------------------------------------------------------------------------------
   //
@@ -31,12 +28,10 @@ public class DeleteUserCommandHandler : ICommandHandler<
   //-------------------------------------------------------------------------------
   public DeleteUserCommandHandler(
       IRepositoryManager repositoryManager,
-      ILogger<GetUserCommandHandler> logger,
-      IMessageLogger messageLogger)
+      ILogger<GetUserCommandHandler> logger)
   {
     _repositoryManager = repositoryManager;
     _logger = logger;
-    _messageLogger = messageLogger;
   }
 
   //------------------------------------------------------------------------------
@@ -85,6 +80,7 @@ public class DeleteUserCommandHandler : ICommandHandler<
         }
       }
 
+      _logger.LogFunctionExit($"Email: {command.Email}");
       return TypedResults.Ok(command.Email);
     }
     catch (Exception ex)

@@ -8,21 +8,21 @@ namespace ESLAdmin.Features.Endpoints.Users;
 
 //------------------------------------------------------------------------------
 //
-//                        class AssignRoleEndpoint
+//                        class AddToRoleEndpoint
 //
 //-------------------------------------------------------------------------------
-public class AssignRoleEndpoint : Endpoint<
-  AssignRoleRequest,
+public class AddToRoleEndpoint : Endpoint<
+  AddToRoleRequest,
   Results<NoContent, ProblemDetails, InternalServerError>>
 {
-  private readonly ILogger<AssignRoleEndpoint> _logger;
+  private readonly ILogger<AddToRoleEndpoint> _logger;
 
   //------------------------------------------------------------------------------
   //
-  //                       AssignRoleEndpoint
+  //                       AddToRoleEndpoint
   //
   //-------------------------------------------------------------------------------
-  public AssignRoleEndpoint(ILogger<AssignRoleEndpoint> logger)
+  public AddToRoleEndpoint(ILogger<AddToRoleEndpoint> logger)
   {
     _logger = logger;
   }
@@ -34,7 +34,7 @@ public class AssignRoleEndpoint : Endpoint<
   //-------------------------------------------------------------------------------
   public override void Configure()
   {
-    Post("/users/assign-role");
+    Post("/api/users/add-to-role");
     AllowAnonymous();
   }
 
@@ -44,16 +44,15 @@ public class AssignRoleEndpoint : Endpoint<
   //
   //-------------------------------------------------------------------------------
   public override async Task<Results<NoContent, ProblemDetails, InternalServerError>>
-  ExecuteAsync(AssignRoleRequest request, CancellationToken cancellationToken)
+  ExecuteAsync(AddToRoleRequest request, CancellationToken cancellationToken)
   {
     try
     {
-      var command = new AssignRoleCommand
+      return await new AddToRoleCommand
       {
         Email = request.Email,
         RoleName = request.RoleName
-      };
-      return await command.ExecuteAsync(cancellationToken);
+      }.ExecuteAsync(cancellationToken); 
     }
     catch (Exception ex)
     {

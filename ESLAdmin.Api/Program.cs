@@ -10,7 +10,7 @@ builder.Services.ConfigureCors();
 builder.Services.ConfigureIISIntegration();
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
-builder.Services.ConfigureIdentity();
+builder.Services.ConfigureIdentity(builder.Configuration);
 builder.Services.ConfigureFirebirdDbContexts(builder.Configuration);
 builder.Services.ConfigureRepositoryManager();
 

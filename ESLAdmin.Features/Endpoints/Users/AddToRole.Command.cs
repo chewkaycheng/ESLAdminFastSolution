@@ -1,15 +1,14 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-
 namespace ESLAdmin.Features.Endpoints.Users;
 
 //-------------------------------------------------------------------------------
 //
-//                       class AssignRoleCommand
+//                       class AddToRoleCommand
 //
 //-------------------------------------------------------------------------------
-public class AssignRoleCommand : 
+public class AddToRoleCommand : 
   ICommand<Results<NoContent, ProblemDetails, InternalServerError>>
 {
   public string Email { get; set; } = string.Empty;

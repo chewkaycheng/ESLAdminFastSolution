@@ -1,4 +1,7 @@
-﻿namespace ESLAdmin.Features.Endpoints.Users;
+﻿using FastEndpoints;
+using FluentValidation;
+
+namespace ESLAdmin.Features.Endpoints.Users;
 
 //------------------------------------------------------------------------------
 //
@@ -24,4 +27,18 @@ public class GetUserResponse
   public string? Email { get; init; }
   public string? PhoneNumber { get; init; }
   public ICollection<string>? Roles { get; init; }
+}
+
+//------------------------------------------------------------------------------
+//
+//                        class GetUserValidator
+//
+//-------------------------------------------------------------------------------
+public class GetUserValidator : Validator<GetUserRequest>
+{
+  public GetUserValidator()
+  {
+    RuleFor(x => x.Email)
+            .NotEmpty().WithMessage("Email is required.");
+  }
 }

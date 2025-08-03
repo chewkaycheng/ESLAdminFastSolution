@@ -1,4 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using FastEndpoints;
+using FluentValidation;
+using Microsoft.Extensions.Configuration;
+using System.ComponentModel.DataAnnotations;
 
 namespace ESLAdmin.Features.Endpoints.Users;
 
@@ -29,4 +32,23 @@ public class LoginUserResponse
   public string Token { get; set; } = string.Empty;
   public string UserId { get; set; } = string.Empty;
   public string? Email { get; set; } = string.Empty;
+}
+
+//------------------------------------------------------------------------------
+//
+//                        class LoginUserValidator
+//
+//-------------------------------------------------------------------------------
+public class LoginUserValidator : Validator<LoginUserRequest>
+{
+  public LoginUserValidator(IConfiguration configuration)
+  {
+    var passwordLength = configuration
+      .GetValue<int>("Identity:Password:RequiredLength", 5);
+    RuleFor(x => x.Email)
+            .NotEmpty().WithMessage("Email is required.");
+    RuleFor(x => x.Password)
+      .NotEmpty().WithMessage("Password is required.")
+      .MinimumLength(passwordLength).WithMessage($"Password must be at least {passwordLength} characters long.");
+  }
 }

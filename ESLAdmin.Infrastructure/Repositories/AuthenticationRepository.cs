@@ -296,10 +296,10 @@ public class AuthenticationRepository : IAuthenticationRepository
 
   //------------------------------------------------------------------------------
   //
-  //                       AssignRoleAsync
+  //                       AddToRoleAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<ErrorOr<string>> AssignRoleAsync(
+  public async Task<ErrorOr<string>> AddToRoleAsync(
     string email,
     string roleName)
   {
@@ -338,6 +338,52 @@ public class AuthenticationRepository : IAuthenticationRepository
       return Errors.CommonErrors.Exception(ex.Message);
     }
   }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       RemoveRoleAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<string>> RemoveFromRoleAsync(
+    string email,
+    string roleName)
+  {
+    try
+    {
+      var user = await _userManager.FindByEmailAsync(email);
+      if (user == null)
+      {
+        return Errors.IdentityErrors.UserNotFound(email);
+      }
+
+      var role = await _roleManager.FindByNameAsync(roleName);
+      if (role == null)
+      {
+        return Errors.IdentityErrors.RoleNotFound(roleName);
+      }
+
+      var result = await _userManager.RemoveFromRoleAsync(user, roleName);
+      if (!result.Succeeded)
+      {
+        _logger.LogIdentityErrors("_userManager.AddToRoleAsync", email, result.Errors.ToFormattedString());
+        foreach (var error in result.Errors)
+        {
+          if (error.Code == "UserAlreadyInRole")
+          {
+            return Errors.IdentityErrors.UserAlreadyInRole(email, roleName);
+          }
+        }
+      }
+
+      return roleName;
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return Errors.CommonErrors.Exception(ex.Message);
+    }
+  }
+
 
   //------------------------------------------------------------------------------
   //

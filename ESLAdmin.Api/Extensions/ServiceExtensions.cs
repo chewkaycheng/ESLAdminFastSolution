@@ -45,8 +45,13 @@ public static class ServiceExtensions
   // ConfigureIdentity
   //
   // ==================================================
-  public static void ConfigureIdentity(this IServiceCollection services)
+  public static void ConfigureIdentity(
+    this IServiceCollection services,
+    IConfiguration configuration)
   {
+    var passwordLength = configuration
+      .GetValue<int>("Identity:Password:RequiredLength", 5);
+
     var builder =
       services.AddIdentity<User, IdentityRole>(o =>
       {
@@ -54,7 +59,7 @@ public static class ServiceExtensions
         o.Password.RequireLowercase = false;
         o.Password.RequireUppercase = false;
         o.Password.RequireNonAlphanumeric = false;
-        o.Password.RequiredLength = 10;
+        o.Password.RequiredLength = passwordLength;
         o.User.RequireUniqueEmail = true;
       })
       .AddEntityFrameworkStores<UserDbContext>()
