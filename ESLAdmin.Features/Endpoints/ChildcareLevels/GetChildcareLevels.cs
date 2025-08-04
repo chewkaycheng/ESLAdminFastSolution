@@ -39,7 +39,7 @@ public class GetChildcareLevelsEndpoint :
   public override void Configure()
   {
     Get("/api/childcarelevels/");
-    AllowAnonymous();
+    //AllowAnonymous();
   }
 
   //------------------------------------------------------------------------------
