@@ -77,7 +77,7 @@ public static class ServiceExtensions
   {
     services.AddDbContext<UserDbContext>(opts =>
         opts.UseFirebird(
-          configuration.GetConnectionString("ESLAdminConnection")));
+          configuration.GetConnectionString("ESLAdminConnection"), b=>b.MigrationsAssembly("ESLAdmin.Api")));
 
     services.AddSingleton<IDbContextDapper, DbContextDapper>();
     services.AddScoped(typeof(IRepositoryBase<,>), typeof(RepositoryBase<,>));

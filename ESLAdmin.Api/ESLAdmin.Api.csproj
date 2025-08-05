@@ -9,12 +9,18 @@
   <ItemGroup>
     <PackageReference Include="FastEndpoints.Swagger" Version="6.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.7">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Serilog.Expressions" Version="5.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ESLAdmin.Domain\ESLAdmin.Domain.csproj" />
     <ProjectReference Include="..\ESLAdmin.Features\ESLAdmin.Features.csproj" />
+    <ProjectReference Include="..\ESLAdmin.Infrastructure\ESLAdmin.Infrastructure.csproj" />
     <ProjectReference Include="..\ESLAdmin.Logging\ESLAdmin.Logging.csproj" />
   </ItemGroup>
 

@@ -1,4 +1,5 @@
-﻿using ESLAdmin.Infrastructure.RepositoryManagers;
+﻿using ESLAdmin.Domain.Entities;
+using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
@@ -125,11 +126,29 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
           expires: DateTime.Now.AddHours(1),
           signingCredentials: creds);
 
+      var refreshToken = new RefreshToken
+      {
+        UserId = userLoginDto.Id,
+        Token = Guid.NewGuid().ToString(),
+        IssuedAt = DateTime.UtcNow,
+        ExpiresAt = DateTime.UtcNow.AddDays(7),
+        IsRevoked = false
+      };
+      
+      var refreshResult = await _repositoryManager
+        .AuthenticationRepository
+        .AddRefreshTokenAsync(refreshToken);
+
+      if (refreshResult.IsError)
+        return TypedResults.InternalServerError();
+
       LoginUserResponse response = new LoginUserResponse
       {
         UserId = userLoginDto.Id,
         Email = userLoginDto.Email,
-        Token = new JwtSecurityTokenHandler().WriteToken(token)
+        AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
+        RefreshToken = refreshToken.Token,
+        Expires = token.ValidTo
       };
 
       return TypedResults.Ok(response);

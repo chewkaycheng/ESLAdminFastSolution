@@ -24,6 +24,8 @@ public interface IAuthenticationRepository
   Task<ErrorOr<UserDto>> GetUserByEmailAsync(
     string email);
 
+  Task<ErrorOr<User>> FindByIdAsync(string userId);
+  Task<ErrorOr<User>> FindByUserNameAsync(string username);
   Task<ErrorOr<UserDto>> LoginAsync(string email, string password);
 
   Task<ErrorOr<string>> DeleteUserByEmailAsync(string email);
@@ -33,4 +35,8 @@ public interface IAuthenticationRepository
   Task<ErrorOr<string>> DeleteRoleAsync(string roleName);
   Task<ErrorOr<IdentityRole>> GetRoleAsync(string roleName);
   Task<ErrorOr<IEnumerable<IdentityRole>>> GetAllRolesAsync();
+  Task<ErrorOr<List<string>>> GetRolesAsync(User user);
+  Task<ErrorOr<RefreshToken>> GetRefreshTokenAsync(string token);
+  Task<ErrorOr<bool>> AddRefreshTokenAsync(RefreshToken refreshToken);
+  Task<ErrorOr<bool>> RevokeRefreshTokenAsync(string token);
 }

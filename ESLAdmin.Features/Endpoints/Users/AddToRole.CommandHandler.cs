@@ -69,6 +69,12 @@ public class AddToRoleCommandHandler : ICommandHandler<
           return TypedResults.InternalServerError();
         }
 
+        var statusCode = StatusCodes.Status404NotFound;
+        if (error.Code == "User.UserAlreadyInRole")
+        {
+          statusCode = StatusCodes.Status400BadRequest;
+        }
+
         var validationFailures = new List<ValidationFailure>
         {
           new ValidationFailure
@@ -77,11 +83,8 @@ public class AddToRoleCommandHandler : ICommandHandler<
             ErrorMessage = error.Description
           }
         };
-        if (error.Code == "User.UserAlreadyInRole")
-        {
-          return new ProblemDetails(validationFailures, StatusCodes.Status400BadRequest);
-        }
-        return new ProblemDetails(validationFailures, StatusCodes.Status404NotFound);
+        
+        return new ProblemDetails(validationFailures, statusCode);
       }
     }
 

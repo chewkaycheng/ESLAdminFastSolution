@@ -202,7 +202,7 @@ public class AuthenticationRepository : IAuthenticationRepository
 
       if (user == null)
       {
-        return Errors.IdentityErrors.UserNotFound(email);
+        return Errors.IdentityErrors.UserEmailNotFound(email);
       }
 
       var roles = await _userManager.GetRolesAsync(user);
@@ -212,6 +212,51 @@ public class AuthenticationRepository : IAuthenticationRepository
     {
       _logger.LogException(ex);
 
+      return Errors.CommonErrors.Exception(ex.Message);
+    }
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       FindByIdAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<User>> FindByIdAsync(string userId)
+  {
+    try
+    {
+      var user = await _userManager.FindByIdAsync(userId);
+      if (user == null)
+      {
+        return Errors.IdentityErrors.UserIdNotFound(userId);
+      }
+      return user;
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return Errors.CommonErrors.Exception(ex.Message);
+    }
+  }
+  //------------------------------------------------------------------------------
+  //
+  //                       FindByUserNameAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<User>> FindByUserNameAsync(string username)
+  {
+    try
+    {
+      var user = await _userManager.FindByNameAsync(username);
+      if (user == null)
+      {
+        return Errors.IdentityErrors.UserNameNotFound(username);
+      }
+      return user;
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
       return Errors.CommonErrors.Exception(ex.Message);
     }
   }
@@ -260,7 +305,7 @@ public class AuthenticationRepository : IAuthenticationRepository
       var user = await _userManager.FindByEmailAsync(email);
       if (user == null)
       {
-        return Errors.IdentityErrors.UserNotFound(email);
+        return Errors.IdentityErrors.UserEmailNotFound(email);
       }
 
       // Optional: Check and remove roles explicity (usually not needed due to cascade delete)
@@ -296,6 +341,26 @@ public class AuthenticationRepository : IAuthenticationRepository
 
   //------------------------------------------------------------------------------
   //
+  //                       GetRoleAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<List<string>>> GetRolesAsync(User user)
+  {
+    try
+    {
+      IList<string> roles = await _userManager.GetRolesAsync(user);
+      return roles.ToList();
+     
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return Errors.CommonErrors.Exception(ex.Message);
+    }
+  }
+
+  //------------------------------------------------------------------------------
+  //
   //                       AddToRoleAsync
   //
   //-------------------------------------------------------------------------------
@@ -308,7 +373,7 @@ public class AuthenticationRepository : IAuthenticationRepository
       var user = await _userManager.FindByEmailAsync(email);
       if (user == null)
       {
-        return Errors.IdentityErrors.UserNotFound(email);
+        return Errors.IdentityErrors.UserEmailNotFound(email);
       }
 
       var role = await _roleManager.FindByNameAsync(roleName);
@@ -353,7 +418,7 @@ public class AuthenticationRepository : IAuthenticationRepository
       var user = await _userManager.FindByEmailAsync(email);
       if (user == null)
       {
-        return Errors.IdentityErrors.UserNotFound(email);
+        return Errors.IdentityErrors.UserEmailNotFound(email);
       }
 
       var role = await _roleManager.FindByNameAsync(roleName);
@@ -383,7 +448,6 @@ public class AuthenticationRepository : IAuthenticationRepository
       return Errors.CommonErrors.Exception(ex.Message);
     }
   }
-
 
   //------------------------------------------------------------------------------
   //
@@ -554,6 +618,11 @@ public class AuthenticationRepository : IAuthenticationRepository
     }
   }
 
+  //------------------------------------------------------------------------------
+  //
+  //                       MapToDto
+  //
+  //-------------------------------------------------------------------------------
   private UserDto MapToDto(User user, IList<string> roles)
   {
     UserDto userDto = new UserDto
@@ -567,6 +636,85 @@ public class AuthenticationRepository : IAuthenticationRepository
       Roles = roles
     };
     return userDto;
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       GetRefreshTokenAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<RefreshToken>> GetRefreshTokenAsync(string token)
+  {
+    try
+    {
+      var refreshToken =  await _dbContext.RefreshTokens
+        .FirstOrDefaultAsync(
+          rt => rt.Token == token &&
+          !rt.IsRevoked &&
+          rt.ExpiresAt > DateTime.UtcNow);
+      if (refreshToken == null)
+      {
+        return Errors.IdentityErrors.RefreshTokenNotFound(token);
+      }
+      return refreshToken;
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return Errors.CommonErrors.Exception(ex.Message);
+    }
+  }
+
+
+  //------------------------------------------------------------------------------
+  //
+  //                       AddRefreshTokenAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<bool>> AddRefreshTokenAsync(RefreshToken refreshToken)
+  {
+    try
+    {
+      await _dbContext.RefreshTokens.AddAsync(refreshToken);
+      await _dbContext.SaveChangesAsync();
+      return true;
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return Errors.CommonErrors.Exception(ex.Message);
+    }
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       RevokeRefreshTokenAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<bool>> RevokeRefreshTokenAsync(string token)
+  {
+    try
+    {
+      var refreshToken = await _dbContext
+                                 .RefreshTokens
+                                 .FirstOrDefaultAsync(
+                                   rt => rt.Token == token);
+      if (refreshToken != null)
+      {
+        refreshToken.IsRevoked = true;
+        await _dbContext.SaveChangesAsync();
+      }
+      else
+      {
+        return Errors.IdentityErrors.RefreshTokenNotFound(token);
+      }
+      return true;
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return Errors.CommonErrors.Exception(ex.Message);
+    }
   }
 }
 

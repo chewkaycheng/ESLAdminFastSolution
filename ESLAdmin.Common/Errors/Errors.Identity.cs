@@ -17,6 +17,11 @@ public static partial class Errors
   //-------------------------------------------------------------------------------
   public static class IdentityErrors
   {
+    public static Error RefreshTokenNotFound(string token) =>
+      Error.Validation(
+        code: "User.RefreshTokenNotFound",
+        description: $"The refresh token: '{token}' is not found.");
+
     //-------------------------------------------------------------------------------
     //
     //                       InvalidRoles
@@ -30,13 +35,33 @@ public static partial class Errors
 
     //-------------------------------------------------------------------------------
     //
-    //                       UserNotFound
+    //                       UserEmailNotFound
     //
     //-------------------------------------------------------------------------------
-    public static Error UserNotFound(string email) =>
+    public static Error UserEmailNotFound(string email) =>
       Error.Validation(
         code: "User.NotFound",
         description: $"The user with email: '{email}' is not found.");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       UserIdNotFound
+    //
+    //-------------------------------------------------------------------------------
+    public static Error UserIdNotFound(string userId) =>
+      Error.Validation(
+        code: "User.NotFound",
+        description: $"The user with Id: '{userId}' is not found.");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       UserNameNotFound
+    //
+    //-------------------------------------------------------------------------------
+    public static Error UserNameNotFound(string username) =>
+      Error.Validation(
+        code: "User.NotFound",
+        description: $"The user with Username: '{username}' is not found.");
 
     //-------------------------------------------------------------------------------
     //
