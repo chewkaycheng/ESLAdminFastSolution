@@ -13,8 +13,8 @@ namespace ESLAdmin.Features.Endpoints.Users;
 //                        class GetUsers
 //
 //------------------------------------------------------------------------------
-public class GetUsersEndpoint : 
-  EndpointWithoutRequest<Results<Ok<IEnumerable<GetUserResponse>>, 
+public class GetUsersEndpoint :
+  EndpointWithoutRequest<Results<Ok<IEnumerable<GetUserResponse>>,
     ProblemDetails, InternalServerError>, GetUserMapper>
 {
   private readonly ILogger<GetUsersEndpoint> _logger;
@@ -46,18 +46,10 @@ public class GetUsersEndpoint :
   //------------------------------------------------------------------------------
   public override async Task<Results<Ok<IEnumerable<GetUserResponse>>, ProblemDetails, InternalServerError>> ExecuteAsync(CancellationToken ct)
   {
-    try
+    var command = new GetUsersCommand
     {
-      var command = new GetUsersCommand
-      {
-        Mapper = new GetUserMapper()
-      };
-      return await command.ExecuteAsync(ct);  
-    }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-      return TypedResults.InternalServerError();
-    }
+      Mapper = new GetUserMapper()
+    };
+    return await command.ExecuteAsync(ct);
   }
 }

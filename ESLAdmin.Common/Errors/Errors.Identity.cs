@@ -17,6 +17,11 @@ public static partial class Errors
   //-------------------------------------------------------------------------------
   public static class IdentityErrors
   {
+    //-------------------------------------------------------------------------------
+    //
+    //                       RefreshTokenNotFound
+    //
+    //-------------------------------------------------------------------------------
     public static Error RefreshTokenNotFound(string token) =>
       Error.Validation(
         code: "User.RefreshTokenNotFound",
@@ -27,11 +32,21 @@ public static partial class Errors
     //                       InvalidRoles
     //
     //-------------------------------------------------------------------------------
-    public static Error InvalidRoles(List<string> invalidRoles) =>
+    public static Error InvalidRoles(List<string?> invalidRoles) =>
       Error.Validation(
         code: "User.InvalidRoles",
         description: $"The following roles do not exist: {string.Join(", ", invalidRoles)}");
 
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       UserEmailCannotBeEmpty
+    //
+    //-------------------------------------------------------------------------------
+    public static Error UserEmailCannotBeEmpty() =>
+      Error.Validation(
+        code: "User.UserEmailEmpty",
+        description: $"The email for the user cannot be empty.");
 
     //-------------------------------------------------------------------------------
     //

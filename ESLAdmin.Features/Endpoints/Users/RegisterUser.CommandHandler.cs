@@ -62,18 +62,15 @@ public class RegisterUserCommandHandler : ICommandHandler<
               error.Code == "Exception")
             return TypedResults.InternalServerError();
 
-          if (error.Code == "User.InvalidRoles")
+          var validationFailures = new List<ValidationFailure>();
+          validationFailures.AddRange(new ValidationFailure
           {
-            var validationFailures = new List<ValidationFailure>();
-            validationFailures.AddRange(new ValidationFailure
-            {
-              PropertyName = error.Code,
-              ErrorMessage = error.Description
-            });
-            return new ProblemDetails(
-              validationFailures, 
+            PropertyName = error.Code,
+            ErrorMessage = error.Description
+          });
+          return new ProblemDetails(
+              validationFailures,
               StatusCodes.Status400BadRequest);
-          }
         }
       }
 

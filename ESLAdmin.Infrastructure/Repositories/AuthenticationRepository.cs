@@ -62,49 +62,39 @@ public class AuthenticationRepository : IAuthenticationRepository
   //                       GetAllUsersAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<ErrorOr<IEnumerable<UserDto>>> GetAllUsersAsync()
+  public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
   {
-    try
+    var sql = DbConstsIdentity.SQL_GETALL;
+
+    using IDbConnection connection = await _dbContextDapper.GetConnectionAsync();
+    var users = await connection.QueryAsync<User>(
+      sql,
+      commandType: CommandType.Text);
+
+    var userRoles = await connection.QueryAsync<UserRole>(
+      DbConstsIdentity.SQL_GETUSERROLES,
+      commandType: CommandType.Text);
+
+    var userDtos = new List<UserDto>();
+    foreach (var user in users)
     {
-      var sql = DbConstsIdentity.SQL_GETALL;
-
-      using IDbConnection connection = await _dbContextDapper.GetConnectionAsync();
-      var users = await connection.QueryAsync<User>(
-        sql,
-        commandType: CommandType.Text);
-
-      var userRoles = await connection.QueryAsync<UserRole>(
-        DbConstsIdentity.SQL_GETUSERROLES,
-        commandType: CommandType.Text);
-
-      
-      var userDtos = new List<UserDto>();
-      foreach (var user in users)
+      var userDto = new UserDto
       {
-        var userDto = new UserDto
-        {
-          Id = user.Id,
-          FirstName = user.FirstName,
-          LastName = user.LastName,
-          UserName = user.UserName,
-          Email = user.Email,
-          PhoneNumber = user.PhoneNumber,
-          Roles = userRoles == null ? new List<string>() :
-            (IList<string>) userRoles.Where(r => r.UserId == user.Id)
-            .Select(r => r.Name)
-            .ToList()
-        };
-        userDtos.Add(userDto);
-      }
-
-      return userDtos;
+        Id = user.Id,
+        FirstName = user.FirstName,
+        LastName = user.LastName,
+        UserName = user.UserName,
+        Email = user.Email,
+        PhoneNumber = user.PhoneNumber,
+        Roles = userRoles == null ? new List<string>() :
+          (IList<string>)userRoles.Where(r => r.UserId == user.Id)
+          .Select(r => r.Name)
+          .ToList()
+      };
+      userDtos.Add(userDto);
     }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
 
-      return Errors.CommonErrors.Exception(ex.Message);
-    }
+    return userDtos;
   }
 
   //------------------------------------------------------------------------------
@@ -117,27 +107,24 @@ public class AuthenticationRepository : IAuthenticationRepository
     string password,
     ICollection<string>? roles)
   {
+    if (string.IsNullOrEmpty(user.Email))
+    {
+      return Errors.IdentityErrors.UserEmailCannotBeEmpty();
+    }
+
     // Check for any invalid roles before doing transaction
     if (roles != null && roles.Any())
     {
-      var invalidRoles = new List<string>();
-      foreach (var role in roles)
-      {
-        if (!await _roleManager.RoleExistsAsync(role))
-        {
-          invalidRoles.Add(role);
-        }
-      }
+      var allRoles = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
+      var invalidRoles = roles.Except(allRoles).ToList();
 
-      if (invalidRoles.Any())
+      if (invalidRoles != null && invalidRoles.Count() > 0)
         return Errors.IdentityErrors.InvalidRoles(invalidRoles);
     }
 
-    IDbContextTransaction? transaction = null;
+    using var transaction = await _dbContext.Database.BeginTransactionAsync();
     try
-    {
-      transaction = await _dbContext.Database.BeginTransactionAsync();
-
+    { 
       var result = await _userManager.CreateAsync(
         user,
         password);
@@ -173,18 +160,9 @@ public class AuthenticationRepository : IAuthenticationRepository
     }
     catch (Exception ex)
     {
-      if (transaction != null)
-      {
-        await transaction.RollbackAsync();
-      }
-
+      await transaction.RollbackAsync();
       _logger.LogException(ex);
-
       return Errors.CommonErrors.Exception(ex.Message);
-    }
-    finally
-    {
-      transaction?.Dispose();
     }
   }
 
@@ -325,7 +303,7 @@ public class AuthenticationRepository : IAuthenticationRepository
       if (!result.Succeeded)
       {
         _logger.LogIdentityErrors("_userManager.DeleteAsync", email, result.Errors.ToFormattedString());
-       
+
         return Errors.IdentityErrors.DeleteUserFailed(email, result.Errors);
       }
 
@@ -350,7 +328,7 @@ public class AuthenticationRepository : IAuthenticationRepository
     {
       IList<string> roles = await _userManager.GetRolesAsync(user);
       return roles.ToList();
-     
+
     }
     catch (Exception ex)
     {
@@ -381,7 +359,7 @@ public class AuthenticationRepository : IAuthenticationRepository
       {
         return Errors.IdentityErrors.RoleNotFound(roleName);
       }
-    
+
       var result = await _userManager.AddToRoleAsync(user, roleName);
       if (!result.Succeeded)
       {
@@ -647,7 +625,7 @@ public class AuthenticationRepository : IAuthenticationRepository
   {
     try
     {
-      var refreshToken =  await _dbContext.RefreshTokens
+      var refreshToken = await _dbContext.RefreshTokens
         .FirstOrDefaultAsync(
           rt => rt.Token == token &&
           !rt.IsRevoked &&

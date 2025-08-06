@@ -45,17 +45,8 @@ public class GetUsersCommandHandler :
   {
     try
     {
-      var result = await _repositoryManager.AuthenticationRepository.GetAllUsersAsync();
+      var userDtos = await _repositoryManager.AuthenticationRepository.GetAllUsersAsync();
 
-      if (result.IsError)
-      {
-        foreach (var error in result.Errors)
-        {
-          return TypedResults.InternalServerError();
-        }
-      }
-
-      var userDtos = result.Value;
       IEnumerable<GetUserResponse> usersResponse =
        userDtos.Select(
          userDto => command.Mapper.DtoToResponse(

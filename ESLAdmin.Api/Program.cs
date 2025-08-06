@@ -1,8 +1,11 @@
 global using FastEndpoints;
 using ESLAdmin.Api.Extensions;
 using ESLAdmin.Features.Extensions;
+using ESLAdmin.Logging;
 using ESLAdmin.Logging.Extensions;
 using FastEndpoints.Swagger;
+using FluentValidation.Results;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -63,6 +66,37 @@ var app = builder.Build();
 //app.UseHttpsRedirection();
 
 app.UseFastEndpoints();
+
+app.UseExceptionHandler(errorApp =>
+{
+  errorApp.Run(async context =>
+  {
+    var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+    if (exception != null)
+    {
+      var logger = context
+        .RequestServices
+        .GetRequiredService<ILogger<Program>>();
+      logger.LogException(exception);
+      context.Response.StatusCode = 
+        StatusCodes.Status500InternalServerError;
+
+      var validationFailures = new List<ValidationFailure>
+      {
+        new ValidationFailure
+        {
+          PropertyName = "Internal Server Error",
+          ErrorMessage = "An unexpected error occurred. Please try again later."
+        }
+      };
+      var problemDetails = new ProblemDetails(
+        validationFailures, 
+        StatusCodes.Status500InternalServerError);
+      await context.Response.WriteAsJsonAsync(problemDetails);
+    }
+  });
+});
+
 if (app.Environment.IsDevelopment())
 {
   app.UseSwagger();
