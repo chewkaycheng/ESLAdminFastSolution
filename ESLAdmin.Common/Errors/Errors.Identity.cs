@@ -29,6 +29,24 @@ public static partial class Errors
 
     //-------------------------------------------------------------------------------
     //
+    //                       AddToRoleFailed
+    //
+    //-------------------------------------------------------------------------------
+    public static Error AddToRoleFailed(string email, string roleName, IEnumerable<IdentityError>? errors = null)
+    {
+      var error = Error.Failure(
+        code: "User.AddToRoleFailed",
+        description: $"AddToRole failed for user: '{email}', role: '{roleName}'.");
+
+      if (errors != null && errors.Any())
+      {
+        AddMetadata(error.Metadata, errors);
+      }
+      return error;
+    }
+
+    //-------------------------------------------------------------------------------
+    //
     //                       InvalidRoles
     //
     //-------------------------------------------------------------------------------

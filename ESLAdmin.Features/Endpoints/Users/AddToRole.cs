@@ -1,6 +1,4 @@
-﻿using ESLAdmin.Logging;
-using FastEndpoints;
-using Microsoft.AspNetCore.Http;
+﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
@@ -46,18 +44,10 @@ public class AddToRoleEndpoint : Endpoint<
   public override async Task<Results<NoContent, ProblemDetails, InternalServerError>>
   ExecuteAsync(AddToRoleRequest request, CancellationToken cancellationToken)
   {
-    try
+    return await new AddToRoleCommand
     {
-      return await new AddToRoleCommand
-      {
-        Email = request.Email,
-        RoleName = request.RoleName
-      }.ExecuteAsync(cancellationToken); 
-    }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-      return TypedResults.InternalServerError();
-    }
+      Email = request.Email,
+      RoleName = request.RoleName
+    }.ExecuteAsync(cancellationToken);
   }
 }

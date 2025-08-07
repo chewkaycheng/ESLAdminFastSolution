@@ -1,4 +1,5 @@
-﻿using ESLAdmin.Infrastructure.RepositoryManagers;
+﻿using ESLAdmin.Common.Errors;
+using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging;
 using FastEndpoints;
 using FluentValidation.Results;
@@ -44,52 +45,43 @@ public class AddToRoleCommandHandler : ICommandHandler<
       AddToRoleCommand command,
       CancellationToken cancellationToken)
   {
-    _logger.LogFunctionEntry($"Email: {command.Email}, RoleName: {command.RoleName}");
-    if (string.IsNullOrEmpty(command.Email) || string.IsNullOrEmpty(command.RoleName))
+    try
     {
-      var validationFailures = new List<ValidationFailure>
+      _logger.LogFunctionEntry($"Email: {command.Email}, RoleName: {command.RoleName}");
+
+      var result = await _repositoryManager.AuthenticationRepository.AddToRoleAsync(
+        command.Email,
+        command.RoleName);
+
+      if (result.IsError)
       {
-        new ValidationFailure("Email", "Email cannot be null or empty."),
-        new ValidationFailure("RoleName", "RoleName cannot be null or empty.")
-      };
-      return new ProblemDetails(validationFailures, StatusCodes.Status400BadRequest);
-    }
-
-    var result = await _repositoryManager.AuthenticationRepository.AddToRoleAsync(
-      command.Email,
-      command.RoleName);
-      
-    if (result.IsError)
-    {
-      foreach (var error in result.Errors)
-      {
-        if (error.Code == "Exception")
-
+        var error = result.Errors.First();
+        var statusCode = StatusCodes.Status500InternalServerError;
+        switch (error.Code)
         {
-          return TypedResults.InternalServerError();
+          case "User.UserNotFound":
+          case "Role.NotFound":
+            statusCode = StatusCodes.Status404NotFound;
+            break;
+          case "User.UserAlreadyInRole":
+            statusCode = StatusCodes.Status400BadRequest;
+            break;
+          default:
+            return TypedResults.InternalServerError();
         }
-
-        var statusCode = StatusCodes.Status404NotFound;
-        if (error.Code == "User.UserAlreadyInRole")
-        {
-          statusCode = StatusCodes.Status400BadRequest;
-        }
-
-        var validationFailures = new List<ValidationFailure>
-        {
-          new ValidationFailure
-          {
-            PropertyName = error.Code,
-            ErrorMessage = error.Description
-          }
-        };
-        
-        return new ProblemDetails(validationFailures, statusCode);
+        return new ProblemDetails(
+          ErrorUtils.CreateFailureList(
+            error.Code,
+            error.Description), statusCode);
       }
+      _logger.LogFunctionExit($"Email: {command.Email}, RoleName: {command.RoleName}");
+      return TypedResults.NoContent();
     }
-
-    _logger.LogFunctionExit($"Email: {command.Email}, RoleName: {command.RoleName}");
-    return TypedResults.NoContent();
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return TypedResults.InternalServerError();
+    }
   }
 }
 

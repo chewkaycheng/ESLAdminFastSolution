@@ -7,13 +7,14 @@ namespace ESLAdmin.Infrastructure.Repositories.Interfaces;
 
 public interface IAuthenticationRepository
 {
+  Task<ErrorOr<string>> AddToRoleAsync(
+  string email,
+  string roleName);
+
   Task<ErrorOr<string>> RemoveFromRoleAsync(
   string email,
   string roleName);
 
-  Task<ErrorOr<string>> AddToRoleAsync(
-    string email,
-    string roleName);
 
   Task<ErrorOr<User>> RegisterUserAsync(
     User user,

@@ -59,6 +59,51 @@ public class AuthenticationRepository : IAuthenticationRepository
 
   //------------------------------------------------------------------------------
   //
+  //                       AddToRoleAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<string>> AddToRoleAsync(
+    string email,
+    string roleName)
+  {
+    var user = await _userManager.FindByEmailAsync(email);
+    if (user == null)
+    {
+      return Errors.IdentityErrors.UserEmailNotFound(email);
+    }
+
+    var role = await _roleManager.FindByNameAsync(roleName);
+    if (role == null)
+    {
+      return Errors.IdentityErrors.RoleNotFound(roleName);
+    }
+
+    var result = await _userManager.AddToRoleAsync(user, roleName);
+    if (!result.Succeeded)
+    {
+      _logger.LogIdentityErrors("_userManager.AddToRoleAsync", email, result.Errors.ToFormattedString());
+      if (result.Errors.Count() == 1)
+      {
+        var error = result.Errors.First();
+        if (error.Code == "UserAlreadyInRole")
+        {
+          return Errors.IdentityErrors.UserAlreadyInRole(email, roleName);
+        }
+        return Errors.IdentityErrors.AddToRoleFailed(
+          email,
+          roleName);
+      }
+      return Errors.IdentityErrors.AddToRoleFailed(
+        email,
+        roleName,
+        result.Errors);
+    }
+
+    return roleName;
+  }
+
+  //------------------------------------------------------------------------------
+  //
   //                       GetAllUsersAsync
   //
   //-------------------------------------------------------------------------------
@@ -124,7 +169,7 @@ public class AuthenticationRepository : IAuthenticationRepository
 
     using var transaction = await _dbContext.Database.BeginTransactionAsync();
     try
-    { 
+    {
       var result = await _userManager.CreateAsync(
         user,
         password);
@@ -329,51 +374,6 @@ public class AuthenticationRepository : IAuthenticationRepository
       IList<string> roles = await _userManager.GetRolesAsync(user);
       return roles.ToList();
 
-    }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-      return Errors.CommonErrors.Exception(ex.Message);
-    }
-  }
-
-  //------------------------------------------------------------------------------
-  //
-  //                       AddToRoleAsync
-  //
-  //-------------------------------------------------------------------------------
-  public async Task<ErrorOr<string>> AddToRoleAsync(
-    string email,
-    string roleName)
-  {
-    try
-    {
-      var user = await _userManager.FindByEmailAsync(email);
-      if (user == null)
-      {
-        return Errors.IdentityErrors.UserEmailNotFound(email);
-      }
-
-      var role = await _roleManager.FindByNameAsync(roleName);
-      if (role == null)
-      {
-        return Errors.IdentityErrors.RoleNotFound(roleName);
-      }
-
-      var result = await _userManager.AddToRoleAsync(user, roleName);
-      if (!result.Succeeded)
-      {
-        _logger.LogIdentityErrors("_userManager.AddToRoleAsync", email, result.Errors.ToFormattedString());
-        foreach (var error in result.Errors)
-        {
-          if (error.Code == "UserAlreadyInRole")
-          {
-            return Errors.IdentityErrors.UserAlreadyInRole(email, roleName);
-          }
-        }
-      }
-
-      return roleName;
     }
     catch (Exception ex)
     {
