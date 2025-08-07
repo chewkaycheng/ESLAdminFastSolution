@@ -10,6 +10,7 @@ public interface IAuthenticationRepository
   Task<ErrorOr<string>> AddToRoleAsync(
   string email,
   string roleName);
+  Task<ErrorOr<string>> DeleteUserByEmailAsync(string email);
 
   Task<ErrorOr<string>> RemoveFromRoleAsync(
   string email,
@@ -29,7 +30,6 @@ public interface IAuthenticationRepository
   Task<ErrorOr<User>> FindByUserNameAsync(string username);
   Task<ErrorOr<UserDto>> LoginAsync(string email, string password);
 
-  Task<ErrorOr<string>> DeleteUserByEmailAsync(string email);
 
   Task<ErrorOr<IdentityRole>> CreateRoleAsync(string roleName);
   Task<ErrorOr<string>> UpdateRoleAsync(string oldRoleName, string newRoleName);

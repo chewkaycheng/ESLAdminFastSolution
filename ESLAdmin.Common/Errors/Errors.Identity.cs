@@ -160,7 +160,7 @@ public static partial class Errors
     {
       var error = Error.Failure(
         code: "User.DeleteFailed",
-        description: $"Failed to delete user {email}.");
+        description: $"Failed to delete user: '{email}'.");
 
       AddMetadata(error.Metadata, errors);
       return error;

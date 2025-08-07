@@ -55,19 +55,10 @@ public class GetUserEndpoint : Endpoint<
     GetUserRequest request,
     CancellationToken cancellationToken)
   {
-    try
+    return await new GetUserCommand
     {
-      return await new GetUserCommand
-      {
-        Email = request.Email,
-        Mapper = Map
-      }.ExecuteAsync();
-    }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-
-      return TypedResults.InternalServerError();
-    }
+      Email = request.Email,
+      Mapper = Map
+    }.ExecuteAsync();
   }
 }

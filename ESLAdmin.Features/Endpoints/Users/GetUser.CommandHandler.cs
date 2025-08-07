@@ -1,4 +1,6 @@
-﻿using ESLAdmin.Domain.Entities;
+﻿using ESLAdmin.Common.Errors;
+using ESLAdmin.Domain.Dtos;
+using ESLAdmin.Domain.Entities;
 using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
@@ -57,40 +59,32 @@ public class GetUserCommandHandler : ICommandHandler<
 
       if (result.IsError)
       {
-        foreach (var error in result.Errors)
-        {
-          if (error.Code == "Exception")
-          {
-            return TypedResults.InternalServerError();
-          }
-
-          var validationFailures = new List<ValidationFailure>();
-          validationFailures.AddRange(new ValidationFailure
-          {
-            PropertyName = error.Code,
-            ErrorMessage = error.Description
-          });
-          return new ProblemDetails(validationFailures, StatusCodes.Status404NotFound);
-        }
+        var error = result.Errors.First();
+        return new ProblemDetails(
+          ErrorUtils.CreateFailureList(error.Code, error.Description),
+          StatusCodes.Status404NotFound );
       }
 
+      var userDto = result.Value;
       var response = command.Mapper.DtoToResponse(result.Value);
+
+      DebugLogFunctionExit(userDto);
+
       return TypedResults.Ok(response);
     }
     catch (Exception ex)
     {
       _logger.LogException(ex);
-
       return TypedResults.InternalServerError();
     }
   }
 
-  private void DebugLogFunctionExit(User user, ICollection<string>? roles)
+  private void DebugLogFunctionExit(UserDto userDto)
   {
     if (_logger.IsEnabled(LogLevel.Debug))
     {
-      var roleLog = roles != null ? string.Join(", ", roles) : "None";
-      var context = $"\n=>User: \n    Username: '{user.UserName}', FirstName: '{user.FirstName}', LastName: '{user.LastName}', Email: '{user.Email}'\n    Password: '[Hidden]', PhoneNumber: '{user.PhoneNumber}', Roles: '{roleLog}'";
+      var roleLog = userDto.Roles != null ? string.Join(", ", userDto.Roles) : "None";
+      var context = $"\n=>User: \n    Username: '{userDto.UserName}', FirstName: '{userDto.FirstName}', LastName: '{userDto.LastName}', Email: '{userDto.Email}'\n    Password: '[Hidden]', PhoneNumber: '{userDto.PhoneNumber}', Roles: '{roleLog}'";
       _logger.LogFunctionEntry(context);
     }
   }

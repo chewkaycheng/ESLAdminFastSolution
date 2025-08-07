@@ -46,10 +46,9 @@ public class GetUsersEndpoint :
   //------------------------------------------------------------------------------
   public override async Task<Results<Ok<IEnumerable<GetUserResponse>>, ProblemDetails, InternalServerError>> ExecuteAsync(CancellationToken ct)
   {
-    var command = new GetUsersCommand
+    return await new GetUsersCommand
     {
       Mapper = new GetUserMapper()
-    };
-    return await command.ExecuteAsync(ct);
+    }.ExecuteAsync(ct); 
   }
 }

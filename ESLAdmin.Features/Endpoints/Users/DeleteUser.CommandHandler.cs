@@ -1,8 +1,7 @@
-﻿using ESLAdmin.Infrastructure.RepositoryManagers;
+﻿using ESLAdmin.Common.Errors;
+using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging;
-using ESLAdmin.Logging.Interface;
 using FastEndpoints;
-using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
@@ -45,17 +44,6 @@ public class DeleteUserCommandHandler : ICommandHandler<
       CancellationToken cancellationToken)
   {
     _logger.LogFunctionEntry($"Email: {command.Email}");
-    if (string.IsNullOrEmpty(command.Email))
-    {
-      var validationFailures = new List<ValidationFailure>();
-      validationFailures.AddRange(new ValidationFailure()
-      {
-        PropertyName = "NullOrEmpty",
-        ErrorMessage = "The email cannot be null or empty"
-      });
-      return new ProblemDetails(validationFailures, StatusCodes.Status400BadRequest);
-    }
-
     try
     {
       var result = await _repositoryManager.AuthenticationRepository.DeleteUserByEmailAsync(
@@ -63,21 +51,16 @@ public class DeleteUserCommandHandler : ICommandHandler<
 
       if (result.IsError)
       {
-        foreach(var error in result.Errors)
+        var error = result.Errors.First();
+        if (error.Code == "User.DeleteFailed")
         {
-          if (error.Code == "Exception" || error.Code == "User.DeleteFailed")
-          {
-            return TypedResults.InternalServerError();
-          }
-
-          var validationFailures = new List<ValidationFailure>();
-          validationFailures.AddRange(new ValidationFailure
-          {
-            PropertyName = error.Code,
-            ErrorMessage = error.Description
-          });
-          return new ProblemDetails(validationFailures, StatusCodes.Status404NotFound);
+          return TypedResults.InternalServerError();
         }
+        return new ProblemDetails(
+          ErrorUtils.CreateFailureList(
+            error.Code, 
+            error.Description), 
+          StatusCodes.Status404NotFound);
       }
 
       _logger.LogFunctionExit($"Email: {command.Email}");

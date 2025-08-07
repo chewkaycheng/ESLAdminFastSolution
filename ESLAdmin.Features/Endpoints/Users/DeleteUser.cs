@@ -1,7 +1,5 @@
 ﻿using ESLAdmin.Infrastructure.RepositoryManagers;
-using ESLAdmin.Logging;
 using FastEndpoints;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
@@ -52,17 +50,9 @@ public class DeleteUserEndpoint : Endpoint<
     DeleteUserRequest request,
     CancellationToken cancellationToken)
   {
-    try
+    return await new DeleteUserCommand
     {
-      return await new DeleteUserCommand
-      {
-        Email = request.Email,
-      }.ExecuteAsync();
-    }
-    catch(Exception ex)
-    {
-      _logger.LogException(ex);
-      return TypedResults.InternalServerError();
-    }
+      Email = request.Email,
+    }.ExecuteAsync();
   }
 }

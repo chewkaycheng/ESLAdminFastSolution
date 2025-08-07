@@ -12,7 +12,6 @@ using ESLAdmin.Logging.Extensions;
 using ESLAdmin.Logging.Interface;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Text;
@@ -79,6 +78,7 @@ public class AuthenticationRepository : IAuthenticationRepository
     }
 
     var result = await _userManager.AddToRoleAsync(user, roleName);
+
     if (!result.Succeeded)
     {
       _logger.LogIdentityErrors("_userManager.AddToRoleAsync", email, result.Errors.ToFormattedString());
@@ -100,6 +100,62 @@ public class AuthenticationRepository : IAuthenticationRepository
     }
 
     return roleName;
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       DeleteUserByEmailAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<string>> DeleteUserByEmailAsync(string email)
+  {
+    var user = await _userManager.FindByEmailAsync(email);
+    if (user == null)
+    {
+      return Errors.IdentityErrors.UserEmailNotFound(email);
+    }
+
+    // Optional: Check and remove roles explicity (usually not needed due to cascade delete)
+    //var roles = await _userManager.GetRolesAsync(user);
+    //if (roles.Any())
+    //{
+    //  var removeRolesResult = await _userManager.RemoveFromRolesAsync(user, roles);
+    //  if (!removeRolesResult.Succeeded)
+    //  {
+    //    InfoLogIdentityErrors("GetRolesAsync", email, removeRolesResult.Errors);
+    //    return IdentityResultEx.Failed(IdentityErrorTypes.RemoveFromRolesError, removeRolesResult.Errors.ToArray());
+    //  }
+    //}
+
+    // Delete the user
+    var result = await _userManager.DeleteAsync(user);
+    if (!result.Succeeded)
+    {
+      _logger.LogIdentityErrors("_userManager.DeleteAsync", email, result.Errors.ToFormattedString());
+
+      return Errors.IdentityErrors.DeleteUserFailed(email, result.Errors);
+    }
+
+    return email;
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       GetUserByEmailAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<UserDto>> GetUserByEmailAsync(
+    string email)
+  {
+    var user = await _userManager.FindByEmailAsync(email);
+
+    if (user == null)
+    {
+      return Errors.IdentityErrors.UserEmailNotFound(email);
+    }
+
+    var roles = await _userManager.GetRolesAsync(user);
+    return MapToDto(user, roles);
   }
 
   //------------------------------------------------------------------------------
@@ -213,34 +269,6 @@ public class AuthenticationRepository : IAuthenticationRepository
 
   //------------------------------------------------------------------------------
   //
-  //                       GetUserByEmailAsync
-  //
-  //-------------------------------------------------------------------------------
-  public async Task<ErrorOr<UserDto>> GetUserByEmailAsync(
-    string email)
-  {
-    try
-    {
-      var user = await _userManager.FindByEmailAsync(email);
-
-      if (user == null)
-      {
-        return Errors.IdentityErrors.UserEmailNotFound(email);
-      }
-
-      var roles = await _userManager.GetRolesAsync(user);
-      return MapToDto(user, roles);
-    }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-
-      return Errors.CommonErrors.Exception(ex.Message);
-    }
-  }
-
-  //------------------------------------------------------------------------------
-  //
   //                       FindByIdAsync
   //
   //-------------------------------------------------------------------------------
@@ -307,52 +335,6 @@ public class AuthenticationRepository : IAuthenticationRepository
 
       var roles = await _userManager.GetRolesAsync(user);
       return MapToDto(user, roles);
-    }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-
-      return Errors.CommonErrors.Exception(ex.Message);
-    }
-  }
-
-  //------------------------------------------------------------------------------
-  //
-  //                       DeleteUserAsync
-  //
-  //-------------------------------------------------------------------------------
-  public async Task<ErrorOr<string>> DeleteUserByEmailAsync(string email)
-  {
-    try
-    {
-      var user = await _userManager.FindByEmailAsync(email);
-      if (user == null)
-      {
-        return Errors.IdentityErrors.UserEmailNotFound(email);
-      }
-
-      // Optional: Check and remove roles explicity (usually not needed due to cascade delete)
-      //var roles = await _userManager.GetRolesAsync(user);
-      //if (roles.Any())
-      //{
-      //  var removeRolesResult = await _userManager.RemoveFromRolesAsync(user, roles);
-      //  if (!removeRolesResult.Succeeded)
-      //  {
-      //    InfoLogIdentityErrors("GetRolesAsync", email, removeRolesResult.Errors);
-      //    return IdentityResultEx.Failed(IdentityErrorTypes.RemoveFromRolesError, removeRolesResult.Errors.ToArray());
-      //  }
-      //}
-
-      // Delete the user
-      var result = await _userManager.DeleteAsync(user);
-      if (!result.Succeeded)
-      {
-        _logger.LogIdentityErrors("_userManager.DeleteAsync", email, result.Errors.ToFormattedString());
-
-        return Errors.IdentityErrors.DeleteUserFailed(email, result.Errors);
-      }
-
-      return email;
     }
     catch (Exception ex)
     {
