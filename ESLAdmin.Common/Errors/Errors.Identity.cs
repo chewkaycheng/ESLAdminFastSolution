@@ -260,22 +260,5 @@ public static partial class Errors
       return error;
     }
 
-    //-------------------------------------------------------------------------------
-    //
-    //                       AddMetadata
-    //
-    //-------------------------------------------------------------------------------
-    private static void AddMetadata(
-      Dictionary<string, object>? metadata,
-      IEnumerable<IdentityError> errors)
-    {
-      if (errors != null && errors.Any())
-      {
-        foreach (var err in errors)
-        {
-          metadata?.Add(err.Code, err.Description);
-        }
-      }
-    }
   }
 }

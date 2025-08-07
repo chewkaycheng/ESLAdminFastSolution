@@ -200,6 +200,29 @@ public class AuthenticationRepository : IAuthenticationRepository
 
   //------------------------------------------------------------------------------
   //
+  //                       LoginAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<UserDto>> LoginAsync(string email, string password)
+  {
+    var user = await _userManager.FindByEmailAsync(email);
+    if (user == null)
+    {
+      return Errors.IdentityErrors.UserLoginFailed();
+    }
+
+    var result = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: false);
+    if (!result.Succeeded)
+    {
+      return Errors.IdentityErrors.UserLoginFailed();
+    }
+
+    var roles = await _userManager.GetRolesAsync(user);
+    return MapToDto(user, roles);
+  }
+
+  //------------------------------------------------------------------------------
+  //
   //                       RegisterUser
   //
   //-------------------------------------------------------------------------------
@@ -308,38 +331,6 @@ public class AuthenticationRepository : IAuthenticationRepository
     catch (Exception ex)
     {
       _logger.LogException(ex);
-      return Errors.CommonErrors.Exception(ex.Message);
-    }
-  }
-
-  //------------------------------------------------------------------------------
-  //
-  //                       LoginAsync
-  //
-  //-------------------------------------------------------------------------------
-  public async Task<ErrorOr<UserDto>> LoginAsync(string email, string password)
-  {
-    try
-    {
-      var user = await _userManager.FindByEmailAsync(email);
-      if (user == null)
-      {
-        return Errors.IdentityErrors.UserLoginFailed();
-      }
-
-      var result = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: false);
-      if (!result.Succeeded)
-      {
-        return Errors.IdentityErrors.UserLoginFailed();
-      }
-
-      var roles = await _userManager.GetRolesAsync(user);
-      return MapToDto(user, roles);
-    }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-
       return Errors.CommonErrors.Exception(ex.Message);
     }
   }
@@ -593,7 +584,8 @@ public class AuthenticationRepository : IAuthenticationRepository
       UserName = user.UserName,
       Email = user.Email,
       PhoneNumber = user.PhoneNumber,
-      Roles = roles
+      Roles = roles == null ? new List<string>() :
+        (IList<string>)roles.ToList()
     };
     return userDto;
   }
@@ -631,19 +623,10 @@ public class AuthenticationRepository : IAuthenticationRepository
   //                       AddRefreshTokenAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<ErrorOr<bool>> AddRefreshTokenAsync(RefreshToken refreshToken)
+  public async Task AddRefreshTokenAsync(RefreshToken refreshToken)
   {
-    try
-    {
-      await _dbContext.RefreshTokens.AddAsync(refreshToken);
-      await _dbContext.SaveChangesAsync();
-      return true;
-    }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-      return Errors.CommonErrors.Exception(ex.Message);
-    }
+    await _dbContext.RefreshTokens.AddAsync(refreshToken);
+    await _dbContext.SaveChangesAsync();
   }
 
   //------------------------------------------------------------------------------

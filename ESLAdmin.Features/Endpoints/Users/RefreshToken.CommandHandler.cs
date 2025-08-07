@@ -156,14 +156,9 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
         ExpiresAt = DateTime.UtcNow.AddDays(7),
         IsRevoked = false
       };
-      var refreshResult = await _repositoryManager
+      await _repositoryManager
         .AuthenticationRepository
         .AddRefreshTokenAsync(newRefreshToken);
-
-      if (refreshResult.IsError)
-      {
-        return TypedResults.InternalServerError();
-      }
 
       return TypedResults.Ok(new RefreshTokenResponse
       {

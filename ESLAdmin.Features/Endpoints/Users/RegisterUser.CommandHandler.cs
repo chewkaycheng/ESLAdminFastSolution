@@ -1,4 +1,5 @@
-﻿using ESLAdmin.Infrastructure.RepositoryManagers;
+﻿using ESLAdmin.Common.Errors;
+using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
@@ -55,33 +56,25 @@ public class RegisterUserCommandHandler : ICommandHandler<
 
       if (result.IsError)
       {
-        foreach (var error in result.Errors)
-        {
-          if (error.Code == "User.CreateFailed" ||
-              error.Code == "User.AddToRolesFailed" ||
-              error.Code == "Exception")
-            return TypedResults.InternalServerError();
+        var error = result.Errors.First();
+        if (error.Code == "User.CreateFailed" ||
+            error.Code == "User.AddToRolesFailed" ||
+            error.Code == "Exception")
+          return TypedResults.InternalServerError();
 
-          var validationFailures = new List<ValidationFailure>();
-          validationFailures.AddRange(new ValidationFailure
-          {
-            PropertyName = error.Code,
-            ErrorMessage = error.Description
-          });
-          return new ProblemDetails(
-              validationFailures,
-              StatusCodes.Status400BadRequest);
-        }
+        return new ProblemDetails(
+          ErrorUtils.CreateFailureList(
+            error.Code,
+            error.Description),
+          StatusCodes.Status400BadRequest);
       }
 
       _logger.LogFunctionExit($"User Id: {result.Value.Id}");
-
       return TypedResults.NoContent();
     }
     catch (Exception ex)
     {
       _logger.LogException(ex);
-      
       return TypedResults.InternalServerError();
     }
   }

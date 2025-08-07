@@ -1,9 +1,10 @@
-﻿using ESLAdmin.Domain.Entities;
+﻿using ESLAdmin.Common.Errors;
+using ESLAdmin.Domain.Entities;
 using ESLAdmin.Infrastructure.RepositoryManagers;
+using ESLAdmin.Infrastructure.Utilities;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
-using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Configuration;
@@ -57,38 +58,36 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
   {
     try
     {
+      // Check for jwt keys
+      var configResult = ConfigurationValidator.ValidateConfiguration(
+        _logger,
+        _config);
+
+      if (configResult.IsError)
+        return TypedResults.InternalServerError();
+
+      var configKeys = configResult.Value;
+      
       var result = await _repositoryManager.AuthenticationRepository.LoginAsync(
           command.Email, command.Password);
 
       if (result.IsError)
       {
-        foreach (var error in result.Errors)
-        {
-          if (error.Code == "Exception")
-            return TypedResults.InternalServerError();
-
-          var validateFailures = new List<FluentValidation.Results.ValidationFailure>();
-          validateFailures.AddRange(new FluentValidation.Results.ValidationFailure
-          {
-            PropertyName = error.Code,
-            ErrorMessage = error.Description
-          });
-          return new ProblemDetails(validateFailures, StatusCodes.Status401Unauthorized);
-        }
+        var error = result.Errors.First();
+        return new ProblemDetails(
+          ErrorUtils.CreateFailureList(
+            error.Code,
+            error.Description), StatusCodes.Status401Unauthorized);
       }
-        
+
       var userLoginDto = result.Value;
 
-      //Generate JWT token
-      var jwtKey = _config["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not found in configuration.");
-      var issuer = _config["Jwt:Issuer"] ?? "YourIssuer";
-      var audience = _config["Jwt:Audience"] ?? "YourAudience";
-
+      // Generate JWT token
       var claims = new List<Claim>
       {
         new Claim(JwtRegisteredClaimNames.Sub, userLoginDto.Id),
         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        new Claim(ClaimTypes.Name, userLoginDto.UserName)
+        new Claim(ClaimTypes.Name, userLoginDto.UserName ?? "")
       };
       claims.AddRange(userLoginDto.Roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
@@ -117,11 +116,11 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
       //    }
       //    o.ExpireAt = DateTime.UtcNow.AddDays(7);
       //  });
-      var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+      var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configKeys["Jwt:Key"]));
       var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
       var token = new JwtSecurityToken(
-          issuer: _config["Jwt:Issuer"],
-          audience: _config["Jwt:Audience"],
+          issuer: configKeys["Jwt:Issuer"],
+          audience: configKeys["Jwt:Audience"],
           claims: claims,
           expires: DateTime.Now.AddHours(1),
           signingCredentials: creds);
@@ -134,13 +133,10 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
         ExpiresAt = DateTime.UtcNow.AddDays(7),
         IsRevoked = false
       };
-      
-      var refreshResult = await _repositoryManager
+
+      await _repositoryManager
         .AuthenticationRepository
         .AddRefreshTokenAsync(refreshToken);
-
-      if (refreshResult.IsError)
-        return TypedResults.InternalServerError();
 
       LoginUserResponse response = new LoginUserResponse
       {
@@ -157,7 +153,6 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
     catch (Exception ex)
     {
       _logger.LogException(ex);
-
       return TypedResults.InternalServerError();
     }
   }
