@@ -223,6 +223,56 @@ public class AuthenticationRepository : IAuthenticationRepository
 
   //------------------------------------------------------------------------------
   //
+  //                       GetRefreshTokenAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<RefreshToken>> GetRefreshTokenAsync(string token)
+  {
+    var refreshToken = await _dbContext.RefreshTokens
+      .FirstOrDefaultAsync(
+        rt => rt.Token == token &&
+        !rt.IsRevoked &&
+        rt.ExpiresAt > DateTime.UtcNow);
+    if (refreshToken == null)
+    {
+      return Errors.IdentityErrors.RefreshTokenNotFound(token);
+    }
+    return refreshToken;
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       AddRefreshTokenAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task AddRefreshTokenAsync(RefreshToken refreshToken)
+  {
+    await _dbContext.RefreshTokens.AddAsync(refreshToken);
+    await _dbContext.SaveChangesAsync();
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       RevokeRefreshTokenAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<bool>> RevokeRefreshTokenAsync(string token)
+  {
+    var refreshToken = await _dbContext
+                               .RefreshTokens
+                               .FirstOrDefaultAsync(
+                                 rt => rt.Token == token);
+    if (refreshToken == null)
+    {
+      return Errors.IdentityErrors.RefreshTokenNotFound(token);
+    }
+    refreshToken.IsRevoked = true;
+    await _dbContext.SaveChangesAsync();
+    return true;
+  }
+
+  //------------------------------------------------------------------------------
+  //
   //                       RegisterUser
   //
   //-------------------------------------------------------------------------------
@@ -588,76 +638,6 @@ public class AuthenticationRepository : IAuthenticationRepository
         (IList<string>)roles.ToList()
     };
     return userDto;
-  }
-
-  //------------------------------------------------------------------------------
-  //
-  //                       GetRefreshTokenAsync
-  //
-  //-------------------------------------------------------------------------------
-  public async Task<ErrorOr<RefreshToken>> GetRefreshTokenAsync(string token)
-  {
-    try
-    {
-      var refreshToken = await _dbContext.RefreshTokens
-        .FirstOrDefaultAsync(
-          rt => rt.Token == token &&
-          !rt.IsRevoked &&
-          rt.ExpiresAt > DateTime.UtcNow);
-      if (refreshToken == null)
-      {
-        return Errors.IdentityErrors.RefreshTokenNotFound(token);
-      }
-      return refreshToken;
-    }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-      return Errors.CommonErrors.Exception(ex.Message);
-    }
-  }
-
-
-  //------------------------------------------------------------------------------
-  //
-  //                       AddRefreshTokenAsync
-  //
-  //-------------------------------------------------------------------------------
-  public async Task AddRefreshTokenAsync(RefreshToken refreshToken)
-  {
-    await _dbContext.RefreshTokens.AddAsync(refreshToken);
-    await _dbContext.SaveChangesAsync();
-  }
-
-  //------------------------------------------------------------------------------
-  //
-  //                       RevokeRefreshTokenAsync
-  //
-  //-------------------------------------------------------------------------------
-  public async Task<ErrorOr<bool>> RevokeRefreshTokenAsync(string token)
-  {
-    try
-    {
-      var refreshToken = await _dbContext
-                                 .RefreshTokens
-                                 .FirstOrDefaultAsync(
-                                   rt => rt.Token == token);
-      if (refreshToken != null)
-      {
-        refreshToken.IsRevoked = true;
-        await _dbContext.SaveChangesAsync();
-      }
-      else
-      {
-        return Errors.IdentityErrors.RefreshTokenNotFound(token);
-      }
-      return true;
-    }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-      return Errors.CommonErrors.Exception(ex.Message);
-    }
   }
 }
 

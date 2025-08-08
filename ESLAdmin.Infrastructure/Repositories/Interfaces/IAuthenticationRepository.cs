@@ -22,6 +22,8 @@ public interface IAuthenticationRepository
     User user,
     string password,
     ICollection<string>? roles);
+  Task<ErrorOr<RefreshToken>> GetRefreshTokenAsync(string token);
+  Task<ErrorOr<bool>> RevokeRefreshTokenAsync(string token);
 
 
   Task<ErrorOr<User>> FindByIdAsync(string userId);
@@ -34,6 +36,4 @@ public interface IAuthenticationRepository
   Task<ErrorOr<IdentityRole>> GetRoleAsync(string roleName);
   Task<ErrorOr<IEnumerable<IdentityRole>>> GetAllRolesAsync();
   Task<ErrorOr<List<string>>> GetRolesAsync(User user);
-  Task<ErrorOr<RefreshToken>> GetRefreshTokenAsync(string token);
-  Task<ErrorOr<bool>> RevokeRefreshTokenAsync(string token);
 }
