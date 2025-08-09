@@ -71,32 +71,26 @@ public class AuthenticationRepository : IAuthenticationRepository
       return Errors.IdentityErrors.UserEmailNotFound(email);
     }
 
-    var role = await _roleManager.FindByNameAsync(roleName);
-    if (role == null)
-    {
-      return Errors.IdentityErrors.RoleNotFound(roleName);
-    }
+    //var role = await _roleManager.FindByNameAsync(roleName);
+    //if (role == null)
+    //{
+    //  return Errors.IdentityErrors.RoleNotFound(roleName);
+    //}
 
     var result = await _userManager.AddToRoleAsync(user, roleName);
 
     if (!result.Succeeded)
     {
       _logger.LogIdentityErrors("_userManager.AddToRoleAsync", email, result.Errors.ToFormattedString());
-      if (result.Errors.Count() == 1)
+      var firstError = result.Errors.FirstOrDefault();
+      return firstError?.Code switch
       {
-        var error = result.Errors.First();
-        if (error.Code == "UserAlreadyInRole")
-        {
-          return Errors.IdentityErrors.UserAlreadyInRole(email, roleName);
-        }
-        return Errors.IdentityErrors.AddToRoleFailed(
-          email,
-          roleName);
-      }
-      return Errors.IdentityErrors.AddToRoleFailed(
-        email,
-        roleName,
-        result.Errors);
+        "UserNotFound" => Errors.IdentityErrors.UserNotFound(user.Id),
+        "RoleNotFound" => Errors.IdentityErrors.RoleNotFound(roleName),
+        "UserAlreadyInRole" => Errors.IdentityErrors.UserAlreadyInRole(user.Id, roleName),
+        "ConcurrencyFailure" => Errors.IdentityErrors.ConcurrencyFailure(user.Id),
+        _ => Errors.IdentityErrors.AddToRoleFailed(user.Id, roleName, result.Errors)
+      };
     }
 
     return roleName;
@@ -132,8 +126,13 @@ public class AuthenticationRepository : IAuthenticationRepository
     if (!result.Succeeded)
     {
       _logger.LogIdentityErrors("_userManager.DeleteAsync", email, result.Errors.ToFormattedString());
-
-      return Errors.IdentityErrors.DeleteUserFailed(email, result.Errors);
+      var firstError = result.Errors.FirstOrDefault();
+      return firstError?.Code switch
+      {
+        "UserNotFound" => Errors.IdentityErrors.UserNotFound(user.Id),
+        "ConcurrencyFailure" => Errors.IdentityErrors.ConcurrencyFailure(user.Id),
+        _ => Errors.IdentityErrors.DeleteUserFailed(user.Id, result.Errors)
+      };
     }
 
     return email;
@@ -342,26 +341,58 @@ public class AuthenticationRepository : IAuthenticationRepository
 
   //------------------------------------------------------------------------------
   //
+  //                       RemoveFromRoleAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<string>> RemoveFromRoleAsync(
+    string email,
+    string roleName)
+  {
+    var user = await _userManager.FindByEmailAsync(email);
+    if (user == null)
+    {
+      return Errors.IdentityErrors.UserEmailNotFound(email);
+    }
+
+    var role = await _roleManager.FindByNameAsync(roleName);
+    if (role == null)
+    {
+      return Errors.IdentityErrors.RoleNotFound(roleName);
+    }
+
+    var result = await _userManager.RemoveFromRoleAsync(user, roleName);
+    if (!result.Succeeded)
+    {
+      _logger.LogIdentityErrors("_userManager.AddToRoleAsync", email, result.Errors.ToFormattedString());
+      var firstError = result.Errors.FirstOrDefault();
+      return firstError?.Code switch
+      {
+        "UserNotFound" => Errors.IdentityErrors.UserNotFound(user.Id),
+        "RoleNotFound" => Errors.IdentityErrors.RoleNotFound(roleName),
+        "UserNotInRole" => Errors.IdentityErrors.UserNotInRole(user.Id, roleName),
+        "ConcurrencyFailure" => Errors.IdentityErrors.ConcurrencyFailure(user.Id),
+        _ => Errors.IdentityErrors.RemoveFromRoleFailed(user.Id, roleName, result.Errors)
+      };
+    }
+
+    return roleName;
+  }
+
+  //------------------------------------------------------------------------------
+  //
   //                       FindByIdAsync
   //
   //-------------------------------------------------------------------------------
   public async Task<ErrorOr<User>> FindByIdAsync(string userId)
   {
-    try
+    var user = await _userManager.FindByIdAsync(userId);
+    if (user == null)
     {
-      var user = await _userManager.FindByIdAsync(userId);
-      if (user == null)
-      {
-        return Errors.IdentityErrors.UserIdNotFound(userId);
-      }
-      return user;
+      return Errors.IdentityErrors.UserIdNotFound(userId);
     }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-      return Errors.CommonErrors.Exception(ex.Message);
-    }
+    return user;
   }
+
   //------------------------------------------------------------------------------
   //
   //                       FindByUserNameAsync
@@ -390,64 +421,10 @@ public class AuthenticationRepository : IAuthenticationRepository
   //                       GetRoleAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<ErrorOr<List<string>>> GetRolesAsync(User user)
+  public async Task<List<string>> GetRolesAsync(User user)
   {
-    try
-    {
-      IList<string> roles = await _userManager.GetRolesAsync(user);
-      return roles.ToList();
-
-    }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-      return Errors.CommonErrors.Exception(ex.Message);
-    }
-  }
-
-  //------------------------------------------------------------------------------
-  //
-  //                       RemoveRoleAsync
-  //
-  //-------------------------------------------------------------------------------
-  public async Task<ErrorOr<string>> RemoveFromRoleAsync(
-    string email,
-    string roleName)
-  {
-    try
-    {
-      var user = await _userManager.FindByEmailAsync(email);
-      if (user == null)
-      {
-        return Errors.IdentityErrors.UserEmailNotFound(email);
-      }
-
-      var role = await _roleManager.FindByNameAsync(roleName);
-      if (role == null)
-      {
-        return Errors.IdentityErrors.RoleNotFound(roleName);
-      }
-
-      var result = await _userManager.RemoveFromRoleAsync(user, roleName);
-      if (!result.Succeeded)
-      {
-        _logger.LogIdentityErrors("_userManager.AddToRoleAsync", email, result.Errors.ToFormattedString());
-        foreach (var error in result.Errors)
-        {
-          if (error.Code == "UserAlreadyInRole")
-          {
-            return Errors.IdentityErrors.UserAlreadyInRole(email, roleName);
-          }
-        }
-      }
-
-      return roleName;
-    }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-      return Errors.CommonErrors.Exception(ex.Message);
-    }
+    IList<string> roles = await _userManager.GetRolesAsync(user);
+    return roles.ToList();
   }
 
   //------------------------------------------------------------------------------

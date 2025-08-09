@@ -1,6 +1,7 @@
 global using FastEndpoints;
 using ESLAdmin.Api.Extensions;
 using ESLAdmin.Features.Extensions;
+using ESLAdmin.Infrastructure.Configuration;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Extensions;
 using FastEndpoints.Swagger;
@@ -9,6 +10,11 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddSingleton<IConfigurationParams, ConfigurationParams>();
+
 builder.Services.ConfigureLogging(builder);
 builder.Services.ConfigureCors();
 builder.Services.ConfigureIISIntegration();
@@ -18,8 +24,6 @@ builder.Services.ConfigureIdentity(builder.Configuration);
 builder.Services.ConfigureFirebirdDbContexts(builder.Configuration);
 builder.Services.ConfigureRepositoryManager();
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddFastEndpoints(options =>
 {
   options.Assemblies = new[] { typeof(
@@ -55,6 +59,15 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+
+// Validate configuration at startup
+var configParams = builder.Services.BuildServiceProvider()
+    .GetRequiredService<IConfigurationParams>();
+var logger = builder.Services.BuildServiceProvider()
+    .GetRequiredService<ILogger<Program>>();
+
+configParams.ValidateConfiguration(logger);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -35,5 +35,5 @@ public interface IAuthenticationRepository
   Task<ErrorOr<string>> DeleteRoleAsync(string roleName);
   Task<ErrorOr<IdentityRole>> GetRoleAsync(string roleName);
   Task<ErrorOr<IEnumerable<IdentityRole>>> GetAllRolesAsync();
-  Task<ErrorOr<List<string>>> GetRolesAsync(User user);
+  Task<List<string>> GetRolesAsync(User user);
 }

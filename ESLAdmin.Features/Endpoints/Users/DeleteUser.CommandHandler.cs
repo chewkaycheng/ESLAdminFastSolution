@@ -52,15 +52,23 @@ public class DeleteUserCommandHandler : ICommandHandler<
       if (result.IsError)
       {
         var error = result.Errors.First();
-        if (error.Code == "User.DeleteFailed")
+        var statusCode = StatusCodes.Status500InternalServerError;
+        switch (error.Code)
         {
-          return TypedResults.InternalServerError();
+          case "Identity.UserNotFound":
+            statusCode = StatusCodes.Status404NotFound;
+            break;
+          case "Identity.ConcurrencyError":
+            statusCode = StatusCodes.Status409Conflict;
+            break;
+          default:
+            return TypedResults.InternalServerError();
         }
+
         return new ProblemDetails(
           ErrorUtils.CreateFailureList(
             error.Code, 
-            error.Description), 
-          StatusCodes.Status404NotFound);
+            error.Description), statusCode);
       }
 
       _logger.LogFunctionExit($"Email: {command.Email}");
@@ -69,7 +77,6 @@ public class DeleteUserCommandHandler : ICommandHandler<
     catch (Exception ex)
     {
       _logger.LogException(ex);
-
       return TypedResults.InternalServerError();
     }
   }

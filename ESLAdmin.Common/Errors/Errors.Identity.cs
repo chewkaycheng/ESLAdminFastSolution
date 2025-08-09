@@ -24,7 +24,7 @@ public static partial class Errors
     //-------------------------------------------------------------------------------
     public static Error RefreshTokenNotFound(string token) =>
       Error.Validation(
-        code: "User.RefreshTokenNotFound",
+        code: "Identity.RefreshTokenNotFound",
         description: $"The refresh token: '{token}' is not found.");
 
     //-------------------------------------------------------------------------------
@@ -35,7 +35,7 @@ public static partial class Errors
     public static Error AddToRoleFailed(string email, string roleName, IEnumerable<IdentityError>? errors = null)
     {
       var error = Error.Failure(
-        code: "User.AddToRoleFailed",
+        code: "Identity.AddToRoleFailed",
         description: $"AddToRole failed for user: '{email}', role: '{roleName}'.");
 
       if (errors != null && errors.Any())
@@ -52,7 +52,7 @@ public static partial class Errors
     //-------------------------------------------------------------------------------
     public static Error InvalidRoles(List<string?> invalidRoles) =>
       Error.Validation(
-        code: "User.InvalidRoles",
+        code: "Identity.InvalidRoles",
         description: $"The following roles do not exist: {string.Join(", ", invalidRoles)}");
 
 
@@ -63,7 +63,7 @@ public static partial class Errors
     //-------------------------------------------------------------------------------
     public static Error UserEmailCannotBeEmpty() =>
       Error.Validation(
-        code: "User.UserEmailEmpty",
+        code: "Identity.UserEmailEmpty",
         description: $"The email for the user cannot be empty.");
 
     //-------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ public static partial class Errors
     //-------------------------------------------------------------------------------
     public static Error UserEmailNotFound(string email) =>
       Error.Validation(
-        code: "User.NotFound",
+        code: "Identity.NotFound",
         description: $"The user with email: '{email}' is not found.");
 
     //-------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ public static partial class Errors
     //-------------------------------------------------------------------------------
     public static Error UserIdNotFound(string userId) =>
       Error.Validation(
-        code: "User.NotFound",
+        code: "Identity.NotFound",
         description: $"The user with Id: '{userId}' is not found.");
 
     //-------------------------------------------------------------------------------
@@ -93,7 +93,7 @@ public static partial class Errors
     //-------------------------------------------------------------------------------
     public static Error UserNameNotFound(string username) =>
       Error.Validation(
-        code: "User.NotFound",
+        code: "Identity.NotFound",
         description: $"The user with Username: '{username}' is not found.");
 
     //-------------------------------------------------------------------------------
@@ -103,7 +103,7 @@ public static partial class Errors
     //-------------------------------------------------------------------------------
     public static Error UserLoginFailed() =>
       Error.Validation(
-        code: "User.LoginFailed",
+        code: "Identity.LoginFailed",
         description: $"Username or password is invalid.");
 
     //-------------------------------------------------------------------------------
@@ -114,8 +114,8 @@ public static partial class Errors
     public static Error CreateUserFailed(string email, IEnumerable<IdentityError> errors)
     {
       var error = Error.Failure(
-        code: "User.CreateFailed",
-        description: $"Failed to remove user: '{email}'.");
+        code: "Identity.CreateUserFailed",
+        description: $"Failed to create user: '{email}'.");
 
       AddMetadata(error.Metadata, errors);
       return error;
@@ -129,7 +129,7 @@ public static partial class Errors
     public static Error AddToRolesFailed(string email, IEnumerable<IdentityError> errors)
     {
       var error = Error.Failure(
-        code: "User.AddToRolesFailed",
+        code: "Identity.AddToRolesFailed",
         description: $"Failed to add roles for user: '{email}'.");
 
       AddMetadata(error.Metadata, errors);
@@ -144,7 +144,7 @@ public static partial class Errors
     public static Error RemoveRolesFailed(string email, IEnumerable<IdentityError> errors)
     {
       var error = Error.Failure(
-        code: "User.RemoveRolesFailed",
+        code: "Identity.RemoveRolesFailed",
         description: $"Failed to remove roles from {email}.");
 
       AddMetadata(error.Metadata, errors);
@@ -159,7 +159,7 @@ public static partial class Errors
     public static Error DeleteUserFailed(string email, IEnumerable<IdentityError> errors)
     {
       var error = Error.Failure(
-        code: "User.DeleteFailed",
+        code: "Identity.DeleteUserFailed",
         description: $"Failed to delete user: '{email}'.");
 
       AddMetadata(error.Metadata, errors);
@@ -177,7 +177,7 @@ public static partial class Errors
       IEnumerable<IdentityError> errors)
     {
       var error = Error.Failure(
-        code: "User.AssignRoleFailed",
+        code: "Identity.AssignRoleFailed",
         description: $"Failed to assign role: '{roleName}' to user: '{email}'.");
 
       AddMetadata(error.Metadata, errors);
@@ -191,7 +191,7 @@ public static partial class Errors
     //-------------------------------------------------------------------------------
     public static Error UserAlreadyInRole(string email, string roleName) =>
       Error.Validation(
-        code: "User.UserAlreadyInRole",
+        code: "Identity.UserAlreadyInRole",
         description: $"The role: '{roleName}' is already assigned to the user: '{email}'.");
 
     //-------------------------------------------------------------------------------
@@ -201,7 +201,7 @@ public static partial class Errors
     //-------------------------------------------------------------------------------
     public static Error RoleNotFound(string roleName) =>
       Error.Validation(
-        code: "Role.NotFound",
+        code: "Identity.RoleNotFound",
         description: $"The role: '{roleName}' is not found.");
 
     //-------------------------------------------------------------------------------
@@ -211,7 +211,7 @@ public static partial class Errors
     //-------------------------------------------------------------------------------
     public static Error RoleExists(string roleName) =>
       Error.Conflict(
-        code: "Role.Exists",
+        code: "Identity.RoleExists",
         description: $"The role: '{roleName}' already exists.");
 
     //-------------------------------------------------------------------------------
@@ -223,7 +223,7 @@ public static partial class Errors
     {
 
       var error = Error.Failure(
-        code: "Role.CreateFailed",
+        code: "Identity.CreateRoleFailed",
         description: $"Failed to create role: '{roleName}'.");
 
       AddMetadata(error.Metadata, errors);
@@ -238,7 +238,7 @@ public static partial class Errors
     public static Error UpdateRoleFailed(string oldRoleName, string newRoleName, IEnumerable<IdentityError> errors)
     {
       var error = Error.Failure(
-        code: "Role.UpdateFailed",
+        code: "Identity.UpdateRoleFailed",
         description: $"Failed to update role: '{oldRoleName}' with '{newRoleName}'.");
 
       AddMetadata(error.Metadata, errors);
@@ -253,12 +253,73 @@ public static partial class Errors
     public static Error DeleteRoleFailed(string roleName, IEnumerable<IdentityError> errors)
     {
       var error = Error.Failure(
-        code: "Role.DeleteFailed",
+        code: "Identity.DeleteRoleFailed",
         description: $"Failed to delete role: '{roleName}'.");
 
       AddMetadata(error.Metadata, errors);
       return error;
     }
 
+    //-------------------------------------------------------------------------------
+    //
+    //                       InvalidUser
+    //
+    //-------------------------------------------------------------------------------
+    public static Error InvalidUser(string description) =>
+        Error.Failure("Identity.InvalidUser", description);
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       InvalidRole
+    //
+    //-------------------------------------------------------------------------------
+    public static Error InvalidRole(string description) =>
+        Error.Failure("Identity.InvalidRole", description);
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       UserNotFound
+    //
+    //-------------------------------------------------------------------------------
+    public static Error UserNotFound(string userId) =>
+        Error.NotFound("Identity.UserNotFound", $"User with ID '{userId}' not found");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       UserNotInRole
+    //
+    //-------------------------------------------------------------------------------
+    public static Error UserNotInRole(string userId, string role) =>
+        Error.Failure("Identity.UserNotInRole", $"User '{userId}' is not in role '{role}'");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       ConcurrencyFailure
+    //
+    //-------------------------------------------------------------------------------
+    public static Error ConcurrencyFailure(string userId) =>
+        Error.Failure("Identity.ConcurrencyFailure", $"Concurrency failure for user '{userId}'");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       RemoveFromRoleFailed
+    //
+    //-------------------------------------------------------------------------------
+    public static Error RemoveFromRoleFailed(string userId, string role, IEnumerable<IdentityError> errors)
+    {
+      var error = Error.Failure("Identity.RemoveFromRoleFailed",
+          $"Failed to remove role '{role}' from user '{userId}.");
+      AddMetadata(error.Metadata, errors);
+      return error;
+    }
+
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       InvalidArgument
+    //
+    //-------------------------------------------------------------------------------
+    public static Error InvalidArgument(string description) =>
+        Error.Failure("Identity.InvalidArgument", description);
   }
 }

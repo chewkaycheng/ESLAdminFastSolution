@@ -53,7 +53,7 @@ public class DeleteRoleCommandHandler : ICommandHandler<
       {
         foreach (var error in result.Errors)
         {
-          if (error.Code == "Role.NotFound")
+          if (error.Code == "Identity.RoleNotFound")
           {
             var validationFailures = new List<ValidationFailure>();
             validationFailures.AddRange(new ValidationFailure

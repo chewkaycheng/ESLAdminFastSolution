@@ -51,7 +51,7 @@ public class UpdateRoleCommandHandler : ICommandHandler<
       {
         foreach (var error in result.Errors)
         {
-          if (error.Code == "Role.UpdateFailed" || error.Code == "Exception")
+          if (error.Code == "Identity.UpdateRoleFailed" || error.Code == "Exception")
           {
             return TypedResults.InternalServerError();
           }
@@ -59,7 +59,7 @@ public class UpdateRoleCommandHandler : ICommandHandler<
           var validationFailures = new List<ValidationFailure>();
           var statusCode = error.Code switch
           {
-            "Role.NotFound" => StatusCodes.Status404NotFound,
+            "Identity.RoleNotFound" => StatusCodes.Status404NotFound,
             _ => StatusCodes.Status409Conflict
           };
           validationFailures.AddRange(new ValidationFailure

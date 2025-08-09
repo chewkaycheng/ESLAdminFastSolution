@@ -59,13 +59,16 @@ public class AddToRoleCommandHandler : ICommandHandler<
         var statusCode = StatusCodes.Status500InternalServerError;
         switch (error.Code)
         {
-          case "User.UserNotFound":
-          case "Role.NotFound":
+          case "Identity.UserNotFound":
+          case "Identity.RoleNotFound":
             statusCode = StatusCodes.Status404NotFound;
             break;
-          case "User.UserAlreadyInRole":
+          case "Identity.UserAlreadyInRole":
             statusCode = StatusCodes.Status400BadRequest;
             break;
+          case "Identity.ConcurrencyError":
+            statusCode = StatusCodes.Status409Conflict;
+            break;  
           default:
             return TypedResults.InternalServerError();
         }

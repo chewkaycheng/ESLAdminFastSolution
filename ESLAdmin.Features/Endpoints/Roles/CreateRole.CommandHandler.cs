@@ -47,7 +47,7 @@ public class CreateRoleCommandHandler : ICommandHandler<
     {
       foreach (var error in result.Errors)
       {
-        if ((error.Code == "Exception") || (error.Code == "Role.CreateFailed"))
+        if ((error.Code == "Exception") || (error.Code == "Identity.CreateRoleFailed"))
         {
           return TypedResults.InternalServerError();
         }

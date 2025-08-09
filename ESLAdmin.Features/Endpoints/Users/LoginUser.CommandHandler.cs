@@ -1,5 +1,6 @@
 ﻿using ESLAdmin.Common.Errors;
 using ESLAdmin.Domain.Entities;
+using ESLAdmin.Infrastructure.Configuration;
 using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Infrastructure.Utilities;
 using ESLAdmin.Logging;
@@ -27,7 +28,7 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
   private readonly IRepositoryManager _repositoryManager;
   private readonly ILogger<LoginUserCommandHandler> _logger;
   private readonly IMessageLogger _messageLogger;
-  private readonly IConfiguration _config;
+  private readonly IConfigurationParams _configurationParams;
 
   //-------------------------------------------------------------------------------
   //
@@ -38,12 +39,12 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
       IRepositoryManager repositoryManager,
       ILogger<LoginUserCommandHandler> logger,
       IMessageLogger messageLogger,
-      IConfiguration config)
+      IConfigurationParams configurationParams)
   {
     _repositoryManager = repositoryManager;
     _logger = logger;
     _messageLogger = messageLogger;
-    _config = config;
+    _configurationParams = configurationParams;
   }
 
   //-------------------------------------------------------------------------------
@@ -58,16 +59,6 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
   {
     try
     {
-      // Check for jwt keys
-      var configResult = ConfigurationValidator.ValidateConfiguration(
-        _logger,
-        _config);
-
-      if (configResult.IsError)
-        return TypedResults.InternalServerError();
-
-      var configKeys = configResult.Value;
-      
       var result = await _repositoryManager.AuthenticationRepository.LoginAsync(
           command.Email, command.Password);
 
@@ -116,6 +107,8 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
       //    }
       //    o.ExpireAt = DateTime.UtcNow.AddDays(7);
       //  });
+      
+      var configKeys = _configurationParams.Settings;
       var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configKeys["Jwt:Key"]));
       var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
       var token = new JwtSecurityToken(

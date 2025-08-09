@@ -46,18 +46,10 @@ public class RemoveFromRoleEndpoint : Endpoint<
   public override async Task<Results<NoContent, ProblemDetails, InternalServerError>>
   ExecuteAsync(RemoveFromRoleRequest request, CancellationToken cancellationToken)
   {
-    try
+    return await new RemoveFromRoleCommand
     {
-      return await new RemoveFromRoleCommand
-      {
-        Email = request.Email,
-        RoleName = request.RoleName
-      }.ExecuteAsync(cancellationToken);
-    }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-      return TypedResults.InternalServerError();
-    }
+      Email = request.Email,
+      RoleName = request.RoleName
+    }.ExecuteAsync(cancellationToken);
   }
 }

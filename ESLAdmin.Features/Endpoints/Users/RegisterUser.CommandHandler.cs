@@ -57,8 +57,8 @@ public class RegisterUserCommandHandler : ICommandHandler<
       if (result.IsError)
       {
         var error = result.Errors.First();
-        if (error.Code == "User.CreateFailed" ||
-            error.Code == "User.AddToRolesFailed" ||
+        if (error.Code == "Identity.CreateUserFailed" ||
+            error.Code == "Identity.AddToRolesFailed" ||
             error.Code == "Exception")
           return TypedResults.InternalServerError();
 
