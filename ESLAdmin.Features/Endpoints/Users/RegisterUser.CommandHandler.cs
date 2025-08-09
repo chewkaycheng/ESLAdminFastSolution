@@ -57,16 +57,32 @@ public class RegisterUserCommandHandler : ICommandHandler<
       if (result.IsError)
       {
         var error = result.Errors.First();
-        if (error.Code == "Identity.CreateUserFailed" ||
-            error.Code == "Identity.AddToRolesFailed" ||
-            error.Code == "Exception")
-          return TypedResults.InternalServerError();
+        var statusCode = StatusCodes.Status500InternalServerError;
+        switch (error.Code)
+        {
+          case "Identity.UserNotFound":
+          case "Identity.RoleNotFound":
+            statusCode = StatusCodes.Status404NotFound;
+            break;
+          case "Identity.UserAlreadyInRole":
+          case "Identity.DuplicateUserName":
+          case "Identity.DuplicateEmail":
+          case "Identity.InvalidUserName":
+          case "Identity.InvalidEmail":
+            statusCode = StatusCodes.Status400BadRequest;
+            break;
+          case "Identity.ConcurrencyError":
+            statusCode = StatusCodes.Status409Conflict;
+            break;
+          default:
+            return TypedResults.InternalServerError();
+        }
 
         return new ProblemDetails(
           ErrorUtils.CreateFailureList(
             error.Code,
             error.Description),
-          StatusCodes.Status400BadRequest);
+          statusCode);
       }
 
       _logger.LogFunctionExit($"User Id: {result.Value.Id}");

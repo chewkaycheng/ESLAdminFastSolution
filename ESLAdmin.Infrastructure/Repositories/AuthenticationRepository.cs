@@ -304,13 +304,24 @@ public class AuthenticationRepository : IAuthenticationRepository
 
       if (!result.Succeeded)
       {
+
+        await transaction.RollbackAsync();
+
         _logger.LogIdentityErrors(
           "_userManager.CreateAsync",
           user.Email,
           result.Errors.ToFormattedString());
 
-        await transaction.RollbackAsync();
-        return Errors.IdentityErrors.CreateUserFailed(user.Email, result.Errors);
+        var firstError = result.Errors.FirstOrDefault();
+        return firstError?.Code switch
+        {
+          "DuplicateUserName" => Errors.IdentityErrors.DuplicateUserName(user.UserName),
+          "DuplicateEmail" => Errors.IdentityErrors.DuplicateEmail(user.Email),
+          "InvalidUserName" => Errors.IdentityErrors.InvalidUserName(user.UserName),
+          "InvalidEmail" => Errors.IdentityErrors.InvalidEmail(user.Email ?? "null"),
+          "ConcurrencyFailure" => Errors.IdentityErrors.ConcurrencyFailure(user.UserName),
+          _ => Errors.IdentityErrors.CreateUserFailed(user.UserName, user.Email, result.Errors)
+        };
       }
 
       if (roles != null && roles.Any())
@@ -318,13 +329,22 @@ public class AuthenticationRepository : IAuthenticationRepository
         var roleResult = await _userManager.AddToRolesAsync(user, roles);
         if (!roleResult.Succeeded)
         {
+          await transaction.RollbackAsync();
+
           _logger.LogIdentityErrors(
             "_userManager.AddToRolesAsync",
             user.Email,
             result.Errors.ToFormattedString());
 
-          await transaction.RollbackAsync();
-          return Errors.IdentityErrors.AddToRolesFailed(user.Email, result.Errors);
+          var firstError = result.Errors.FirstOrDefault();
+          return firstError?.Code switch
+          {
+            "UserNotFound" => Errors.IdentityErrors.UserNotFound(user.Id),
+            "RoleNotFound" => Errors.IdentityErrors.RoleNotFound(string.Join(", ", roles)),
+            "UserAlreadyInRole" => Errors.IdentityErrors.UserAlreadyInRole(user.Id, string.Join(", ", roles)),
+            "ConcurrencyFailure" => Errors.IdentityErrors.ConcurrencyFailure(user.Id),
+            _ => Errors.IdentityErrors.AddToRolesFailed(user.Id, roles, result.Errors)
+          };
         }
       }
 

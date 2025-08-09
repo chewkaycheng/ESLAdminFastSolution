@@ -321,5 +321,64 @@ public static partial class Errors
     //-------------------------------------------------------------------------------
     public static Error InvalidArgument(string description) =>
         Error.Failure("Identity.InvalidArgument", description);
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       DuplicateUserName
+    //
+    //-------------------------------------------------------------------------------
+    public static Error DuplicateUserName(string userName) =>
+        Error.Failure("Identity.DuplicateUserName", $"User name '{userName}' is already taken");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       DuplicateEmail
+    //
+    //-------------------------------------------------------------------------------
+    public static Error DuplicateEmail(string email) =>
+        Error.Failure("Identity.DuplicateEmail", $"Email '{email}' is already taken");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       InvalidUserName
+    //
+    //-------------------------------------------------------------------------------
+    public static Error InvalidUserName(string userName) =>
+        Error.Failure("Identity.InvalidUserName", $"User name '{userName}' is invalid");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       InvalidEmail
+    //
+    //-------------------------------------------------------------------------------
+    public static Error InvalidEmail(string email) =>
+        Error.Failure("Identity.InvalidEmail", $"Email '{email}' is not valid");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       InvalidEmail
+    //
+    //-------------------------------------------------------------------------------
+    public static Error CreateUserFailed(string userName, string email, IEnumerable<IdentityError> errors)
+    {
+      var error = Error.Failure("Identity.CreateUserFailed",
+          $"Failed to create user '{userName}' with email '{email}'.");
+
+      AddMetadata(error.Metadata, errors);
+      return error;
+    }
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       AddToRolesFailed
+    //
+    //-------------------------------------------------------------------------------
+    public static Error AddToRolesFailed(string userId, IEnumerable<string> roles, IEnumerable<IdentityError> errors)
+    {
+      var error = Error.Failure("Identity.AddToRolesFailed",
+          $"Failed to add roles '{string.Join(", ", roles)}' to user '{userId}'.");
+      AddMetadata(error.Metadata, errors);
+      return error;
+    }
   }
 }
