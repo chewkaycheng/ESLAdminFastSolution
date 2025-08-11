@@ -13,10 +13,10 @@ namespace ESLAdmin.Features.ChildcareLevels.Repositories.Interfaces
     Task<ErrorOr<bool>> CreateChildcareLevelAsync(
       DynamicParameters parameters);
 
-    Task UpdateChildcareLevelAsync(
+    Task<ErrorOr<bool>> UpdateChildcareLevelAsync(
       DynamicParameters parameters);
 
-    Task DeleteChildcareLevelAsync(
+    Task<ErrorOr<bool>> DeleteChildcareLevelAsync(
       DynamicParameters parameters);
   }
 }

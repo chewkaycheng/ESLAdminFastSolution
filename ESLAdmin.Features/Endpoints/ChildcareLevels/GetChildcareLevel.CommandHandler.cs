@@ -1,8 +1,7 @@
-﻿using ESLAdmin.Domain.Entities;
+﻿using ESLAdmin.Common.Errors;
 using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
-using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -47,13 +46,10 @@ public class GetChildcareLevelHandler : ICommandHandler<
       var childcareLevel = childcareLevelResult.Value;
       if (childcareLevel == null)
       {
-        var validationFailures = new List<ValidationFailure>();
-        validationFailures.AddRange(new ValidationFailure
-        {
-          PropertyName = "NotFound",
-          ErrorMessage = $"The childcare level with id: {command.Id} is not found."
-        });
-        return new ProblemDetails(validationFailures, StatusCodes.Status404NotFound);
+        return new ProblemDetails(ErrorUtils.CreateFailureList(
+          "NotFound",
+          $"The childcare level with id: {command.Id} is not found."
+          ), StatusCodes.Status404NotFound);
       }
 
       var childcareLevelResponse = command.Mapper.FromEntity(childcareLevel);
@@ -62,7 +58,6 @@ public class GetChildcareLevelHandler : ICommandHandler<
     catch (Exception ex)
     {
       _messageLogger.LogDatabaseException(nameof(ExecuteAsync), ex);
-
       return TypedResults.InternalServerError();
     }
   }

@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using ESLAdmin.Infrastructure.Repositories;
 using ESLAdmin.Infrastructure.RepositoryManagers;
+using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using FluentValidation.Results;
@@ -36,11 +37,18 @@ public class UpdateChildcareLevelCommandHandler : ICommandHandler<
     try
     {
       DynamicParameters parameters = command.Mapper.ToParameters(command);
-      await _repositoryManager
+      var result = await _repositoryManager
               .ChildcareLevelRepository
               .UpdateChildcareLevelAsync(
                  parameters);
-
+      if (result.IsError)
+      {
+        var error = result.Errors.First();
+        if (error.Code != "Database.StoredProcedureError")
+        {
+          return TypedResults.InternalServerError();
+        }
+      }
       OperationResult operationResult = command.Mapper.FromParameters(parameters);
 
       if (operationResult.DbApiError == 0)
@@ -107,9 +115,7 @@ public class UpdateChildcareLevelCommandHandler : ICommandHandler<
     }
     catch (Exception ex)
     {
-      _messageLogger.LogControllerException(
-        nameof(ExecuteAsync),
-        ex);
+      _logger.LogException(ex);
 
       return TypedResults.InternalServerError();
     }

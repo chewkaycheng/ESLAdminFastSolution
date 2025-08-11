@@ -96,26 +96,17 @@ public class ChildcareLevelRepository :
   //                        UpdateChildcareLevel
   //
   //------------------------------------------------------------------------------
-  public async Task UpdateChildcareLevelAsync(
+  public async Task<ErrorOr<bool>> UpdateChildcareLevelAsync(
     DynamicParameters parameters)
   {
     var sql = DbConstsChildcareLevel.SP_CHILDCARELEVEL_UPD;
 
-    try
+    var result = await DapExecWithTransAsync(sql, parameters);
+    if (result.IsError)
     {
-      await DapExecWithTransAsync(sql, parameters);
-      return;
+      return result.Errors;
     }
-    catch (Exception ex)
-    {
-      _messageLogger.LogDatabaseException(
-        nameof(UpdateChildcareLevelAsync),
-        ex);
-
-      throw new DatabaseException(
-        nameof(UpdateChildcareLevelAsync),
-        ex);
-    }
+    return true;
   }
 
   //------------------------------------------------------------------------------
@@ -123,26 +114,16 @@ public class ChildcareLevelRepository :
   //                        DeleteChildcareLevel
   //
   //------------------------------------------------------------------------------
-  public async Task DeleteChildcareLevelAsync(
+  public async Task<ErrorOr<bool>> DeleteChildcareLevelAsync(
     DynamicParameters parameters)
   {
-    try
-    {
-      var sql = DbConstsChildcareLevel.SP_CHILDCARELEVEL_DEL;
+    var sql = DbConstsChildcareLevel.SP_CHILDCARELEVEL_DEL;
 
-      await DapExecWithTransAsync(sql, parameters);
-      return;
-    }
-    catch (Exception ex)
+    var result = await DapExecWithTransAsync(sql, parameters);
+    if (result.IsError)
     {
-      _messageLogger.LogDatabaseException(
-        nameof(DeleteChildcareLevelAsync),
-        ex);
-
-      throw new DatabaseException(
-        nameof(DeleteChildcareLevelAsync),
-        ex);
+      return result.Errors;
     }
+    return true;
   }
-
 }

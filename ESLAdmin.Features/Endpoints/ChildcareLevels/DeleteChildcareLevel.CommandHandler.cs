@@ -1,10 +1,10 @@
 ﻿using Dapper;
+using ESLAdmin.Common.Errors;
 using ESLAdmin.Infrastructure.Repositories;
 using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
-using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
@@ -53,33 +53,38 @@ public class DeleteChildcareLevelCommandHandler :
     try
     {
       DynamicParameters parameters = command.Mapper.ToParameters(command.Id);
-      await _repositoryManager
+      var result = await _repositoryManager
               .ChildcareLevelRepository
               .DeleteChildcareLevelAsync(
                 parameters);
 
-      OperationResult operationResult = command.Mapper.FromParameters(parameters);
-      if (operationResult.DbApiError == 0)
+      if (result.IsError)
       {
-        _logger.LogFunctionExit();
-        return TypedResults.NoContent();
-      }
-      else
-      {
-        var validationFailures = new List<ValidationFailure>();
-        validationFailures.AddRange(new ValidationFailure
+        var error = result.Errors.First();
+        if (error.Code != "Database.StoredProcedureError")
         {
-          PropertyName = "ConcurrencyConflict",
-          ErrorMessage = $"Cannot delete Childcare level. It is being used by {operationResult.ReferenceTable}."
-        });
-        _logger.LogFunctionExit();
-        return new ProblemDetails(validationFailures, StatusCodes.Status409Conflict);
+          return TypedResults.InternalServerError();
+        }
+        OperationResult operationResult = command.Mapper.FromParameters(parameters);
+        if (operationResult.DbApiError == 0)
+        {
+          _logger.LogFunctionExit();
+          return TypedResults.NoContent();
+        }
+        else
+        {
+          _logger.LogFunctionExit();
+          return new ProblemDetails(ErrorUtils.CreateFailureList(
+            "ConcurrencyConflict",
+            $"Cannot delete Childcare level. It is being used by {operationResult.ReferenceTable}."),
+            StatusCodes.Status409Conflict);
+        }
       }
+      return TypedResults.NoContent();
     }
     catch (Exception exception)
     {
       _logger.LogException(exception);
-
       return TypedResults.InternalServerError();
     }
   }
