@@ -1,4 +1,5 @@
-﻿using ESLAdmin.Infrastructure.RepositoryManagers;
+﻿using ESLAdmin.Common.Errors;
+using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging;
 using FastEndpoints;
 using FluentValidation.Results;
@@ -51,21 +52,25 @@ public class DeleteRoleCommandHandler : ICommandHandler<
       var result = await _repositoryManager.AuthenticationRepository.DeleteRoleAsync(command.Name);
       if (result.IsError)
       {
-        foreach (var error in result.Errors)
+        var error = result.Errors.First();
+        var statusCode = StatusCodes.Status500InternalServerError;
+        switch (error.Code)
         {
-          if (error.Code == "Identity.RoleNotFound")
-          {
-            var validationFailures = new List<ValidationFailure>();
-            validationFailures.AddRange(new ValidationFailure
-            {
-              PropertyName = error.Code,
-              ErrorMessage = error.Description
-            });
-            return new ProblemDetails(validationFailures, StatusCodes.Status404NotFound);
-          }
-
-          return TypedResults.InternalServerError();
+          case "Identity.RoleNotFound":
+            statusCode = StatusCodes.Status400BadRequest;
+            break;
+          case "Identity.ConcurrencyError":
+            statusCode = StatusCodes.Status409Conflict;
+            break;
+          default:
+            return TypedResults.InternalServerError();
         }
+
+        return new ProblemDetails(
+          ErrorUtils.CreateFailureList(
+            error.Code,
+            error.Description),
+          statusCode);
       }
 
       return TypedResults.NoContent();

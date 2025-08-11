@@ -458,15 +458,46 @@ public class IdentityRepository : IIdentityRepository
       var firstError = result.Errors.FirstOrDefault();
       return firstError?.Code switch
       {
-        "DuplicateRoleName" => Errors.IdentityErrors.DuplicateRoleName(role.Name),
-        "InvalidRoleName" => Errors.IdentityErrors.InvalidRoleName(role.Name),
-        "ConcurrencyFailure" => Errors.IdentityErrors.ConcurrencyFailure(role.Name),
-        _ => Errors.IdentityErrors.CreateRoleFailed(role.Name, result.Errors)
+        "DuplicateRoleName" => Errors.IdentityErrors.DuplicateRoleName(roleName),
+        "InvalidRoleName" => Errors.IdentityErrors.InvalidRoleName(roleName),
+        "ConcurrencyFailure" => Errors.IdentityErrors.ConcurrencyFailure(roleName),
+        _ => Errors.IdentityErrors.CreateRoleFailed(roleName, result.Errors)
       };
     }
 
     return role;
   }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       DeleteRoleAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<string>> DeleteRoleAsync(string roleName)
+  {
+
+    var role = await _roleManager.FindByNameAsync(roleName);
+    if (role == null)
+    {
+      return Errors.IdentityErrors.RoleNotFound(roleName);
+    }
+
+    var result = await _roleManager.DeleteAsync(role);
+    if (!result.Succeeded)
+    {
+      _logger.LogIdentityErrors("_roleManager.DeleteAsync", "roleName", result.Errors.ToFormattedString());
+      var firstError = result.Errors.FirstOrDefault();
+      return firstError?.Code switch
+      {
+        "RoleNotFound" => Errors.IdentityErrors.RoleNotFound(roleName),
+        "ConcurrencyFailure" => Errors.IdentityErrors.ConcurrencyFailure(roleName),
+        _ => Errors.IdentityErrors.DeleteRoleFailed(roleName, result.Errors)
+      };
+    }
+
+    return role.Id;
+  }
+
   //------------------------------------------------------------------------------
   //
   //                       GetRoleAsync
@@ -507,38 +538,6 @@ public class IdentityRepository : IIdentityRepository
       }
 
       return newRoleName;
-    }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-
-      return Errors.CommonErrors.Exception(ex.Message);
-    }
-  }
-
-  //------------------------------------------------------------------------------
-  //
-  //                       DeleteRoleAsync
-  //
-  //-------------------------------------------------------------------------------
-  public async Task<ErrorOr<string>> DeleteRoleAsync(string roleName)
-  {
-    try
-    {
-      var role = await _roleManager.FindByNameAsync(roleName);
-      if (role == null)
-      {
-        return Errors.IdentityErrors.RoleNotFound(roleName);
-      }
-
-      var result = await _roleManager.DeleteAsync(role);
-      if (!result.Succeeded)
-      {
-        _logger.LogIdentityErrors("_roleManager.DeleteAsync", "roleName", result.Errors.ToFormattedString());
-        return Errors.IdentityErrors.DeleteRoleFailed(roleName, result.Errors);
-      }
-
-      return role.Id;
     }
     catch (Exception ex)
     {
