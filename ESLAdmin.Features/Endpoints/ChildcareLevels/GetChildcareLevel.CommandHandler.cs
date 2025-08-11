@@ -36,10 +36,15 @@ public class GetChildcareLevelHandler : ICommandHandler<
     try
     {
       var parameters = command.Mapper.ToParameters(command.Id);
-      ChildcareLevel? childcareLevel = await _repositoryManager
+      var childcareLevelResult = await _repositoryManager
                                         .ChildcareLevelRepository
                                         .GetChildcareLevelAsync(parameters);
+      if (childcareLevelResult.IsError)
+      {
+        return TypedResults.InternalServerError();
+      }
 
+      var childcareLevel = childcareLevelResult.Value;
       if (childcareLevel == null)
       {
         var validationFailures = new List<ValidationFailure>();

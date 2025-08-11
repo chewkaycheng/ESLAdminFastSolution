@@ -166,7 +166,14 @@ public class IdentityRepository : IIdentityRepository
   {
     var sql = DbConstsIdentity.SQL_GETALL;
 
-    using IDbConnection connection = await _dbContextDapper.GetConnectionAsync();
+    var connectionResult = await _dbContextDapper.GetConnectionAsync();
+    if (connectionResult.IsError)
+    {
+      _logger.LogError("Failed to get database connection: {Error}", connectionResult.Errors);
+      return Enumerable.Empty<UserDto>();
+    }
+
+    using IDbConnection connection = connectionResult.Value;
     var users = await connection.QueryAsync<User>(
       sql,
       commandType: CommandType.Text);
@@ -516,35 +523,34 @@ public class IdentityRepository : IIdentityRepository
   //-------------------------------------------------------------------------------
   public async Task<ErrorOr<string>> UpdateRoleAsync(string oldRoleName, string newRoleName)
   {
-    try
+    var role = await _roleManager.FindByNameAsync(oldRoleName);
+    if (role == null)
     {
-      var role = await _roleManager.FindByNameAsync(oldRoleName);
-      if (role == null)
-      {
-        return Errors.IdentityErrors.RoleNotFound(oldRoleName);
-      }
-
-      if (await _roleManager.RoleExistsAsync(newRoleName))
-      {
-        return Errors.IdentityErrors.RoleExists(newRoleName);
-      }
-
-      role.Name = newRoleName;
-      var result = await _roleManager.UpdateAsync(role);
-      if (!result.Succeeded)
-      {
-        _logger.LogIdentityErrors("_roleManager.UpdateAsync", newRoleName, result.Errors.ToFormattedString());
-        return Errors.IdentityErrors.UpdateRoleFailed(oldRoleName, newRoleName, result.Errors);
-      }
-
-      return newRoleName;
+      return Errors.IdentityErrors.RoleNotFound(oldRoleName);
     }
-    catch (Exception ex)
+
+    //if (await _roleManager.RoleExistsAsync(newRoleName))
+    //{
+    //  return Errors.IdentityErrors.RoleExists(newRoleName);
+    //}
+
+    role.Name = newRoleName;
+    var result = await _roleManager.UpdateAsync(role);
+    if (!result.Succeeded)
     {
-      _logger.LogException(ex);
-
-      return Errors.CommonErrors.Exception(ex.Message);
+      _logger.LogIdentityErrors("_roleManager.UpdateAsync", newRoleName, result.Errors.ToFormattedString());
+      var firstError = result.Errors.First();
+      return firstError.Code switch
+      {
+        "RoleNotFound" => Errors.IdentityErrors.RoleNotFound(role.Name),
+        "DuplicateRoleName" => Errors.IdentityErrors.DuplicateRoleName(role.Name),
+        "InvalidRoleName" => Errors.IdentityErrors.InvalidRoleName(role.Name),
+        "ConcurrencyFailure" => Errors.IdentityErrors.ConcurrencyFailure(role.Name),
+        _ => Errors.IdentityErrors.UpdateRoleFailed(oldRoleName, newRoleName, result.Errors)
+      };
     }
+
+    return newRoleName;
   }
 
   //------------------------------------------------------------------------------
@@ -554,21 +560,12 @@ public class IdentityRepository : IIdentityRepository
   //-------------------------------------------------------------------------------
   public async Task<ErrorOr<IdentityRole>> GetRoleAsync(string roleName)
   {
-    try
+    var role = await _roleManager.FindByNameAsync(roleName);
+    if (role == null)
     {
-      var role = await _roleManager.FindByNameAsync(roleName);
-      if (role == null)
-      {
-        return Errors.IdentityErrors.RoleNotFound(roleName);
-      }
-      return role;
+      return Errors.IdentityErrors.RoleNotFound(roleName);
     }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-
-      return Errors.CommonErrors.Exception(ex.Message);
-    }
+    return role;
   }
 
   //------------------------------------------------------------------------------

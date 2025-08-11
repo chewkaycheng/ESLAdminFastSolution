@@ -1,4 +1,7 @@
-﻿using ESLAdmin.Infrastructure.Repositories.Interfaces;
+﻿using Dapper;
+using ErrorOr;
+using ESLAdmin.Infrastructure.Repositories.Interfaces;
+using System.Data;
 
 namespace ESLAdmin.Features.Repositories;
 
@@ -12,4 +15,5 @@ public partial class RepositoryBase<ReadT, WriteT> :
   where ReadT : class
   where WriteT : class
 {
+  
 }

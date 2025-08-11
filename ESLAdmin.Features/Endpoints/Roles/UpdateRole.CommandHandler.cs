@@ -1,4 +1,5 @@
-﻿using ESLAdmin.Infrastructure.RepositoryManagers;
+﻿using ESLAdmin.Common.Errors;
+using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging;
 using FastEndpoints;
 using FluentValidation.Results;
@@ -49,26 +50,27 @@ public class UpdateRoleCommandHandler : ICommandHandler<
 
       if (result.IsError)
       {
-        foreach (var error in result.Errors)
+        var error = result.Errors.First();
+        var statusCode = StatusCodes.Status500InternalServerError;
+        switch (error.Code)
         {
-          if (error.Code == "Identity.UpdateRoleFailed" || error.Code == "Exception")
-          {
+          case "Identity.RoleNotFound":
+          case "Identity.InvalidRoleName":
+            statusCode = StatusCodes.Status400BadRequest;
+            break;
+          case "Identity.ConcurrencyError":
+          case "Identity.RoleAlreadyExists":
+            statusCode = StatusCodes.Status409Conflict;
+            break;
+          default:
             return TypedResults.InternalServerError();
-          }
-
-          var validationFailures = new List<ValidationFailure>();
-          var statusCode = error.Code switch
-          {
-            "Identity.RoleNotFound" => StatusCodes.Status404NotFound,
-            _ => StatusCodes.Status409Conflict
-          };
-          validationFailures.AddRange(new ValidationFailure
-          {
-            PropertyName = error.Code,
-            ErrorMessage = error.Description
-          });
-          return new ProblemDetails(validationFailures, statusCode);
         }
+
+        return new ProblemDetails(
+          ErrorUtils.CreateFailureList(
+            error.Code,
+            error.Description),
+          statusCode);
       }
 
       return TypedResults.Ok(result.Value);

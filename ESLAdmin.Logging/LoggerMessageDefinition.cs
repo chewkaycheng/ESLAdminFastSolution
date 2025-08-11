@@ -78,10 +78,10 @@ public static partial class MessageLoggerDefs
   //                       LogNotFound
   //
   //------------------------------------------------------------------------------
-  [LoggerMessage(EventId = 6, Level = LogLevel.Information, Message = "The {entity} with {context} is not found.")]
+  [LoggerMessage(EventId = 6, Level = LogLevel.Information, Message = "The {entityName} with {context} is not found.")]
   public static partial void LogNotFound(
     this ILogger logger,
-    string entity,
+    string entityName,
     string? context = null);
 
   //------------------------------------------------------------------------------
@@ -89,10 +89,44 @@ public static partial class MessageLoggerDefs
   //                       LogIdentityErrors
   //
   //------------------------------------------------------------------------------
-  [LoggerMessage(EventId = 6, Level = LogLevel.Information, Message = "Identity Error performing {identityFunction}. Id: {id}. {context}")]
+  [LoggerMessage(EventId = 7, Level = LogLevel.Error, Message = "Identity Error performing {identityFunction}. Id: {id}. {context}")]
   public static partial void LogIdentityErrors(
     this ILogger logger,
     string identityFunction,
     string? id,
     string context);
+  //------------------------------------------------------------------------------
+  //
+  //                       LogIdentityErrors
+  //
+  //------------------------------------------------------------------------------
+  [LoggerMessage(EventId = 8, Level = LogLevel.Error, Message = "A database execute command failure has occured. \nSql: {sql} \nParameters: {parameters}")]
+  public static partial void LogDatabaseExecFailure(
+    this ILogger logger,
+    string sql,
+    string? parameters);
+
+  //------------------------------------------------------------------------------
+  //
+  //                     LogDatabaseException
+  //
+  //------------------------------------------------------------------------------
+  [LoggerMessage(EventId = 9, Level = LogLevel.Error, Message = "A Database Exception has occured. \nSql: '{sql}' \nParameters: '{parameters}' \nException: '{ex}'")]
+  public static partial void LogDatabaseException(
+    this ILogger logger,
+    string sql,
+    string? parameters,
+    Exception ex);
+
+  //------------------------------------------------------------------------------
+  //
+  //                     LogSerializationFailure
+  //
+  //------------------------------------------------------------------------------
+  [LoggerMessage(EventId = 10, Level = LogLevel.Error, Message = "Failed to serialize paramaters.\nException: '{ex}'")]
+  public static partial void LogSerializationFailure(
+      this ILogger logger, 
+      Exception ex);
+  
+
 }

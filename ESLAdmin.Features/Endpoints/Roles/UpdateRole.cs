@@ -37,27 +37,16 @@ public class UpdateRoleEndpoint :
   //                        ExecuteAsync
   //
   //------------------------------------------------------------------------------
-  public override async Task<Results<Ok<string>, ProblemDetails, InternalServerError>> 
+  public override async Task<Results<Ok<string>, ProblemDetails, InternalServerError>>
     ExecuteAsync(
-      UpdateRoleRequest request, 
+      UpdateRoleRequest request,
       CancellationToken c)
   {
-    try
+    UpdateRoleCommand command = new UpdateRoleCommand
     {
-      UpdateRoleCommand command = new UpdateRoleCommand
-      {
-        OldName = request.OldName,
-        NewName = request.NewName
-      };
-      return await command.ExecuteAsync(c);
-
-    }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-
-      return TypedResults.InternalServerError();
-    }
-
+      OldName = request.OldName,
+      NewName = request.NewName
+    };
+    return await command.ExecuteAsync(c);
   }
 }

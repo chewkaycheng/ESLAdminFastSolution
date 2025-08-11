@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using ErrorOr;
 using System.Data;
 
 namespace ESLAdmin.Infrastructure.Repositories.Interfaces;
@@ -17,12 +18,13 @@ public interface IRepositoryBaseDapper<ReadT, WriteT>
     DynamicParameters? parameters,
     CommandType commandType = CommandType.StoredProcedure);
 
-  Task<IEnumerable<ReadT>> DapQueryMultipleAsync(
+  Task<ErrorOr<IEnumerable<ReadT>>> DapQueryMultipleAsync(
       string sql,
       DynamicParameters? parameters,
-      CommandType commandType = CommandType.StoredProcedure);
+      CommandType commandType = CommandType.StoredProcedure,
+      CancellationToken cancellationToken = default);
 
-  Task<ReadT?> DapQuerySingleAsync(
+  Task<ErrorOr<ReadT?>> DapQuerySingleAsync(
   string sql,
   DynamicParameters? parameters,
   CommandType commandType = CommandType.StoredProcedure);
@@ -32,9 +34,10 @@ public interface IRepositoryBaseDapper<ReadT, WriteT>
     DynamicParameters parameters,
     CommandType commandType = CommandType.StoredProcedure);
 
-  Task<bool> DapExecWithTransAsync(
+  Task<ErrorOr<bool>> DapExecWithTransAsync(
     string sql,
     DynamicParameters parameters,
-    CommandType commandType = CommandType.StoredProcedure);
+    CommandType commandType = CommandType.StoredProcedure,
+    CancellationToken cancellationToken = default);
 
 }

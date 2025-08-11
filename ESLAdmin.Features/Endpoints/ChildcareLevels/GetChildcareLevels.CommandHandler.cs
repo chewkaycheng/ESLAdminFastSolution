@@ -1,8 +1,10 @@
 ﻿using ESLAdmin.Infrastructure.RepositoryManagers;
+using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
 
@@ -16,14 +18,14 @@ public class GetChildcareLevelsCommandHandler : ICommandHandler<
   Results<Ok<IEnumerable<GetChildcareLevelResponse>>, ProblemDetails, InternalServerError>>
 {
   private readonly IRepositoryManager _repositoryManager;
-  private readonly IMessageLogger _messageLogger;
+  private readonly ILogger<GetChildcareLevelsCommandHandler> _logger;
 
   public GetChildcareLevelsCommandHandler(
     IRepositoryManager repositoryManager,
-    IMessageLogger messageLogger)
+    ILogger<GetChildcareLevelsCommandHandler> logger)
   {
     _repositoryManager = repositoryManager;
-    _messageLogger = messageLogger;
+    _logger = logger;
   }
 
   public async Task<Results<Ok<IEnumerable<GetChildcareLevelResponse>>, ProblemDetails, InternalServerError>>
@@ -33,10 +35,15 @@ public class GetChildcareLevelsCommandHandler : ICommandHandler<
   {
     try
     {
-      var childcareLevels = await _repositoryManager
+      var childcareLevelsResult = await _repositoryManager
                                     .ChildcareLevelRepository
                                     .GetChildcareLevelsAsync();
+      if (childcareLevelsResult.IsError)
+      {
+        return TypedResults.InternalServerError();
+      }
 
+      var childcareLevels = childcareLevelsResult.Value;
       IEnumerable<GetChildcareLevelResponse> childcareLevelsResponse =
         childcareLevels.Select(
           childcareLevel => command.Mapper.FromEntity(
@@ -46,7 +53,7 @@ public class GetChildcareLevelsCommandHandler : ICommandHandler<
     }
     catch (Exception ex)
     {
-      _messageLogger.LogDatabaseException(nameof(ExecuteAsync), ex);
+      _logger.LogException(ex);
 
       return TypedResults.InternalServerError();
     }

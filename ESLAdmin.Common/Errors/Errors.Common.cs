@@ -44,6 +44,5 @@ public static partial class Errors
       }
       return error;
     }
-
   }
 }

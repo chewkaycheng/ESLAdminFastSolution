@@ -24,7 +24,8 @@ public class ConfigurationParams : IConfigurationParams
     {
       { "Jwt:Key", config["Jwt:Key"] ?? "" },
       { "Jwt:Issuer", config["Jwt:Issuer"] ?? "" },
-      { "Jwt:Audience", config["Jwt:Audience"] ?? "" }
+      { "Jwt:Audience", config["Jwt:Audience"] ?? "" },
+      { "ConnectionStrings:ESLAdminConnection", config["ConnectionStrings:ESLAdminConnection"] ?? "" }
     };
   }
 

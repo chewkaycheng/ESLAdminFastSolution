@@ -1,4 +1,5 @@
-﻿using ESLAdmin.Infrastructure.RepositoryManagers;
+﻿using ESLAdmin.Common.Errors;
+using ESLAdmin.Infrastructure.RepositoryManagers;
 using ESLAdmin.Logging;
 using FastEndpoints;
 using FluentValidation.Results;
@@ -51,19 +52,13 @@ public class GetRoleCommandHandler : ICommandHandler<
       var result = await _repositoryManager.AuthenticationRepository.GetRoleAsync(command.Name);
       if (result.IsError)
       {
-        foreach (var error in result.Errors)
-        {
-          if (error.Code == "Exception")
-            return TypedResults.InternalServerError();
-
-          var validationFailures = new List<ValidationFailure>();
-          validationFailures.AddRange(new ValidationFailure
-          {
-            PropertyName = error.Code,
-            ErrorMessage = error.Description
-          });
-          return new ProblemDetails(validationFailures, StatusCodes.Status404NotFound);
-        }
+        _logger.LogNotFound("role", $"name: '{command.Name}'");
+        var error = result.Errors.First();
+        return new ProblemDetails(
+           ErrorUtils.CreateFailureList(
+             error.Code,
+             error.Description),
+           StatusCodes.Status404NotFound);
       }
 
       var response = command.Mapper.FromEntity(result.Value);
@@ -72,7 +67,6 @@ public class GetRoleCommandHandler : ICommandHandler<
     catch (Exception ex)
     {
       _logger.LogException(ex);
-
       return TypedResults.InternalServerError();
     }
   }

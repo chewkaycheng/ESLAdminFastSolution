@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using ErrorOr;
 using ESLAdmin.Common.Exceptions;
 using ESLAdmin.Domain.Entities;
 using ESLAdmin.Features.ChildcareLevels.Repositories.Interfaces;
@@ -7,6 +8,7 @@ using ESLAdmin.Infrastructure.Data.Consts;
 using ESLAdmin.Infrastructure.Data.Interfaces;
 using ESLAdmin.Infrastructure.Repositories;
 using ESLAdmin.Logging.Interface;
+using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Features.ChildcareLevels.Repositories;
 
@@ -26,65 +28,10 @@ public class ChildcareLevelRepository :
   //------------------------------------------------------------------------------
   public ChildcareLevelRepository(
     IDbContextDapper dbContextDapper,
+    ILogger logger,
     IMessageLogger messageLogger)
-    : base(dbContextDapper, messageLogger)
+    : base(dbContextDapper, logger, messageLogger)
   {
-  }
-
-  //------------------------------------------------------------------------------
-  //
-  //                        GetChildcareLevelsAsync
-  //
-  //------------------------------------------------------------------------------
-  public async Task<IEnumerable<ChildcareLevel>> GetChildcareLevelsAsync()
-  {
-    try
-    {
-      var sql = DbConstsChildcareLevel.SQL_GETALL;
-
-      var childcareLevels = await DapQueryMultipleAsync(sql, null);
-
-      return childcareLevels;
-    }
-    catch (Exception ex)
-    {
-      _messageLogger.LogDatabaseException(
-        nameof(GetChildcareLevelsAsync),
-        ex);
-
-      throw new DatabaseException(
-        nameof(GetChildcareLevelsAsync),
-        ex);
-    }
-  }
-
-  //------------------------------------------------------------------------------
-  //
-  //                        GetChildcareLevelAsync
-  //
-  //------------------------------------------------------------------------------
-  public async Task<ChildcareLevel?> GetChildcareLevelAsync(
-   DynamicParameters parameters)
-  {
-    try
-    {
-      var sql = DbConstsChildcareLevel.SQL_GETBYID;
-
-      ChildcareLevel? childcareLevel = await DapQuerySingleAsync(
-        sql,
-        parameters);
-      return childcareLevel;
-    }
-    catch (Exception ex)
-    {
-      _messageLogger.LogDatabaseException(
-        nameof(GetChildcareLevelAsync),
-        ex);
-
-      throw new DatabaseException(
-        nameof(GetChildcareLevelAsync),
-        ex);
-    }
   }
 
   //------------------------------------------------------------------------------
@@ -92,26 +39,56 @@ public class ChildcareLevelRepository :
   //                        CreateChildcareLevel
   //
   //------------------------------------------------------------------------------
-  public async Task CreateChildcareLevelAsync(
+  public async Task<ErrorOr<bool>> CreateChildcareLevelAsync(
     DynamicParameters parameters)
   {
-    try
-    {
-      var sql = DbConstsChildcareLevel.SP_CHILDCARELEVEL_ADD;
+    var sql = DbConstsChildcareLevel.SP_CHILDCARELEVEL_ADD;
 
-      await DapExecWithTransAsync(sql, parameters);
-      return;
-    }
-    catch (Exception ex)
+    var result = await DapExecWithTransAsync(sql, parameters);
+    if (result.IsError)
     {
-      _messageLogger.LogDatabaseException(
-        nameof(CreateChildcareLevelAsync),
-        ex);
-
-      throw new DatabaseException(
-        nameof(CreateChildcareLevelAsync),
-        ex);
+      return result.Errors;
     }
+    return true;
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                        GetChildcareLevelsAsync
+  //
+  //------------------------------------------------------------------------------
+  public async Task<ErrorOr<IEnumerable<ChildcareLevel>>> GetChildcareLevelsAsync()
+  {
+    var sql = DbConstsChildcareLevel.SQL_GETALL;
+
+    var childcareLevelsResult = await DapQueryMultipleAsync(sql, null);
+
+    if (childcareLevelsResult.IsError)
+    {
+      return childcareLevelsResult.Errors;
+    }
+    var childcareLevels = childcareLevelsResult.Value;
+    return ErrorOrFactory.From(childcareLevels);
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                        GetChildcareLevelAsync
+  //
+  //------------------------------------------------------------------------------
+  public async Task<ErrorOr<ChildcareLevel?>> GetChildcareLevelAsync(
+   DynamicParameters parameters)
+  {
+    var sql = DbConstsChildcareLevel.SQL_GETBYID;
+    var childcareLevelResult = await DapQuerySingleAsync(
+      sql,
+      parameters);
+    if (childcareLevelResult.IsError)
+    {
+      return childcareLevelResult.Errors;
+    }
+
+    return childcareLevelResult.Value;
   }
 
   //------------------------------------------------------------------------------

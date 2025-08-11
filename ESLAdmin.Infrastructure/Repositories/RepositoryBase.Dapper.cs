@@ -1,8 +1,12 @@
 ﻿using Dapper;
+using ErrorOr;
+using ESLAdmin.Common.Errors;
 using ESLAdmin.Common.Exceptions;
 using ESLAdmin.Infrastructure.Repositories;
 using ESLAdmin.Infrastructure.Repositories.Interfaces;
+using ESLAdmin.Logging;
 using FirebirdSql.Data.FirebirdClient;
+using Microsoft.Extensions.Logging;
 using System.Data;
 
 namespace ESLAdmin.Features.Repositories;
@@ -45,22 +49,25 @@ public partial class RepositoryBase<ReadT, WriteT> :
   //                       DapQueryMultipleAsync
   //
   //------------------------------------------------------------------------------
-  public async Task<IEnumerable<ReadT>> DapQueryMultipleAsync(
+  public async Task<ErrorOr<IEnumerable<ReadT>>> DapQueryMultipleAsync(
     string sql,
     DynamicParameters? parameters,
-    CommandType commandType = CommandType.StoredProcedure)
+    CommandType commandType = CommandType.StoredProcedure,
+    CancellationToken cancellationToken = default)
   {
-    if (_dbContextDapper == null)
-      throw new NullException(
-        nameof(DapQueryMultipleAsync),
-        "_dbcontextDapper");
+    var connectionResult = await _dbContextDapper.GetConnectionAsync();
+    if (connectionResult.IsError)
+    {
+   
+      return connectionResult.Errors;
+    }
+    using IDbConnection connection = connectionResult.Value;
 
-    using IDbConnection connection = await _dbContextDapper.GetConnectionAsync();
-
-    return await connection.QueryAsync<ReadT>(
+    var result =  await connection.QueryAsync<ReadT>(
           sql,
           parameters,
           commandType: commandType);
+    return ErrorOrFactory.From(result);
   }
 
   //------------------------------------------------------------------------------
@@ -91,17 +98,17 @@ public partial class RepositoryBase<ReadT, WriteT> :
   //                       DapQuerySingleAsync
   //
   //------------------------------------------------------------------------------
-  public async Task<ReadT?> DapQuerySingleAsync(
+  public async Task<ErrorOr<ReadT?>> DapQuerySingleAsync(
     string sql,
     DynamicParameters? parameters,
     CommandType commandType = CommandType.StoredProcedure)
   {
-    if (_dbContextDapper == null)
-      throw new NullException(
-        nameof(DapQueryMultipleAsync),
-        "_dbcontextDapper");
-
-    using IDbConnection connection = await _dbContextDapper.GetConnectionAsync();
+    var connectionResult = await _dbContextDapper.GetConnectionAsync();
+    if (connectionResult.IsError)
+    {
+      return connectionResult.Errors;
+    }
+    using IDbConnection connection = connectionResult.Value;
     return await connection.QueryFirstOrDefaultAsync<ReadT>(
           sql,
           parameters,
@@ -186,20 +193,44 @@ public partial class RepositoryBase<ReadT, WriteT> :
   //                       DapExecWithTransAsync
   //
   //------------------------------------------------------------------------------
-  public async Task<bool> DapExecWithTransAsync(
+  public async Task<ErrorOr<bool>> DapExecWithTransAsync(
     string sql,
     DynamicParameters parameters,
-    CommandType commandType = CommandType.StoredProcedure)
+    CommandType commandType = CommandType.StoredProcedure,
+    CancellationToken cancellationToken = default)
   {
-    if (_dbContextDapper == null)
-      throw new NullException(
-        nameof(DapExecWithTrans),
-        "_dbcontextDapper");
+    if (string.IsNullOrWhiteSpace(sql))
+    {
+      _logger.LogError("DapExecWithTransAsync: SQL query or stored procedure name is null or empty.");
+      return Errors.DatabaseErrors.InvalidSqlQuery("SQL query or stored procedure name cannot be null or empty.");
+    }
 
-    using IDbConnection connection
-      = await _dbContextDapper.GetConnectionAsync();
-    using IDbTransaction transaction =
-      await _dbContextDapper.GetTransactionAsync(connection);
+    if (parameters == null)
+    {
+      _logger.LogError("DapExecWithTransAsync: Parameters are null.");
+      return Errors.DatabaseErrors.InvalidParameters("Parameters cannot be null.");
+    }
+
+    var connectionResult = await _dbContextDapper.GetConnectionAsync();
+    if (connectionResult.IsError)
+    {
+      _logger.LogWarning(
+        "DapExecWithTransAsync: Failed to get connection: {Error}",
+        connectionResult.FirstError.Description);
+      return connectionResult.Errors;
+    }
+    using IDbConnection connection = connectionResult.Value;
+
+    var transactionResult = await _dbContextDapper.GetTransactionAsync(connection);
+    if (transactionResult.IsError)
+    {
+      _logger.LogWarning(
+        "DapExecWithTransAsync: Failed to begin transaction: {Error}",
+        transactionResult.FirstError.Description);
+      return transactionResult.Errors;
+    }
+
+    using IDbTransaction transaction = transactionResult.Value;
 
     try
     {
@@ -215,10 +246,9 @@ public partial class RepositoryBase<ReadT, WriteT> :
 
       if (dbApiError == 0)
       {
-        await ((FbTransaction)transaction).CommitAsync();
+        await ((FbTransaction)transaction).CommitAsync(cancellationToken);
 
-        _messageLogger.LogDatabaseExecSuccess(
-          nameof(DapExecWithTransAsync),
+        _logger.LogDatabaseExecSuccess(
           sql,
           _dbContextDapper.SerializeDynamicParameters(parameters));
 
@@ -226,30 +256,24 @@ public partial class RepositoryBase<ReadT, WriteT> :
       }
       else
       {
-        _messageLogger.LogDatabaseExecFailure(
-          nameof(DapExecWithTransAsync),
+        _logger.LogDatabaseExecFailure(
           sql,
           _dbContextDapper.SerializeDynamicParameters(parameters));
 
         await ((FbTransaction)transaction).RollbackAsync();
-        return false;
+        return Errors.DatabaseErrors.StoredProcedureError(sql, dbApiError);
       }
     }
     catch (Exception ex)
     {
       await ((FbTransaction)transaction).RollbackAsync();
 
-      _messageLogger.LogDatabaseException(
-        nameof(DapExecWithTransAsync),
+      _logger.LogDatabaseException(
         sql,
         _dbContextDapper.SerializeDynamicParameters(parameters),
         ex);
 
-      throw new DatabaseException(
-        nameof(DapExecWithTrans),
-        sql,
-        _dbContextDapper.SerializeDynamicParameters(parameters),
-        ex);
+      return Errors.CommonErrors.Exception(ex.Message);
     }
   }
 }

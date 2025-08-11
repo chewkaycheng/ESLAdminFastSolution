@@ -1,9 +1,11 @@
 ﻿using Dapper;
-using ESLAdmin.Common.Exceptions;
+using ErrorOr;
+using ESLAdmin.Common.Errors;
+using ESLAdmin.Infrastructure.Configuration;
 using ESLAdmin.Infrastructure.Data.Interfaces;
-using ESLAdmin.Logging.Interface;
+using ESLAdmin.Logging;
 using FirebirdSql.Data.FirebirdClient;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Text.Json;
 
@@ -16,7 +18,7 @@ namespace ESLAdmin.Infrastructure.Data;
 //------------------------------------------------------------------------------
 public class DbContextDapper : IDbContextDapper
 {
-  private readonly IMessageLogger _messageLogger;
+  private readonly ILogger<DbContextDapper> _logger;
   private readonly string _connectionString;
 
   //------------------------------------------------------------------------------
@@ -25,16 +27,11 @@ public class DbContextDapper : IDbContextDapper
   //
   //------------------------------------------------------------------------------
   public DbContextDapper(
-    IMessageLogger messageLogger,
-    IConfiguration configuration)
+    ILogger<DbContextDapper> logger,
+    IConfigurationParams configParams)
   {
-    _messageLogger = messageLogger;
-
-    _connectionString = configuration.GetConnectionString("ESLAdminConnection")
-      ?? throw new NullOrEmptyException("Connection string", nameof(DbContextDapper));
-
-    if (string.IsNullOrEmpty(_connectionString))
-      throw new NullOrEmptyException("Connection string", nameof(DbContextDapper));
+    _logger = logger;
+    _connectionString = configParams.Settings["ConnectionStrings:ESLAdminConnection"]!;
   }
 
   //------------------------------------------------------------------------------
@@ -52,11 +49,41 @@ public class DbContextDapper : IDbContextDapper
   //                       GetConnectionAsync
   //
   //------------------------------------------------------------------------------
-  public async Task<IDbConnection> GetConnectionAsync()
+  public async Task<ErrorOr<IDbConnection>> GetConnectionAsync()
   {
-    var connection = new FbConnection(_connectionString);
-    await connection.OpenAsync();
-    return connection;
+    try
+    {
+      _logger.LogDebug("Attempting to open database connection.");
+      var connection = new FbConnection(_connectionString);
+      await connection.OpenAsync();
+      _logger.LogDebug("Database connection opened successfully.");
+      return connection;
+    }
+    catch (FbException ex)
+    {
+      _logger.LogException(ex);
+      return Errors.DatabaseErrors.DatabaseConnectionError(ex.Message);
+    }
+    catch (ArgumentException ex)
+    {
+      _logger.LogException(ex);
+      return Errors.DatabaseErrors.InvalidConnectionString(ex.Message);
+    }
+    catch (InvalidOperationException ex)
+    {
+      _logger.LogException(ex);
+      return Errors.DatabaseErrors.InvalidOperation(ex.Message);
+    }
+    catch (OperationCanceledException ex)
+    {
+      _logger.LogException(ex);
+      return Errors.DatabaseErrors.OperationCanceled(ex.Message);
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return Errors.CommonErrors.Exception(ex.Message);
+    }
   }
 
   //------------------------------------------------------------------------------
@@ -64,20 +91,50 @@ public class DbContextDapper : IDbContextDapper
   //                       GetTransactionAsync
   //
   //------------------------------------------------------------------------------
-  public async Task<IDbTransaction> GetTransactionAsync(
-    IDbConnection connection)
+  public async Task<ErrorOr<IDbTransaction>> GetTransactionAsync(
+    IDbConnection connection, CancellationToken cancellationToken = default)
   {
     if (connection == null)
-      throw new ArgumentNullException(
-        string.Format("Database connection cannot be null. \nfuncName: {0}",
-          nameof(GetTransactionAsync)));
-
-    if (connection.State != ConnectionState.Open)
     {
-      await ((FbConnection)connection).OpenAsync();
+      _logger.LogError("GetTransactionAsync: Connection is null.");
+      return Errors.DatabaseErrors.ConnectionNullError();
     }
 
-    return await ((FbConnection)connection).BeginTransactionAsync();
+    if (connection is not FbConnection fbConnection)
+    {
+      _logger.LogError("GetTransactionAsync: Connection is not a Firebird connection. Type: {ConnectionType}", connection.GetType().Name);
+      return Errors.DatabaseErrors.InvalidConnectionType("Connection must be a Firebird connection.");
+    }
+
+    try
+    {
+      if (connection.State != ConnectionState.Open)
+      {
+        await ((FbConnection)connection).OpenAsync(cancellationToken);
+      }
+
+      return await ((FbConnection)connection).BeginTransactionAsync(cancellationToken);
+    }
+    catch (FbException ex)
+    {
+      _logger.LogException(ex);
+      return Errors.DatabaseErrors.DatabaseConnectionError($"Firebird error: {ex.Message} (ErrorCode: {ex.ErrorCode})");
+    }
+    catch (InvalidOperationException ex)
+    {
+      _logger.LogException(ex);
+      return Errors.DatabaseErrors.InvalidOperation(ex.Message);
+    }
+    catch (OperationCanceledException ex)
+    {
+      _logger.LogException(ex);
+      return Errors.DatabaseErrors.OperationCanceled(ex.Message);
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return Errors.CommonErrors.Exception(ex.Message);
+    }
   }
 
   //------------------------------------------------------------------------------
@@ -111,8 +168,7 @@ public class DbContextDapper : IDbContextDapper
     }
     catch (Exception ex)
     {
-      _messageLogger.LogSerializationFailure(
-        nameof(SerializeDynamicParameters),
+      _logger.LogSerializationFailure(
         ex);
       return "";
     }
