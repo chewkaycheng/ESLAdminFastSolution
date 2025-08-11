@@ -380,5 +380,22 @@ public static partial class Errors
       AddMetadata(error.Metadata, errors);
       return error;
     }
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       DuplicateRoleName
+    //
+    //-------------------------------------------------------------------------------
+    public static Error DuplicateRoleName(string roleName) =>
+        Error.Failure("Identity.DuplicateRoleName", $"Role name '{roleName}' already exists.");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       InvalidRoleName
+    //
+    //-------------------------------------------------------------------------------
+    public static Error InvalidRoleName(string roleName) =>
+        Error.Failure("Identity.InvalidRoleName", $"Role name '{roleName}' is invalid.");
   }
 }
+

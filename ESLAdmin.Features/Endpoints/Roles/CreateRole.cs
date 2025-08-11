@@ -49,15 +49,6 @@ public class CreateRoleEndpoint :
   public override async Task<Results<Ok<CreateRoleResponse>, ProblemDetails, InternalServerError>> ExecuteAsync(
     CreateRoleRequest request, CancellationToken c)
   {
-    try
-    {
-      return await Map.ToCommand(request, Map).ExecuteAsync();
-    }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-
-      return TypedResults.InternalServerError();
-    }
+    return await Map.ToCommand(request, Map).ExecuteAsync();
   }
 }

@@ -61,12 +61,14 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // Validate configuration at startup
-var configParams = builder.Services.BuildServiceProvider()
-    .GetRequiredService<IConfigurationParams>();
-var logger = builder.Services.BuildServiceProvider()
-    .GetRequiredService<ILogger<Program>>();
+//var configParams = builder.Services.BuildServiceProvider()
+//    .GetRequiredService<IConfigurationParams>();
+//var logger = builder.Services.BuildServiceProvider()
+//    .GetRequiredService<ILogger<Program>>();
 
-configParams.ValidateConfiguration(logger);
+//configParams.ValidateConfiguration(logger);
+
+builder.Services.AddHostedService<ConfigurationValidationService>(); 
 
 var app = builder.Build();
 
@@ -118,3 +120,38 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 app.Run();
+
+
+public class ConfigurationValidationService : IHostedService
+{
+  private readonly IConfigurationParams _configParams;
+  private readonly ILogger<ConfigurationValidationService> _logger;
+
+  public ConfigurationValidationService(
+         IConfigurationParams configParams,
+         ILogger<ConfigurationValidationService> logger)
+  {
+    _configParams = configParams;
+    _logger = logger;
+  }
+  public Task StartAsync(CancellationToken cancellationToken)
+  {
+    _logger.LogInformation("Starting configuration validation...");
+    try
+    {
+      _configParams.ValidateConfiguration(_logger);
+      _logger.LogInformation("Configuration validation completed successfully.");
+    }
+    catch (Exception ex)
+    {
+      _logger.LogCritical(ex, "Configuration validation failed. Application will not start.");
+      throw; // Rethrow to prevent application startup
+    }
+    return Task.CompletedTask;
+  }
+
+  public Task StopAsync(CancellationToken cancellationToken)
+  {
+    return Task.CompletedTask;
+  }
+}

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace ESLAdmin.Infrastructure.Repositories.Interfaces;
 
-public interface IAuthenticationRepository
+public interface IIdentityRepository
 {
   Task<ErrorOr<string>> AddToRoleAsync(
   string email,

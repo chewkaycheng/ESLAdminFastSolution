@@ -19,7 +19,7 @@ namespace ESLAdmin.Infrastructure.RepositoryManagers;
 public class RepositoryManager : IRepositoryManager
 {
   private readonly Lazy<IChildcareLevelRepository> _childcareLevelRepository;
-  private readonly Lazy<IAuthenticationRepository>
+  private readonly Lazy<IIdentityRepository>
     _authenticationRespository;
 
   //------------------------------------------------------------------------------
@@ -41,8 +41,8 @@ public class RepositoryManager : IRepositoryManager
         dbContextDapper,
         messageLogger));
 
-    _authenticationRespository = new Lazy<IAuthenticationRepository>(
-      () => new AuthenticationRepository(
+    _authenticationRespository = new Lazy<IIdentityRepository>(
+      () => new IdentityRepository(
         logger,
         messageLogger,
         userManager,
@@ -65,7 +65,7 @@ public class RepositoryManager : IRepositoryManager
   //                       AuthenticationRepository
   //
   //------------------------------------------------------------------------------
-  public IAuthenticationRepository AuthenticationRepository =>
+  public IIdentityRepository AuthenticationRepository =>
     _authenticationRespository.Value;
 }
 

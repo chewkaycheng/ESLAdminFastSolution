@@ -20,10 +20,10 @@ namespace ESLAdmin.Features.Users.Repositories;
 
 //------------------------------------------------------------------------------
 //
-//                       class AuthenticationRepository
+//                       class IIdentityRepository
 //
 //-------------------------------------------------------------------------------
-public class AuthenticationRepository : IAuthenticationRepository
+public class IdentityRepository : IIdentityRepository
 {
   private readonly IMessageLogger _messageLogger;
   private readonly ILogger _logger;
@@ -35,10 +35,10 @@ public class AuthenticationRepository : IAuthenticationRepository
 
   //------------------------------------------------------------------------------
   //
-  //                       AuthenticationRepository
+  //                       IdentityRepository
   //
   //-------------------------------------------------------------------------------
-  public AuthenticationRepository(
+  public IdentityRepository(
     ILogger logger,
     IMessageLogger messageLogger,
     UserManager<User> userManager,
@@ -213,6 +213,13 @@ public class AuthenticationRepository : IAuthenticationRepository
     var result = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: false);
     if (!result.Succeeded)
     {
+      _logger.LogWarning(
+                    "Sign-in failed for user '{UserId}': IsLockedOut={IsLockedOut}, IsNotAllowed={IsNotAllowed}, RequiresTwoFactor={RequiresTwoFactor}",
+                    user.Id,
+                    result.IsLockedOut,
+                    result.IsNotAllowed,
+                    result.RequiresTwoFactor);
+
       return Errors.IdentityErrors.UserLoginFailed();
     }
 
@@ -420,31 +427,12 @@ public class AuthenticationRepository : IAuthenticationRepository
   //-------------------------------------------------------------------------------
   public async Task<ErrorOr<User>> FindByUserNameAsync(string username)
   {
-    try
+    var user = await _userManager.FindByNameAsync(username);
+    if (user == null)
     {
-      var user = await _userManager.FindByNameAsync(username);
-      if (user == null)
-      {
-        return Errors.IdentityErrors.UserNameNotFound(username);
-      }
-      return user;
+      return Errors.IdentityErrors.UserNameNotFound(username);
     }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-      return Errors.CommonErrors.Exception(ex.Message);
-    }
-  }
-
-  //------------------------------------------------------------------------------
-  //
-  //                       GetRoleAsync
-  //
-  //-------------------------------------------------------------------------------
-  public async Task<List<string>> GetRolesAsync(User user)
-  {
-    IList<string> roles = await _userManager.GetRolesAsync(user);
-    return roles.ToList();
+    return user;
   }
 
   //------------------------------------------------------------------------------
@@ -454,31 +442,40 @@ public class AuthenticationRepository : IAuthenticationRepository
   //-------------------------------------------------------------------------------
   public async Task<ErrorOr<IdentityRole>> CreateRoleAsync(string roleName)
   {
-    try
+    //if (await _roleManager.RoleExistsAsync(roleName))
+    //{
+    //  return Errors.IdentityErrors.RoleExists(roleName);
+    //}
+
+    var role = new IdentityRole(roleName);
+    var result = await _roleManager.CreateAsync(role);
+
+    if (!result.Succeeded)
     {
-      if (await _roleManager.RoleExistsAsync(roleName))
+      _logger.LogIdentityErrors("_roleManager.CreateAsync", roleName, result.Errors.ToFormattedString());
+
+      // Map specific Identity errors to ErrorOr
+      var firstError = result.Errors.FirstOrDefault();
+      return firstError?.Code switch
       {
-        return Errors.IdentityErrors.RoleExists(roleName);
-      }
-
-
-      var role = new IdentityRole(roleName);
-      var result = await _roleManager.CreateAsync(role);
-
-      if (!result.Succeeded)
-      {
-        _logger.LogIdentityErrors("_roleManager.CreateAsync", roleName, result.Errors.ToFormattedString());
-        Errors.IdentityErrors.CreateRoleFailed(roleName, result.Errors);
-      }
-
-      return role;
+        "DuplicateRoleName" => Errors.IdentityErrors.DuplicateRoleName(role.Name),
+        "InvalidRoleName" => Errors.IdentityErrors.InvalidRoleName(role.Name),
+        "ConcurrencyFailure" => Errors.IdentityErrors.ConcurrencyFailure(role.Name),
+        _ => Errors.IdentityErrors.CreateRoleFailed(role.Name, result.Errors)
+      };
     }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
 
-      return Errors.CommonErrors.Exception(ex.Message);
-    }
+    return role;
+  }
+  //------------------------------------------------------------------------------
+  //
+  //                       GetRoleAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<List<string>> GetRolesAsync(User user)
+  {
+    IList<string> roles = await _userManager.GetRolesAsync(user);
+    return roles.ToList();
   }
 
   //------------------------------------------------------------------------------

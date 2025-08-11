@@ -1,4 +1,5 @@
-﻿using ESLAdmin.Infrastructure.RepositoryManagers;
+﻿using ESLAdmin.Common.Errors;
+using ESLAdmin.Infrastructure.RepositoryManagers;
 using FastEndpoints;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
@@ -43,23 +44,29 @@ public class CreateRoleCommandHandler : ICommandHandler<
       CancellationToken ct)
   {
     var result = await _repositoryManager.AuthenticationRepository.CreateRoleAsync(command.Name);
+
     if (result.IsError)
     {
-      foreach (var error in result.Errors)
+      var error = result.Errors.First();
+      var statusCode = StatusCodes.Status500InternalServerError;
+      switch (error.Code)
       {
-        if ((error.Code == "Exception") || (error.Code == "Identity.CreateRoleFailed"))
-        {
+        case "Identity.DuplicateRoleName":
+        case "Identity.InvalidRoleName":
+          statusCode = StatusCodes.Status400BadRequest;
+          break;
+        case "Identity.ConcurrencyError":
+          statusCode = StatusCodes.Status409Conflict;
+          break;
+        default:
           return TypedResults.InternalServerError();
-        }
-
-        var validationFailures = new List<ValidationFailure>();
-        validationFailures.AddRange(new ValidationFailure
-        {
-          PropertyName = error.Code,
-          ErrorMessage = error.Description
-        });
-        return new ProblemDetails(validationFailures, StatusCodes.Status409Conflict);
       }
+
+      return new ProblemDetails(
+        ErrorUtils.CreateFailureList(
+          error.Code,
+          error.Description),
+        statusCode);
     }
 
     return TypedResults.Ok(command.Mapper.FromEntity(result.Value));
