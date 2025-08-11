@@ -15,7 +15,7 @@ public partial class RepositoryBase<ReadT, WriteT> :
   where ReadT : class
   where WriteT : class
 {
-  protected IDbContextDapper? _dbContextDapper;
+  protected IDbContextDapper _dbContextDapper;
   //protected IDbContextEF? _dbContextEF;
   protected IMessageLogger _messageLogger;
   protected ILogger _logger;
@@ -26,7 +26,7 @@ public partial class RepositoryBase<ReadT, WriteT> :
   //
   //------------------------------------------------------------------------------
   public RepositoryBase(
-    IDbContextDapper? dbContextDapper,
+    IDbContextDapper dbContextDapper,
     ILogger logger,
     IMessageLogger messageLogger)
   {

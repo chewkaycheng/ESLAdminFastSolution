@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using ErrorOr;
-using ESLAdmin.Common.Exceptions;
 using ESLAdmin.Domain.Entities;
 using ESLAdmin.Features.ChildcareLevels.Repositories.Interfaces;
 using ESLAdmin.Features.Repositories;
