@@ -39,9 +39,21 @@ public class DbContextDapper : IDbContextDapper
   //                       GetConnection
   //
   //------------------------------------------------------------------------------
-  public IDbConnection GetConnection()
+  public ErrorOr<IDbConnection> GetConnection()
   {
-    return new FbConnection(_connectionString);
+    try
+    {
+      _logger.LogDebug("Attempting to open database connection.");
+      var connection =  new FbConnection(_connectionString);
+      connection.Open();
+      _logger.LogDebug("Database connection opened successfully.");
+      return connection;
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return Errors.DatabaseErrors.DatabaseConnectionError(ex.Message);
+    }
   }
 
   //------------------------------------------------------------------------------
@@ -59,26 +71,26 @@ public class DbContextDapper : IDbContextDapper
       _logger.LogDebug("Database connection opened successfully.");
       return connection;
     }
-    catch (FbException ex)
-    {
-      _logger.LogException(ex);
-      return Errors.DatabaseErrors.DatabaseConnectionError(ex.Message);
-    }
-    catch (ArgumentException ex)
-    {
-      _logger.LogException(ex);
-      return Errors.DatabaseErrors.InvalidConnectionString(ex.Message);
-    }
-    catch (InvalidOperationException ex)
-    {
-      _logger.LogException(ex);
-      return Errors.DatabaseErrors.InvalidOperation(ex.Message);
-    }
-    catch (OperationCanceledException ex)
-    {
-      _logger.LogException(ex);
-      return Errors.DatabaseErrors.OperationCanceled(ex.Message);
-    }
+    //catch (FbException ex)
+    //{
+    //  _logger.LogException(ex);
+    //  return Errors.DatabaseErrors.DatabaseConnectionError(ex.Message);
+    //}
+    //catch (ArgumentException ex)
+    //{
+    //  _logger.LogException(ex);
+    //  return Errors.DatabaseErrors.InvalidConnectionString(ex.Message);
+    //}
+    //catch (InvalidOperationException ex)
+    //{
+    //  _logger.LogException(ex);
+    //  return Errors.DatabaseErrors.InvalidOperation(ex.Message);
+    //}
+    //catch (OperationCanceledException ex)
+    //{
+    //  _logger.LogException(ex);
+    //  return Errors.DatabaseErrors.OperationCanceled(ex.Message);
+    //}
     catch (Exception ex)
     {
       _logger.LogException(ex);
@@ -96,14 +108,18 @@ public class DbContextDapper : IDbContextDapper
   {
     if (connection == null)
     {
-      _logger.LogError("GetTransactionAsync: Connection is null.");
+      _logger.LogError(
+        "GetTransactionAsync: Connection is null.");
       return Errors.DatabaseErrors.ConnectionNullError();
     }
 
     if (connection is not FbConnection fbConnection)
     {
-      _logger.LogError("GetTransactionAsync: Connection is not a Firebird connection. Type: {ConnectionType}", connection.GetType().Name);
-      return Errors.DatabaseErrors.InvalidConnectionType("Connection must be a Firebird connection.");
+      _logger.LogError(
+        "GetTransactionAsync: Connection is not a Firebird connection. Type: {ConnectionType}", 
+        connection.GetType().Name);
+      return Errors.DatabaseErrors.InvalidConnectionType(
+        "Connection must be a Firebird connection.");
     }
 
     try
@@ -115,21 +131,21 @@ public class DbContextDapper : IDbContextDapper
 
       return await ((FbConnection)connection).BeginTransactionAsync(cancellationToken);
     }
-    catch (FbException ex)
-    {
-      _logger.LogException(ex);
-      return Errors.DatabaseErrors.DatabaseConnectionError($"Firebird error: {ex.Message} (ErrorCode: {ex.ErrorCode})");
-    }
-    catch (InvalidOperationException ex)
-    {
-      _logger.LogException(ex);
-      return Errors.DatabaseErrors.InvalidOperation(ex.Message);
-    }
-    catch (OperationCanceledException ex)
-    {
-      _logger.LogException(ex);
-      return Errors.DatabaseErrors.OperationCanceled(ex.Message);
-    }
+    //catch (FbException ex)
+    //{
+    //  _logger.LogException(ex);
+    //  return Errors.DatabaseErrors.DatabaseConnectionError($"Firebird error: {ex.Message} (ErrorCode: {ex.ErrorCode})");
+    //}
+    //catch (InvalidOperationException ex)
+    //{
+    //  _logger.LogException(ex);
+    //  return Errors.DatabaseErrors.InvalidOperation(ex.Message);
+    //}
+    //catch (OperationCanceledException ex)
+    //{
+    //  _logger.LogException(ex);
+    //  return Errors.DatabaseErrors.OperationCanceled(ex.Message);
+    //}
     catch (Exception ex)
     {
       _logger.LogException(ex);

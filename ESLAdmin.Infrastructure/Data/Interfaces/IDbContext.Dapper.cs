@@ -6,7 +6,7 @@ namespace ESLAdmin.Infrastructure.Data.Interfaces;
 
 public interface IDbContextDapper
 {
-  IDbConnection GetConnection();
+  ErrorOr<IDbConnection> GetConnection();
 
   Task<ErrorOr<IDbConnection>> GetConnectionAsync();
 

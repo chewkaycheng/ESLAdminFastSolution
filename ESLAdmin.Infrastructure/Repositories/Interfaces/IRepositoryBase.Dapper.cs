@@ -8,7 +8,7 @@ public interface IRepositoryBaseDapper<ReadT, WriteT>
   where ReadT : class
   where WriteT : class
 {
-  IEnumerable<ReadT> DapQueryMultiple(
+  ErrorOr<IEnumerable<ReadT>> DapQueryMultiple(
       string sql,
       DynamicParameters? parameters,
       CommandType commandType = CommandType.StoredProcedure);

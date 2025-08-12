@@ -26,22 +26,25 @@ public partial class RepositoryBase<ReadT, WriteT> :
   //                       DapQueryMultiple
   //
   //------------------------------------------------------------------------------
-  public IEnumerable<ReadT> DapQueryMultiple(
+  public ErrorOr<IEnumerable<ReadT>> DapQueryMultiple(
     string sql,
     DynamicParameters? parameters,
     CommandType commandType = CommandType.StoredProcedure)
   {
-    if (_dbContextDapper == null)
-      throw new NullException(
-        nameof(DapQueryMultiple),
-        "_dbcontextDapper");
+    _logger.LogFunctionEntry();
+    var result = _dbContextDapper.GetConnection();
+    if (result.IsError)
+    {
+      return result.Errors;
+    }
+    using IDbConnection connection = result.Value;
 
-    using IDbConnection connection = _dbContextDapper.GetConnection();
-
-    return connection.Query<ReadT>(
+    var results =  connection.Query<ReadT>(
       sql,
       parameters,
       commandType: commandType);
+    _logger.LogFunctionExit();
+    return ErrorOrFactory.From(results);
   }
 
   //------------------------------------------------------------------------------
@@ -55,18 +58,19 @@ public partial class RepositoryBase<ReadT, WriteT> :
     CommandType commandType = CommandType.StoredProcedure,
     CancellationToken cancellationToken = default)
   {
+    _logger.LogFunctionEntry();
     var connectionResult = await _dbContextDapper.GetConnectionAsync();
     if (connectionResult.IsError)
     {
-   
       return connectionResult.Errors;
     }
     using IDbConnection connection = connectionResult.Value;
 
-    var result =  await connection.QueryAsync<ReadT>(
+    var result = await connection.QueryAsync<ReadT>(
           sql,
           parameters,
           commandType: commandType);
+    _logger.LogFunctionExit();
     return ErrorOrFactory.From(result);
   }
 
