@@ -13,7 +13,7 @@ public interface IRepositoryBaseDapper<ReadT, WriteT>
       DynamicParameters? parameters,
       CommandType commandType = CommandType.StoredProcedure);
 
-  ReadT? DapQuerySingle(
+  ErrorOr<ReadT?> DapQuerySingle(
     string sql,
     DynamicParameters? parameters,
     CommandType commandType = CommandType.StoredProcedure);
@@ -29,7 +29,7 @@ public interface IRepositoryBaseDapper<ReadT, WriteT>
   DynamicParameters? parameters,
   CommandType commandType = CommandType.StoredProcedure);
 
-  bool DapExecWithTrans(
+  ErrorOr<bool> DapExecWithTrans(
     string sql,
     DynamicParameters parameters,
     CommandType commandType = CommandType.StoredProcedure);

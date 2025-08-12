@@ -79,17 +79,18 @@ public partial class RepositoryBase<ReadT, WriteT> :
   //                       DapQuerySingle
   //
   //------------------------------------------------------------------------------
-  public ReadT? DapQuerySingle(
+  public ErrorOr<ReadT?> DapQuerySingle(
     string sql,
     DynamicParameters? parameters,
     CommandType commandType = CommandType.StoredProcedure)
   {
-    if (_dbContextDapper == null)
-      throw new NullException(
-        nameof(DapQuerySingle),
-        "_dbcontextDapper");
 
-    using IDbConnection connection = _dbContextDapper.GetConnection();
+    var result = _dbContextDapper.GetConnection();
+    if (result.IsError)
+    {
+      return result.Errors;
+    }
+    using IDbConnection connection = result.Value;
 
     return connection.QueryFirstOrDefault<ReadT>(
           sql,
@@ -124,20 +125,20 @@ public partial class RepositoryBase<ReadT, WriteT> :
   //                       DapExecWithTrans
   //
   //------------------------------------------------------------------------------
-  public bool DapExecWithTrans(
+  public ErrorOr<bool> DapExecWithTrans(
     string sql,
     DynamicParameters parameters,
     CommandType commandType = CommandType.StoredProcedure)
   {
-    if (_dbContextDapper == null)
-      throw new NullException(
-        nameof(DapExecWithTrans),
-        "_dbcontextDapper");
-
     parameters.AddInt32OutputParam(
       "dbApiError");
 
-    using IDbConnection connection = _dbContextDapper.GetConnection();
+    var connectionResult = _dbContextDapper.GetConnection();
+    if (connectionResult.IsError)
+    {
+      return connectionResult.Errors;
+    }
+    using IDbConnection connection = connectionResult.Value;
     using IDbTransaction transaction = connection.BeginTransaction();
 
     try
@@ -184,11 +185,7 @@ public partial class RepositoryBase<ReadT, WriteT> :
         ex);
 
       transaction.Rollback();
-      throw new DatabaseException(
-        nameof(DapExecWithTrans),
-        sql,
-        _dbContextDapper.SerializeDynamicParameters(parameters),
-        ex);
+      return Errors.CommonErrors.Exception(ex.Message);
     }
   }
 
