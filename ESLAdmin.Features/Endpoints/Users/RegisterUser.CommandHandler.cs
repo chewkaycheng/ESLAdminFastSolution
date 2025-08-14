@@ -49,7 +49,7 @@ public class RegisterUserCommandHandler : ICommandHandler<
     {
       var user = command.Mapper.CommandToEntity(command);
 
-      var result = await _repositoryManager.AuthenticationRepository.RegisterUserAsync(
+      var result = await _repositoryManager.IdentityRepository.RegisterUserAsync(
         user,
         command.Password,
         command.Roles);

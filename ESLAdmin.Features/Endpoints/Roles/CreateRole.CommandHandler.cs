@@ -43,7 +43,7 @@ public class CreateRoleCommandHandler : ICommandHandler<
       CreateRoleCommand command,
       CancellationToken ct)
   {
-    var result = await _repositoryManager.AuthenticationRepository.CreateRoleAsync(command.Name);
+    var result = await _repositoryManager.IdentityRepository.CreateRoleAsync(command.Name);
 
     if (result.IsError)
     {

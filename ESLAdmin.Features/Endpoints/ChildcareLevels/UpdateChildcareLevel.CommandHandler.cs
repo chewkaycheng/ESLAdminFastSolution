@@ -53,13 +53,13 @@ public class UpdateChildcareLevelCommandHandler : ICommandHandler<
 
       if (operationResult.DbApiError == 0)
       {
-        UpdateChildcareLevelResponse response = new UpdateChildcareLevelResponse();
         if (operationResult.Guid == null)
         {
           _logger.LogError("Guid Id for UpdateChildcareLevel is null");
           return TypedResults.InternalServerError();
         }
 
+        UpdateChildcareLevelResponse response = new UpdateChildcareLevelResponse();
         response.ChildcareLevelId = command.ChildcareLevelId;
         response.Guid = operationResult.Guid;
         return TypedResults.Ok(response);

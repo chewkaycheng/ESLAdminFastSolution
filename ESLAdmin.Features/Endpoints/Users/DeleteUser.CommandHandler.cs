@@ -46,7 +46,7 @@ public class DeleteUserCommandHandler : ICommandHandler<
     _logger.LogFunctionEntry($"Email: {command.Email}");
     try
     {
-      var result = await _repositoryManager.AuthenticationRepository.DeleteUserByEmailAsync(
+      var result = await _repositoryManager.IdentityRepository.DeleteUserByEmailAsync(
         command.Email);
 
       if (result.IsError)

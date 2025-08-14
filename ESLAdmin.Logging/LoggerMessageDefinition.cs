@@ -125,8 +125,28 @@ public static partial class MessageLoggerDefs
   //------------------------------------------------------------------------------
   [LoggerMessage(EventId = 10, Level = LogLevel.Error, Message = "Failed to serialize paramaters.\nException: '{ex}'")]
   public static partial void LogSerializationFailure(
-      this ILogger logger, 
+      this ILogger logger,
       Exception ex);
-  
+
+  //------------------------------------------------------------------------------
+  //
+  //                     LogCustomError
+  //
+  //------------------------------------------------------------------------------
+  [LoggerMessage(EventId = 11, Level = LogLevel.Error, Message = "{message}")]
+  public static partial void LogCustomError(
+    this ILogger logger,
+    string message);
+
+  //------------------------------------------------------------------------------
+  //
+  //                     LogCustomInformation
+  //
+  //------------------------------------------------------------------------------
+  [LoggerMessage(EventId = 12, Level = LogLevel.Information, Message = "{message}")]
+  public static partial void LogCustomInformation(
+    this ILogger logger,
+    string message);
+
 
 }

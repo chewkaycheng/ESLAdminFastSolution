@@ -19,6 +19,48 @@ public static partial class Errors
   {
     //-------------------------------------------------------------------------------
     //
+    //                       TokenRevokactionFailed
+    //
+    //-------------------------------------------------------------------------------
+    public static Error TokenRevocationFailed(
+      string userId, 
+      string description) =>
+        Error.Failure(
+          "Identity.TokenRevocationFailed", 
+          $"Failed to revoke tokens for user '{userId}': {description}");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       TokenGenerationFailed
+    //
+    //-------------------------------------------------------------------------------
+    public static Error TokenGenerationFailed(
+      string userId, 
+      string description) =>
+        Error.Failure(
+          "Identity.TokenGenerationFailed", $"Failed to generate token for user '{userId}': {description}");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       RefreshTokenInvalid
+    //
+    //-------------------------------------------------------------------------------
+    public static Error RefreshTokenInvalid(
+      string description) =>
+        Error.Failure($"Identity.InvalidRefreshToken", description);
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       OperationCanceled
+    //
+    //-------------------------------------------------------------------------------
+    public static Error OperationCanceled() =>
+       Error.Failure(
+         "Identity.OperationCanceled", 
+         "Operation was canceled.");
+
+    //-------------------------------------------------------------------------------
+    //
     //                       RefreshTokenNotFound
     //
     //-------------------------------------------------------------------------------

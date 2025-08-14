@@ -46,7 +46,7 @@ public class UpdateRoleCommandHandler : ICommandHandler<
   {
     try
     {
-      var result = await _repositoryManager.AuthenticationRepository.UpdateRoleAsync(command.OldName, command.NewName);
+      var result = await _repositoryManager.IdentityRepository.UpdateRoleAsync(command.OldName, command.NewName);
 
       if (result.IsError)
       {

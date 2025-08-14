@@ -6,6 +6,6 @@ namespace ESLAdmin.Infrastructure.RepositoryManagers
   public interface IRepositoryManager
   {
     IChildcareLevelRepository ChildcareLevelRepository { get; }
-    IIdentityRepository AuthenticationRepository { get; }
+    IIdentityRepository IdentityRepository { get; }
   }
 }

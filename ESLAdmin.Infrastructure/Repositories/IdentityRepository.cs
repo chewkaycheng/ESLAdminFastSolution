@@ -11,6 +11,7 @@ using ESLAdmin.Logging;
 using ESLAdmin.Logging.Extensions;
 using ESLAdmin.Logging.Interface;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
@@ -236,6 +237,111 @@ public class IdentityRepository : IIdentityRepository
 
   //------------------------------------------------------------------------------
   //
+  //                       ValidateRefreshTokenAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<RefreshToken>> ValidateRefreshTokenAsync(
+    string token,
+    CancellationToken cancellationToken = default)
+  {
+    try
+    {
+      var refreshToken = await _dbContext.RefreshTokens
+        .FirstOrDefaultAsync(rt => rt.Token == token,
+          cancellationToken);
+
+      if (refreshToken == null)
+      {
+        _logger.LogCustomError("Refresh token not found.");
+        return Errors.IdentityErrors.RefreshTokenNotFound(token);
+      }
+
+      if (refreshToken.IsRevoked || refreshToken.ExpiresAt < DateTime.UtcNow)
+      {
+        _logger.LogCustomError($"Refresh token is revoked or expired for user '{refreshToken.UserId}'.");
+        return Errors.IdentityErrors.RefreshTokenInvalid("Refresh token is revoked or expired.");
+      }
+
+      var user = await _userManager.FindByIdAsync(refreshToken.UserId);
+      if (user == null)
+      {
+        _logger.LogCustomError($"User: '{refreshToken.UserId}' not found for refresh token.");
+        return Errors.IdentityErrors.UserIdNotFound(refreshToken.UserId);
+      }
+
+      return new RefreshToken
+      {
+        UserId = refreshToken.UserId,
+        Token = refreshToken.Token,
+        ExpiresAt = refreshToken.ExpiresAt
+      };
+    }
+    catch (OperationCanceledException ex)
+    {
+      _logger.LogException(ex);
+      return Errors.IdentityErrors.OperationCanceled();
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return Errors.IdentityErrors.RefreshTokenInvalid($"Unexpected error: {ex.Message}");
+    }
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       GenerateRefreshTokenAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<string>> GenerateRefreshTokenAsync(
+    string userId,
+    CancellationToken cancellationToken = default)
+  {
+    try
+    {
+      var user = await _userManager.FindByIdAsync(userId);
+      if (user == null)
+      {
+        _logger.LogCustomError("User: '{userId}' not found.");
+        return Errors.IdentityErrors.UserIdNotFound(userId);
+      }
+
+      var token = Guid.NewGuid().ToString();
+      var expiryDate = DateTime.UtcNow.AddDays(30);
+
+      var refreshToken = new RefreshToken
+      {
+        UserId = userId,
+        Token = token,
+        ExpiresAt = expiryDate,
+        IsRevoked = false
+      };
+
+      _dbContext.RefreshTokens.Add(refreshToken);
+      await _dbContext.SaveChangesAsync(cancellationToken);
+
+      _logger.LogCustomInformation("Generated refresh token for user '{userId}'.");
+      return token;
+    }
+    catch (DbUpdateException ex)
+    {
+      _logger.LogException(ex);
+      return Errors.IdentityErrors.TokenGenerationFailed(userId, ex.Message);
+    }
+    catch (OperationCanceledException ex)
+    {
+      _logger.LogException(ex);
+      return Errors.IdentityErrors.OperationCanceled();
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return Errors.IdentityErrors.TokenGenerationFailed(userId, ex.Message);
+    }
+  }
+
+  //------------------------------------------------------------------------------
+  //
   //                       GetRefreshTokenAsync
   //
   //-------------------------------------------------------------------------------
@@ -282,6 +388,60 @@ public class IdentityRepository : IIdentityRepository
     refreshToken.IsRevoked = true;
     await _dbContext.SaveChangesAsync();
     return true;
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       RevokeRefreshTokenAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<Success>> RevokeRefreshTokenAsync(
+    string userId,
+    CancellationToken cancellationToken = default)
+  {
+    try
+    {
+      var user = await _userManager.FindByIdAsync(userId);
+      if (user == null)
+      {
+        _logger.LogCustomError($"User: '{userId}' not found.");
+        return Errors.IdentityErrors.UserIdNotFound(userId);
+      }
+
+      var tokens = await _dbContext.RefreshTokens
+        .Where(rt => rt.UserId == userId && !rt.IsRevoked)
+        .ToListAsync(cancellationToken);
+
+      if (!tokens.Any())
+      {
+        _logger.LogCustomInformation($"No active refresh tokens found for user: '{userId}'.");
+        return Result.Success;
+      }
+
+      foreach (var token in tokens)
+      {
+        token.IsRevoked = true;
+      }
+
+      await _dbContext.SaveChangesAsync(cancellationToken);
+      _logger.LogCustomInformation($"Revoked {tokens.Count} refresh tokens for user: '{userId}'.");
+      return Result.Success;
+    }
+    catch (DbUpdateException ex)
+    {
+      _logger.LogException(ex);
+      return Errors.IdentityErrors.TokenRevocationFailed(userId, ex.Message);
+    }
+    catch (OperationCanceledException ex)
+    {
+      _logger.LogException(ex);
+      return Errors.IdentityErrors.OperationCanceled();
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return Errors.IdentityErrors.TokenRevocationFailed(userId, ex.Message);
+    }
   }
 
   //------------------------------------------------------------------------------

@@ -37,7 +37,7 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
     {
       // Validate refresh token
       var result = await _repositoryManager
-                          .AuthenticationRepository
+                          .IdentityRepository
                           .GetRefreshTokenAsync(command.RefreshToken);
       if (result.IsError)
       {
@@ -68,7 +68,7 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
 
       // Verify user
       var userResult = await _repositoryManager
-        .AuthenticationRepository
+        .IdentityRepository
         .FindByIdAsync(userId);
       if (userResult.IsError)
       {
@@ -92,7 +92,7 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
 
       // Revoke old refresh token
       var tokenResult = await _repositoryManager
-        .AuthenticationRepository
+        .IdentityRepository
         .RevokeRefreshTokenAsync(command.RefreshToken);
       if (tokenResult.IsError)
       {
@@ -106,7 +106,7 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
 
       // Generate new access token
       var userRoles = await _repositoryManager
-        .AuthenticationRepository
+        .IdentityRepository
         .GetRolesAsync(user);
       var claims = new List<Claim>
       {
@@ -140,7 +140,7 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
         IsRevoked = false
       };
       await _repositoryManager
-        .AuthenticationRepository
+        .IdentityRepository
         .AddRefreshTokenAsync(newRefreshToken);
 
       return TypedResults.Ok(new RefreshTokenResponse

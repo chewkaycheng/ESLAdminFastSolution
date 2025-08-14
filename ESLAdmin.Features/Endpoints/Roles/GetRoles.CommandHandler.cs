@@ -45,7 +45,7 @@ public class GetRolesCommandHandler : ICommandHandler<
   {
     try
     {
-      var result = await _repositoryManager.AuthenticationRepository.GetAllRolesAsync();
+      var result = await _repositoryManager.IdentityRepository.GetAllRolesAsync();
       if (result.IsError)
       {
         foreach (var error in result.Errors)

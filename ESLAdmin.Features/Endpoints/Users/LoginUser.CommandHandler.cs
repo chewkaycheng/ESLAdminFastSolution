@@ -59,7 +59,7 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
   {
     try
     {
-      var result = await _repositoryManager.AuthenticationRepository.LoginAsync(
+      var result = await _repositoryManager.IdentityRepository.LoginAsync(
           command.Email, command.Password);
 
       if (result.IsError)
@@ -128,7 +128,7 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
       };
 
       await _repositoryManager
-        .AuthenticationRepository
+        .IdentityRepository
         .AddRefreshTokenAsync(refreshToken);
 
       LoginUserResponse response = new LoginUserResponse

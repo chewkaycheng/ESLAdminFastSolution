@@ -45,7 +45,7 @@ public class GetUsersCommandHandler :
   {
     try
     {
-      var userDtos = await _repositoryManager.AuthenticationRepository.GetAllUsersAsync();
+      var userDtos = await _repositoryManager.IdentityRepository.GetAllUsersAsync();
 
       IEnumerable<GetUserResponse> usersResponse =
        userDtos.Select(

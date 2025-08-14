@@ -49,7 +49,7 @@ public class DeleteRoleCommandHandler : ICommandHandler<
   {
     try
     {
-      var result = await _repositoryManager.AuthenticationRepository.DeleteRoleAsync(command.Name);
+      var result = await _repositoryManager.IdentityRepository.DeleteRoleAsync(command.Name);
       if (result.IsError)
       {
         var error = result.Errors.First();

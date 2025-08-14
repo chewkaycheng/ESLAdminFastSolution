@@ -46,7 +46,7 @@ public class RemoveFromRoleCommandHandler : ICommandHandler<
   {
     _logger.LogFunctionEntry($"Email: {command.Email}, RoleName: {command.RoleName}");
 
-    var result = await _repositoryManager.AuthenticationRepository.RemoveFromRoleAsync(
+    var result = await _repositoryManager.IdentityRepository.RemoveFromRoleAsync(
       command.Email,
       command.RoleName);
 

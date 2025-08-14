@@ -49,7 +49,7 @@ public class AddToRoleCommandHandler : ICommandHandler<
     {
       _logger.LogFunctionEntry($"Email: {command.Email}, RoleName: {command.RoleName}");
 
-      var result = await _repositoryManager.AuthenticationRepository.AddToRoleAsync(
+      var result = await _repositoryManager.IdentityRepository.AddToRoleAsync(
         command.Email,
         command.RoleName);
 

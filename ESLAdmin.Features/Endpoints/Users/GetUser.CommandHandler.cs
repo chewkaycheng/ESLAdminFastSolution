@@ -54,7 +54,7 @@ public class GetUserCommandHandler : ICommandHandler<
     _logger.LogFunctionEntry($"Email: {command.Email}");
     try
     {
-      var result = await _repositoryManager.AuthenticationRepository.GetUserByEmailAsync(
+      var result = await _repositoryManager.IdentityRepository.GetUserByEmailAsync(
         command.Email);
 
       if (result.IsError)

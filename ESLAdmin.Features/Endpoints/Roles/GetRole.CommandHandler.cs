@@ -49,7 +49,7 @@ public class GetRoleCommandHandler : ICommandHandler<
   {
     try
     {
-      var result = await _repositoryManager.AuthenticationRepository.GetRoleAsync(command.Name);
+      var result = await _repositoryManager.IdentityRepository.GetRoleAsync(command.Name);
       if (result.IsError)
       {
         _logger.LogNotFound("role", $"name: '{command.Name}'");

@@ -20,7 +20,7 @@ public class RepositoryManager : IRepositoryManager
 {
   private readonly Lazy<IChildcareLevelRepository> _childcareLevelRepository;
   private readonly Lazy<IIdentityRepository>
-    _authenticationRespository;
+    _identityRespository;
 
   //------------------------------------------------------------------------------
   //
@@ -42,7 +42,7 @@ public class RepositoryManager : IRepositoryManager
         logger,
         messageLogger));
 
-    _authenticationRespository = new Lazy<IIdentityRepository>(
+    _identityRespository = new Lazy<IIdentityRepository>(
       () => new IdentityRepository(
         logger,
         messageLogger,
@@ -66,8 +66,8 @@ public class RepositoryManager : IRepositoryManager
   //                       AuthenticationRepository
   //
   //------------------------------------------------------------------------------
-  public IIdentityRepository AuthenticationRepository =>
-    _authenticationRespository.Value;
+  public IIdentityRepository IdentityRepository =>
+    _identityRespository.Value;
 }
 
 

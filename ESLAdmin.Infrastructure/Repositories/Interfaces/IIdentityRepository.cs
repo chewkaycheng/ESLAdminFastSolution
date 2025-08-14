@@ -2,6 +2,7 @@
 using ESLAdmin.Domain.Dtos;
 using ESLAdmin.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
+using System.Threading;
 
 namespace ESLAdmin.Infrastructure.Repositories.Interfaces;
 
@@ -22,10 +23,17 @@ public interface IIdentityRepository
     User user,
     string password,
     ICollection<string>? roles);
+  Task<ErrorOr<RefreshToken>> ValidateRefreshTokenAsync(
+    string token, 
+    CancellationToken cancellationToken = default);
+  Task<ErrorOr<string>> GenerateRefreshTokenAsync(
+    string userId, 
+    CancellationToken cancellationToken = default);
   Task<ErrorOr<RefreshToken>> GetRefreshTokenAsync(string token);
   Task<ErrorOr<bool>> RevokeRefreshTokenAsync(string token);
-
-
+  Task<ErrorOr<Success>> RevokeRefreshTokenAsync(
+    string userId,
+    CancellationToken cancellationToken = default);
   Task<ErrorOr<User>> FindByIdAsync(string userId);
   Task<ErrorOr<User>> FindByUserNameAsync(string username);
 
