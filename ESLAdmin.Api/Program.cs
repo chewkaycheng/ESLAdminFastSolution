@@ -2,6 +2,7 @@ global using FastEndpoints;
 using ESLAdmin.Api.Extensions;
 using ESLAdmin.Features.Extensions;
 using ESLAdmin.Infrastructure.Configuration;
+using ESLAdmin.Infrastructure.Middleware;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Extensions;
 using FastEndpoints.Swagger;
@@ -20,6 +21,7 @@ builder.Services.ConfigureCors();
 builder.Services.ConfigureIISIntegration();
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
+builder.Services.ConfigureBlacklistService();
 builder.Services.ConfigureIdentity(builder.Configuration);
 builder.Services.ConfigureFirebirdDbContexts(builder.Configuration);
 builder.Services.ConfigureRepositoryManager();
@@ -118,6 +120,7 @@ if (app.Environment.IsDevelopment())
   app.UseSwaggerUI();
 }
 app.UseAuthentication();
+app.UseMiddleware<JwtBlacklistMiddleware>();
 app.UseAuthorization();
 app.Run();
 

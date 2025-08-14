@@ -42,9 +42,21 @@ public class LogoutUserEndpoint : EndpointWithoutRequest<
         StatusCodes.Status400BadRequest);
     }
 
+    var accessToken = HttpContext.Request.Headers["Authorization"]
+      .ToString().Replace("Bearer ", "");
+    if (string.IsNullOrEmpty(accessToken))
+    {
+      return new ProblemDetails(
+        ErrorUtils.CreateFailureList(
+          "Authentication Error",
+          "No JWT provided."),
+        StatusCodes.Status401Unauthorized);
+    }
+
     return await new LogoutUserCommand
     {
-      UserId = userId
+      UserId = userId,
+      Token = accessToken
     }.ExecuteAsync(ct);
   }
 }

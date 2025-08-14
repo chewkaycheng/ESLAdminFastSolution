@@ -4,6 +4,7 @@ using ESLAdmin.Infrastructure.Data;
 using FirebirdSql.EntityFrameworkCore.Firebird.Metadata;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ESLAdmin.Api.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    partial class UserDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250814173636_AddBlackListedTokens")]
+    partial class AddBlackListedTokens
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,11 +40,6 @@ namespace ESLAdmin.Api.Migrations
                         .HasMaxLength(2048)
                         .HasColumnType("VARCHAR(2048)");
 
-                    b.Property<string>("TokenHash")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("VARCHAR(64)");
-
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasMaxLength(450)
@@ -50,9 +48,6 @@ namespace ESLAdmin.Api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ExpiryDate");
-
-                    b.HasIndex("TokenHash")
-                        .IsUnique();
 
                     b.HasIndex("UserId");
 

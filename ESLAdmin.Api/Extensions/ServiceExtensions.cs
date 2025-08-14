@@ -4,6 +4,7 @@ using ESLAdmin.Infrastructure.Data;
 using ESLAdmin.Infrastructure.Data.Interfaces;
 using ESLAdmin.Infrastructure.Repositories.Interfaces;
 using ESLAdmin.Infrastructure.RepositoryManagers;
+using ESLAdmin.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -92,5 +93,16 @@ public static class ServiceExtensions
     this IServiceCollection services)
   {
     services.AddScoped<IRepositoryManager, RepositoryManager>();
+  }
+
+  // =================================================
+  // 
+  // ConfigureBlacklistService
+  //
+  // ==================================================
+  public static void ConfigureBlacklistService(
+    this IServiceCollection services)
+  {
+    services.AddScoped<ITokenBlacklistService, TokenBlacklistService>();
   }
 }
