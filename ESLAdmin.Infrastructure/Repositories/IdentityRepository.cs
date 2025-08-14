@@ -10,6 +10,7 @@ using ESLAdmin.Infrastructure.Repositories.Interfaces;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Extensions;
 using ESLAdmin.Logging.Interface;
+using FirebirdSql.Data.FirebirdClient;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -78,23 +79,54 @@ public class IdentityRepository : IIdentityRepository
     //  return Errors.IdentityErrors.RoleNotFound(roleName);
     //}
 
-    var result = await _userManager.AddToRoleAsync(user, roleName);
-
-    if (!result.Succeeded)
+    try
     {
-      _logger.LogIdentityErrors("_userManager.AddToRoleAsync", email, result.Errors.ToFormattedString());
-      var firstError = result.Errors.FirstOrDefault();
-      return firstError?.Code switch
-      {
-        "UserNotFound" => Errors.IdentityErrors.UserNotFound(user.Id),
-        "RoleNotFound" => Errors.IdentityErrors.RoleNotFound(roleName),
-        "UserAlreadyInRole" => Errors.IdentityErrors.UserAlreadyInRole(user.Id, roleName),
-        "ConcurrencyFailure" => Errors.IdentityErrors.ConcurrencyFailure(user.Id),
-        _ => Errors.IdentityErrors.AddToRoleFailed(user.Id, roleName, result.Errors)
-      };
-    }
+      _logger.LogFunctionEntry($"Adding user: '{user.Id}' to role: '{ roleName}'.");
 
-    return roleName;
+      var result = await _userManager.AddToRoleAsync(user, roleName);
+
+      if (!result.Succeeded)
+      {
+        _logger.LogIdentityErrors("_userManager.AddToRoleAsync", email, result.Errors.ToFormattedString());
+        var firstError = result.Errors.FirstOrDefault();
+        return firstError?.Code switch
+        {
+          "UserNotFound" => Errors.IdentityErrors.UserNotFound(user.Id),
+          //"RoleNotFound" => Errors.IdentityErrors.RoleNotFound(roleName),
+          "UserAlreadyInRole" => Errors.IdentityErrors.UserAlreadyInRole(user.Id, roleName),
+          "ConcurrencyFailure" => Errors.IdentityErrors.ConcurrencyFailure(user.Id),
+          _ => Errors.IdentityErrors.AddToRoleFailed(user.Id, roleName, result.Errors)
+        };
+      }
+
+      _logger.LogFunctionExit();
+      return roleName;
+    }
+    catch (ArgumentNullException ex)
+    {
+      _logger.LogException(ex);
+      return Errors.IdentityErrors.InvalidArgument(ex.Message);
+    }
+    catch (FbException ex)
+    {
+      _logger.LogException(ex);
+      return Errors.DatabaseErrors.DatabaseError($"Firebird error: {ex.Message} (ErrorCode: {ex.ErrorCode})");
+    }
+    catch (InvalidOperationException ex)
+    {
+      _logger.LogException(ex);
+      return Errors.IdentityErrors.InvalidOperation(ex.Message);
+    }
+    catch (OperationCanceledException ex)
+    {
+      _logger.LogException(ex);
+      return Errors.DatabaseErrors.OperationCanceled();
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return Errors.CommonErrors.Exception(ex.Message);
+    }
   }
 
   //------------------------------------------------------------------------------

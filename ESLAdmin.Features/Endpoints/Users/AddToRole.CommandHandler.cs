@@ -45,46 +45,37 @@ public class AddToRoleCommandHandler : ICommandHandler<
       AddToRoleCommand command,
       CancellationToken cancellationToken)
   {
-    try
+    _logger.LogFunctionEntry($"Email: {command.Email}, RoleName: {command.RoleName}");
+
+    var result = await _repositoryManager.IdentityRepository.AddToRoleAsync(
+      command.Email,
+      command.RoleName);
+
+    if (result.IsError)
     {
-      _logger.LogFunctionEntry($"Email: {command.Email}, RoleName: {command.RoleName}");
-
-      var result = await _repositoryManager.IdentityRepository.AddToRoleAsync(
-        command.Email,
-        command.RoleName);
-
-      if (result.IsError)
+      var error = result.Errors.First();
+      var statusCode = StatusCodes.Status500InternalServerError;
+      switch (error.Code)
       {
-        var error = result.Errors.First();
-        var statusCode = StatusCodes.Status500InternalServerError;
-        switch (error.Code)
-        {
-          case "Identity.UserNotFound":
-          case "Identity.RoleNotFound":
-            statusCode = StatusCodes.Status404NotFound;
-            break;
-          case "Identity.UserAlreadyInRole":
-            statusCode = StatusCodes.Status400BadRequest;
-            break;
-          case "Identity.ConcurrencyError":
-            statusCode = StatusCodes.Status409Conflict;
-            break;  
-          default:
-            return TypedResults.InternalServerError();
-        }
-        return new ProblemDetails(
-          ErrorUtils.CreateFailureList(
-            error.Code,
-            error.Description), statusCode);
+        case "Identity.UserNotFound":
+          statusCode = StatusCodes.Status404NotFound;
+          break;
+        case "Identity.UserAlreadyInRole":
+          statusCode = StatusCodes.Status400BadRequest;
+          break;
+        case "Identity.ConcurrencyError":
+          statusCode = StatusCodes.Status409Conflict;
+          break;
+        default:
+          return TypedResults.InternalServerError();
       }
-      _logger.LogFunctionExit($"Email: {command.Email}, RoleName: {command.RoleName}");
-      return TypedResults.NoContent();
+      return new ProblemDetails(
+        ErrorUtils.CreateFailureList(
+          error.Code,
+          error.Description), statusCode);
     }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-      return TypedResults.InternalServerError();
-    }
+    _logger.LogFunctionExit($"Email: {command.Email}, RoleName: {command.RoleName}");
+    return TypedResults.NoContent();
   }
 }
 

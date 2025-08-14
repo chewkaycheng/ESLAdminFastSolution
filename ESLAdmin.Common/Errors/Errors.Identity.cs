@@ -438,6 +438,16 @@ public static partial class Errors
     //-------------------------------------------------------------------------------
     public static Error InvalidRoleName(string roleName) =>
         Error.Failure("Identity.InvalidRoleName", $"Role name '{roleName}' is invalid.");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       InvalidOperation
+    //
+    //-------------------------------------------------------------------------------
+    public static Error InvalidOperation(string description) =>
+        Error.Failure(
+          "Identity.InvalidOperation", 
+          description);
   }
 }
 

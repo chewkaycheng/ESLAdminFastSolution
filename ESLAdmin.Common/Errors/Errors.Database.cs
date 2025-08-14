@@ -98,6 +98,28 @@ public static partial class Errors
     //
     //-------------------------------------------------------------------------------
     public static Error StoredProcedureError(string procedureName, int errorCode) =>
-        Error.Failure("Database.StoredProcedureError", $"Stored procedure '{procedureName}' failed with error code: {errorCode}");
+        Error.Failure(
+          "Database.StoredProcedureError", 
+          $"Stored procedure '{procedureName}' failed with error code: {errorCode}");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       DatabaseError
+    //
+    //-------------------------------------------------------------------------------
+    public static Error DatabaseError(string description) =>
+        Error.Failure(
+          "Database.DatabaseError", 
+          description);
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       OperationCanceled
+    //
+    //-------------------------------------------------------------------------------
+    public static Error OperationCanceled() =>
+        Error.Failure(
+          "Database.OperationCanceled", 
+          "Operation was canceled");
   }
 }
