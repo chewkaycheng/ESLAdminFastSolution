@@ -44,40 +44,32 @@ public class DeleteUserCommandHandler : ICommandHandler<
       CancellationToken cancellationToken)
   {
     _logger.LogFunctionEntry($"Email: {command.Email}");
-    try
+    var result = await _repositoryManager.IdentityRepository.DeleteUserByEmailAsync(
+      command.Email);
+
+    if (result.IsError)
     {
-      var result = await _repositoryManager.IdentityRepository.DeleteUserByEmailAsync(
-        command.Email);
-
-      if (result.IsError)
+      var error = result.Errors.First();
+      var statusCode = StatusCodes.Status500InternalServerError;
+      switch (error.Code)
       {
-        var error = result.Errors.First();
-        var statusCode = StatusCodes.Status500InternalServerError;
-        switch (error.Code)
-        {
-          case "Identity.UserNotFound":
-            statusCode = StatusCodes.Status404NotFound;
-            break;
-          case "Identity.ConcurrencyError":
-            statusCode = StatusCodes.Status409Conflict;
-            break;
-          default:
-            return TypedResults.InternalServerError();
-        }
-
-        return new ProblemDetails(
-          ErrorUtils.CreateFailureList(
-            error.Code, 
-            error.Description), statusCode);
+        case "Identity.UserNotFound":
+          statusCode = StatusCodes.Status404NotFound;
+          break;
+        case "Identity.ConcurrencyError":
+          statusCode = StatusCodes.Status409Conflict;
+          break;
+        default:
+          return TypedResults.InternalServerError();
       }
 
-      _logger.LogFunctionExit($"Email: {command.Email}");
-      return TypedResults.Ok(command.Email);
+      return new ProblemDetails(
+        ErrorUtils.CreateFailureList(
+          error.Code,
+          error.Description), statusCode);
     }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
-      return TypedResults.InternalServerError();
-    }
+
+    _logger.LogFunctionExit($"Email: {command.Email}");
+    return TypedResults.Ok(command.Email);
   }
 }

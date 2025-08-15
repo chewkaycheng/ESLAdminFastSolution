@@ -136,6 +136,8 @@ public class IdentityRepository : IIdentityRepository
   //-------------------------------------------------------------------------------
   public async Task<ErrorOr<string>> DeleteUserByEmailAsync(string email)
   {
+    _logger.LogFunctionEntry($"Deleting user by email: '{email}'.");
+
     var user = await _userManager.FindByEmailAsync(email);
     if (user == null)
     {
@@ -155,20 +157,44 @@ public class IdentityRepository : IIdentityRepository
     //}
 
     // Delete the user
-    var result = await _userManager.DeleteAsync(user);
-    if (!result.Succeeded)
+    try
     {
-      _logger.LogIdentityErrors("_userManager.DeleteAsync", email, result.Errors.ToFormattedString());
-      var firstError = result.Errors.FirstOrDefault();
-      return firstError?.Code switch
+      var result = await _userManager.DeleteAsync(user);
+      if (!result.Succeeded)
       {
-        "UserNotFound" => Errors.IdentityErrors.UserNotFound(user.Id),
-        "ConcurrencyFailure" => Errors.IdentityErrors.ConcurrencyFailure(user.Id),
-        _ => Errors.IdentityErrors.DeleteUserFailed(user.Id, result.Errors)
-      };
-    }
+        _logger.LogIdentityErrors("_userManager.DeleteAsync", email, result.Errors.ToFormattedString());
+        var firstError = result.Errors.FirstOrDefault();
+        return firstError?.Code switch
+        {
+          "UserNotFound" => Errors.IdentityErrors.UserNotFound(user.Id),
+          "ConcurrencyFailure" => Errors.IdentityErrors.ConcurrencyFailure(user.Id),
+          _ => Errors.IdentityErrors.DeleteUserFailed(user.Id, result.Errors)
+        };
+      }
 
-    return email;
+      _logger.LogFunctionExit();
+      return email;
+    }
+    catch (ArgumentNullException ex)
+    {
+      _logger.LogException(ex);
+      return Errors.IdentityErrors.InvalidArgument(ex.Message);
+    }
+    catch(DbUpdateException ex)
+    {
+      _logger.LogException(ex);
+      return Errors.DatabaseErrors.DatabaseError(ex.InnerException?.Message ?? ex.Message);
+    }
+    catch (OperationCanceledException ex)
+    {
+      _logger.LogException(ex);
+      return Errors.DatabaseErrors.OperationCanceled();
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return Errors.CommonErrors.Exception(ex.Message);
+    }
   }
 
   //------------------------------------------------------------------------------
