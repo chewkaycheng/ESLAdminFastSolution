@@ -1,6 +1,6 @@
 ﻿using ESLAdmin.Common.Configuration;
 using ESLAdmin.Common.CustomErrors;
-using ESLAdmin.Domain.Entities;
+using ESLAdmin.Infrastructure.Persistence.Entities;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
 using FastEndpoints;

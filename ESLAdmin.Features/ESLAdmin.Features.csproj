@@ -37,4 +37,11 @@
     <ProjectReference Include="..\ESLAdmin.Logging\ESLAdmin.Logging.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Auth\Entities\" />
+    <Folder Include="ChildcareLevels\Entities\" />
+    <Folder Include="Roles\" />
+    <Folder Include="Users\" />
+  </ItemGroup>
+
 </Project>

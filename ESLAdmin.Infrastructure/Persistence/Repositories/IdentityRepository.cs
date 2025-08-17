@@ -6,13 +6,13 @@ using ESLAdmin.Domain.Entities;
 using ESLAdmin.Infrastructure.Persistence.Constants;
 using ESLAdmin.Infrastructure.Persistence.DatabaseContexts;
 using ESLAdmin.Infrastructure.Persistence.DatabaseContexts.Interfaces;
+using ESLAdmin.Infrastructure.Persistence.Entities;
 using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Extensions;
 using ESLAdmin.Logging.Interface;
 using FirebirdSql.Data.FirebirdClient;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
@@ -140,12 +140,14 @@ public class IdentityRepository : IIdentityRepository
 
     try
     {
+      
       var user = await _userManager.FindByEmailAsync(email);
       if (user == null)
       {
+        _logger.LogWarning($"User with email '{email}' not found.");
         return AppErrors.IdentityErrors.UserEmailNotFound(email);
       }
-
+      
       // Optional: Check and remove roles explicity (usually not needed due to cascade delete)
       //var roles = await _userManager.GetRolesAsync(user);
       //if (roles.Any())
@@ -163,7 +165,7 @@ public class IdentityRepository : IIdentityRepository
       var result = await _userManager.DeleteAsync(user);
       if (!result.Succeeded)
       {
-        _logger.LogIdentityErrors("_userManager.DeleteAsync", email, result.Errors.ToFormattedString());
+        _logger.LogError($"Failed to delete user with email '{email}': {result.Errors.ToFormattedString()}");
         var firstError = result.Errors.FirstOrDefault();
         return firstError?.Code switch
         {
@@ -173,7 +175,7 @@ public class IdentityRepository : IIdentityRepository
         };
       }
 
-      _logger.LogFunctionExit();
+      _logger.LogFunctionExit($"User with email '{email}' deleted successfully.");
       return email;
     }
     catch (ArgumentNullException ex)
@@ -505,7 +507,7 @@ public class IdentityRepository : IIdentityRepository
 
   //------------------------------------------------------------------------------
   //
-  //                       RegisterUser
+  //                       RegisterUserAsync
   //
   //-------------------------------------------------------------------------------
   public async Task<ErrorOr<User>> RegisterUserAsync(
@@ -513,8 +515,11 @@ public class IdentityRepository : IIdentityRepository
     string password,
     ICollection<string>? roles)
   {
+    _logger.LogInformation($"Registering user with email: '{user.Email}'");
+
     if (string.IsNullOrEmpty(user.Email))
     {
+      _logger.LogWarning("User email cannot be empty.");
       return AppErrors.IdentityErrors.UserEmailCannotBeEmpty();
     }
 
@@ -525,7 +530,10 @@ public class IdentityRepository : IIdentityRepository
       var invalidRoles = roles.Except(allRoles).ToList();
 
       if (invalidRoles != null && invalidRoles.Count() > 0)
+      {
+        _logger.LogWarning($"Invalid roles provided: {string.Join(", ", invalidRoles)}.");
         return AppErrors.IdentityErrors.InvalidRoles(invalidRoles);
+      }
     }
 
     using var transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -539,12 +547,9 @@ public class IdentityRepository : IIdentityRepository
       {
 
         await transaction.RollbackAsync();
-
-        _logger.LogIdentityErrors(
-          "_userManager.CreateAsync",
-          user.Email,
-          result.Errors.ToFormattedString());
-
+        _logger.LogError(
+          $"Failed to create user with email '{user.Email}': {result.Errors.ToFormattedString()}");
+        
         var firstError = result.Errors.FirstOrDefault();
         return firstError?.Code switch
         {
@@ -564,10 +569,8 @@ public class IdentityRepository : IIdentityRepository
         {
           await transaction.RollbackAsync();
 
-          _logger.LogIdentityErrors(
-            "_userManager.AddToRolesAsync",
-            user.Email,
-            result.Errors.ToFormattedString());
+          _logger.LogError(
+            $"Failed to add roles to user with email '{user.Email}': {roleResult.Errors.ToFormattedString()}");
 
           var firstError = result.Errors.FirstOrDefault();
           return firstError?.Code switch
@@ -582,6 +585,7 @@ public class IdentityRepository : IIdentityRepository
       }
 
       await transaction.CommitAsync();
+      _logger.LogFunctionExit($"User with email '{user.Email}' registered successfully.");
       return user;
     }
     catch (Exception ex)

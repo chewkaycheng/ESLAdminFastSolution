@@ -1,8 +1,8 @@
 ﻿using ESLAdmin.Common.Configuration;
-using ESLAdmin.Domain.Entities;
 using ESLAdmin.Features.Repositories;
 using ESLAdmin.Infrastructure.Persistence.DatabaseContexts;
 using ESLAdmin.Infrastructure.Persistence.DatabaseContexts.Interfaces;
+using ESLAdmin.Infrastructure.Persistence.Entities;
 using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Infrastructure.Services;

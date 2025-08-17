@@ -1,4 +1,4 @@
-﻿using ESLAdmin.Domain.Entities;
+﻿using ESLAdmin.Infrastructure.Persistence.Entities;
 using FastEndpoints;
 
 namespace ESLAdmin.Features.Endpoints.Users;

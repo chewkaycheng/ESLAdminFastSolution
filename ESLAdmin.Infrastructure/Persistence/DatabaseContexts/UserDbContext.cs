@@ -1,4 +1,5 @@
 ﻿using ESLAdmin.Domain.Entities;
+using ESLAdmin.Infrastructure.Persistence.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;

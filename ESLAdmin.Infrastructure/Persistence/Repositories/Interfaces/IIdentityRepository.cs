@@ -1,6 +1,6 @@
 ﻿using ErrorOr;
 using ESLAdmin.Domain.Dtos;
-using ESLAdmin.Domain.Entities;
+using ESLAdmin.Infrastructure.Persistence.Entities;
 using Microsoft.AspNetCore.Identity;
 using System.Threading;
 

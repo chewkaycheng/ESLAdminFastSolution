@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-
-namespace ESLAdmin.Domain.Entities;
+﻿namespace ESLAdmin.Infrastructure.Persistence.Entities;
 
 public class RefreshToken
 {
