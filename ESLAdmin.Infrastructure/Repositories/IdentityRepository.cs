@@ -81,7 +81,7 @@ public class IdentityRepository : IIdentityRepository
 
     try
     {
-      _logger.LogFunctionEntry($"Adding user: '{user.Id}' to role: '{ roleName}'.");
+      _logger.LogFunctionEntry($"Adding user: '{user.Id}' to role: '{roleName}'.");
 
       var result = await _userManager.AddToRoleAsync(user, roleName);
 
@@ -138,27 +138,28 @@ public class IdentityRepository : IIdentityRepository
   {
     _logger.LogFunctionEntry($"Deleting user by email: '{email}'.");
 
-    var user = await _userManager.FindByEmailAsync(email);
-    if (user == null)
-    {
-      return Errors.IdentityErrors.UserEmailNotFound(email);
-    }
-
-    // Optional: Check and remove roles explicity (usually not needed due to cascade delete)
-    //var roles = await _userManager.GetRolesAsync(user);
-    //if (roles.Any())
-    //{
-    //  var removeRolesResult = await _userManager.RemoveFromRolesAsync(user, roles);
-    //  if (!removeRolesResult.Succeeded)
-    //  {
-    //    InfoLogIdentityErrors("GetRolesAsync", email, removeRolesResult.Errors);
-    //    return IdentityResultEx.Failed(IdentityErrorTypes.RemoveFromRolesError, removeRolesResult.Errors.ToArray());
-    //  }
-    //}
-
-    // Delete the user
     try
     {
+      var user = await _userManager.FindByEmailAsync(email);
+      if (user == null)
+      {
+        return Errors.IdentityErrors.UserEmailNotFound(email);
+      }
+
+      // Optional: Check and remove roles explicity (usually not needed due to cascade delete)
+      //var roles = await _userManager.GetRolesAsync(user);
+      //if (roles.Any())
+      //{
+      //  var removeRolesResult = await _userManager.RemoveFromRolesAsync(user, roles);
+      //  if (!removeRolesResult.Succeeded)
+      //  {
+      //    InfoLogIdentityErrors("GetRolesAsync", email, removeRolesResult.Errors);
+      //    return IdentityResultEx.Failed(IdentityErrorTypes.RemoveFromRolesError, removeRolesResult.Errors.ToArray());
+      //  }
+      //}
+
+      // Delete the user
+
       var result = await _userManager.DeleteAsync(user);
       if (!result.Succeeded)
       {
@@ -180,7 +181,7 @@ public class IdentityRepository : IIdentityRepository
       _logger.LogException(ex);
       return Errors.IdentityErrors.InvalidArgument(ex.Message);
     }
-    catch(DbUpdateException ex)
+    catch (DbUpdateException ex)
     {
       _logger.LogException(ex);
       return Errors.DatabaseErrors.DatabaseError(ex.InnerException?.Message ?? ex.Message);
