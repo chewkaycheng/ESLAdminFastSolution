@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using ESLAdmin.Domain.Entities;
-using ESLAdmin.Infrastructure.Data.Consts;
+using ESLAdmin.Infrastructure.Persistence.Constants;
 using ESLAdmin.Infrastructure.Repositories;
 using FastEndpoints;
 

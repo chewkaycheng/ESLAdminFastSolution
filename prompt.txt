@@ -1,0 +1,1 @@
+I have an asp.net webapi 9.0 app using Fastendpoints with CommandHandler, UserIdentity using EF Core, Firebird database, Non UserIdentity database access using Dapper, and veritcal slice architecture. I have a features project and an infrastructure project. Where should I place my entities and dtos

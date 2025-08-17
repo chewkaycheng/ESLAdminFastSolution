@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using ErrorOr;
+using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Infrastructure.Configuration;
 
@@ -17,6 +18,6 @@ public interface IConfigurationParams
   //                        ValidateConfiguration
   //
   //-------------------------------------------------------------------------------
-  void ValidateConfiguration(
+  ErrorOr<Success> ValidateConfiguration(
     ILogger logger);
 }

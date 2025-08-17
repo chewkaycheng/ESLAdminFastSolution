@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace ESLAdmin.Logging;
 
@@ -14,10 +15,21 @@ public static partial class MessageLoggerDefs
   //                     LogException
   //
   //------------------------------------------------------------------------------
-  [LoggerMessage(EventId = 0, Level = LogLevel.Error, Message = "Exception thrown.")]
+  [LoggerMessage(EventId = 0, Level = LogLevel.Error, Message = "Exception thrown. TraceId: '{traceId}'.")]
   public static partial void LogException(
     this ILogger logger,
-    Exception exception);
+    Exception exception,
+    string traceId);
+
+  //------------------------------------------------------------------------------
+  //
+  //                     LogException
+  //
+  //------------------------------------------------------------------------------
+  public static void LogException(this ILogger logger, Exception exception)
+  {
+    logger.LogException(exception, Activity.Current?.Id ?? "NoTraceId");
+  }
 
   //------------------------------------------------------------------------------
   //
@@ -148,5 +160,16 @@ public static partial class MessageLoggerDefs
     this ILogger logger,
     string message);
 
-
+  //------------------------------------------------------------------------------
+  //
+  //                     LogMissingConfigKey
+  //
+  //------------------------------------------------------------------------------
+  [LoggerMessage(
+    EventId = 13, 
+    Level = LogLevel.Error, 
+    Message = "Configuration key: '{key}' is not found in the configuration file.")]
+  public static partial void LogMissingConfigKey(
+    this ILogger logger,
+    string key);
 }

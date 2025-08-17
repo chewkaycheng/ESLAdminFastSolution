@@ -44,5 +44,25 @@ public static partial class Errors
       }
       return error;
     }
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       ConfigurationMissingKey
+    //
+    //-------------------------------------------------------------------------------
+    public static Error ConfigurationMissingKey(string key) =>
+          Error.Failure(
+            "Configuration.MissingKey",
+            $"Configuration key '{key}' is not found in the configuration file");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       ConfigurationError
+    //
+    //-------------------------------------------------------------------------------
+    public static Error ConfigurationError(IEnumerable<Error> errors) =>
+          Error.Failure(
+            "Configuration.Error",
+            string.Join("; ", errors.Select(e => e.Description)));
   }
 }

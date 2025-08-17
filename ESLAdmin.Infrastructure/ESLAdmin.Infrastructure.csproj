@@ -19,12 +19,20 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.14.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ESLAdmin.Common\ESLAdmin.Common.csproj" />
     <ProjectReference Include="..\ESLAdmin.Domain\ESLAdmin.Domain.csproj" />
     <ProjectReference Include="..\ESLAdmin.Logging\ESLAdmin.Logging.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Extensions\" />
+    <Folder Include="Persistence\DatabaseContexts\" />
+    <Folder Include="Persistence\RepositoryManagers\" />
+    <Folder Include="Persistence\Repositories\" />
   </ItemGroup>
 
 </Project>

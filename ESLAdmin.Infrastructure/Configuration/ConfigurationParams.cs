@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using ErrorOr;
+using ESLAdmin.Common.Errors;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Infrastructure.Configuration;
@@ -34,7 +36,7 @@ public class ConfigurationParams : IConfigurationParams
   //                        ValidateConfiguration
   //
   //-------------------------------------------------------------------------------
-  public void ValidateConfiguration(ILogger logger)
+  public ErrorOr<Success> ValidateConfiguration(ILogger logger)
   {
     var missingKeys = _settings
      .Where(kvp => string.IsNullOrEmpty(kvp.Value))
@@ -43,12 +45,11 @@ public class ConfigurationParams : IConfigurationParams
 
     if (missingKeys.Any())
     {
-      foreach (var key in missingKeys)
-      {
-        logger.LogError("{ConfigKey} is not found or empty in the configuration", key);
-      }
-      throw new InvalidOperationException(
-          $"Missing or empty configuration keys: {string.Join(", ", missingKeys)}");
+      logger.LogError("Missing or empty configuration keys: {MissingKeys}", string.Join(", ", missingKeys));
+      return missingKeys.Select(
+        key => Errors.CommonErrors.ConfigurationMissingKey(key)).ToList();
     }
+
+    return Result.Success;
   }
 }

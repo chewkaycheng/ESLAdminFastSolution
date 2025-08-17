@@ -1,4 +1,4 @@
-﻿namespace ESLAdmin.Infrastructure.Data.Consts;
+﻿namespace ESLAdmin.Infrastructure.Persistence.Constants;
 
 //------------------------------------------------------------------------------
 //
