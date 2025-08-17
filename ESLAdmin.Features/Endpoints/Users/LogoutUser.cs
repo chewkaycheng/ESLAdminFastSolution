@@ -1,5 +1,5 @@
-﻿using ESLAdmin.Common.Errors;
-using ESLAdmin.Infrastructure.RepositoryManagers;
+﻿using ESLAdmin.Common.CustomErrors;
+using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using FastEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;

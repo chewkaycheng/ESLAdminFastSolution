@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ESLAdmin.Common\ESLAdmin.Common.csproj" />
     <ProjectReference Include="..\ESLAdmin.Domain\ESLAdmin.Domain.csproj" />
     <ProjectReference Include="..\ESLAdmin.Features\ESLAdmin.Features.csproj" />
     <ProjectReference Include="..\ESLAdmin.Infrastructure\ESLAdmin.Infrastructure.csproj" />

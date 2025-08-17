@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using ESLAdmin.Infrastructure.Persistence.Constants;
-using ESLAdmin.Infrastructure.Repositories;
+using ESLAdmin.Infrastructure.Persistence.Repositories;
 using FastEndpoints;
 
 namespace ESLAdmin.Features.Endpoints.ChildcareLevels;

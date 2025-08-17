@@ -1,14 +1,15 @@
-﻿using ESLAdmin.Domain.Entities;
+﻿using ESLAdmin.Common.Configuration;
+using ESLAdmin.Domain.Entities;
 using ESLAdmin.Features.Repositories;
-using ESLAdmin.Infrastructure.Configuration;
-using ESLAdmin.Infrastructure.Data;
-using ESLAdmin.Infrastructure.Data.Interfaces;
-using ESLAdmin.Infrastructure.Repositories.Interfaces;
-using ESLAdmin.Infrastructure.RepositoryManagers;
+using ESLAdmin.Infrastructure.Persistence.DatabaseContexts;
+using ESLAdmin.Infrastructure.Persistence.DatabaseContexts.Interfaces;
+using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
+using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Infrastructure.Services;
 using ESLAdmin.Logging;
 using FastEndpoints.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -87,7 +88,7 @@ public static class ServiceExtensions
     services.AddFastEndpoints(options =>
     {
       options.Assemblies = new[] { typeof(
-    ESLAdmin.Features.FeatureAssemblyMarker).Assembly};
+        ESLAdmin.Features.FeatureAssemblyMarker).Assembly};
     });
   }
 
@@ -228,6 +229,23 @@ public static class ServiceExtensions
             ValidIssuer = issuer,
             ValidAudience = audience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+          };
+          o.Events = new()
+          {
+            OnChallenge = async ctx =>
+            {
+              ctx.HandleResponse();
+              var requiresAuth =
+                ctx.HttpContext
+                   .GetEndpoint()
+                   .Metadata.OfType<IAuthorizeData>()
+                   .Any();          
+              if (ctx.AuthenticateFailure is not null || requiresAuth is true)
+              {
+                await ctx.Response.SendErrorsAsync(
+                  [new("Security", "You are not authorized.")], 401);
+              }
+            }
           };
         })
       .AddAuthentication(options =>

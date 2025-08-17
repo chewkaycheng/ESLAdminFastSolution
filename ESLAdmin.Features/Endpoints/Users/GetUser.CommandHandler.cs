@@ -1,7 +1,7 @@
-﻿using ESLAdmin.Common.Errors;
+﻿using ESLAdmin.Common.CustomErrors;
 using ESLAdmin.Domain.Dtos;
 using ESLAdmin.Domain.Entities;
-using ESLAdmin.Infrastructure.RepositoryManagers;
+using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;

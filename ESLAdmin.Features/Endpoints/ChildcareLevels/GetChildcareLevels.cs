@@ -1,4 +1,4 @@
-﻿using ESLAdmin.Infrastructure.RepositoryManagers;
+﻿using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -39,7 +39,8 @@ public class GetChildcareLevelsEndpoint :
   public override void Configure()
   {
     Get("/api/childcarelevels/");
-    //AllowAnonymous();
+    //AuthSchemes("Bearer");
+    AllowAnonymous();
   }
 
   //------------------------------------------------------------------------------

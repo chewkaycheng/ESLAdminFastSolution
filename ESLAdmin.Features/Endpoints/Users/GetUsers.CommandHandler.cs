@@ -1,7 +1,7 @@
 ﻿using ESLAdmin.Domain.Dtos;
 using ESLAdmin.Domain.Entities;
 using ESLAdmin.Features.Endpoints.ChildcareLevels;
-using ESLAdmin.Infrastructure.RepositoryManagers;
+using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
