@@ -8,13 +8,16 @@ namespace ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 
 public interface IIdentityRepository
 {
-  Task<ErrorOr<string>> AddToRoleAsync(
+  Task<ErrorOr<Success>> AddToRoleAsync(
   string email,
   string roleName);
-  Task<ErrorOr<string>> DeleteUserByEmailAsync(string email);
-  Task<ErrorOr<UserDto>> GetUserByEmailAsync(
+  Task<ErrorOr<Success>> DeleteUserByEmailAsync(string email);
+  Task<ErrorOr<User>> GetUserByEmailAsync(
   string email);
-  Task<IEnumerable<UserDto>> GetAllUsersAsync();
+  Task<ErrorOr<List<string>>> GetRolesForUserAsync(
+    User user);
+  Task<ErrorOr<IEnumerable<User>>> GetAllUsersAsync();
+  Task<ErrorOr<IEnumerable<UserRole>>> GetAllUserRolesAsync();
   Task<ErrorOr<string>> RemoveFromRoleAsync(
   string email,
   string roleName);

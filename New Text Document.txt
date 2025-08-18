@@ -1,0 +1,10 @@
+I have the following project: 
+1. Asp.Net webapi 9.0
+2. Uses FastEndPoint with command handlers
+3. Implements function for IdentityUser using EFCore
+4. Uses Dapper for other database functionalities.
+5. Uses Firebird Sql as backend database.
+6. Uses vertical slice architecture.
+7. Generate code inline from now on.
+
+I have a library project ESLAdmin.Infrastructure, with a Persistence directory. Where should I store the IdentityErrorHandler file

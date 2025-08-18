@@ -1,4 +1,6 @@
-﻿using ESLAdmin.Common.CustomErrors;
+﻿using ErrorOr;
+using ESLAdmin.Common.CustomErrors;
+using ESLAdmin.Infrastructure.Persistence.Identity;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
 using FastEndpoints;
@@ -15,7 +17,7 @@ namespace ESLAdmin.Features.Endpoints.Users;
 //-------------------------------------------------------------------------------
 public class DeleteUserCommandHandler : ICommandHandler<
   DeleteUserCommand,
-  Results<Ok<string>, ProblemDetails, InternalServerError>>
+  Results<Ok<Success>, ProblemDetails, InternalServerError>>
 {
   private readonly IRepositoryManager _repositoryManager;
   private readonly ILogger<GetUserCommandHandler> _logger;
@@ -38,7 +40,7 @@ public class DeleteUserCommandHandler : ICommandHandler<
   //                        ExecuteAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<Results<Ok<string>, ProblemDetails, InternalServerError>>
+  public async Task<Results<Ok<Success>, ProblemDetails, InternalServerError>>
     ExecuteAsync(
       DeleteUserCommand command,
       CancellationToken cancellationToken)
@@ -50,26 +52,10 @@ public class DeleteUserCommandHandler : ICommandHandler<
     if (result.IsError)
     {
       var error = result.Errors.First();
-      var statusCode = StatusCodes.Status500InternalServerError;
-      switch (error.Code)
-      {
-        case "Identity.UserNotFound":
-          statusCode = StatusCodes.Status404NotFound;
-          break;
-        case "Identity.ConcurrencyError":
-          statusCode = StatusCodes.Status409Conflict;
-          break;
-        default:
-          return TypedResults.InternalServerError();
-      }
-
-      return new ProblemDetails(
-        ErrorUtils.CreateFailureList(
-          error.Code,
-          error.Description), statusCode);
+      return IdentityResultMapper.MapToResult<Success>(error);
     }
 
     _logger.LogFunctionExit($"Email: {command.Email}");
-    return TypedResults.Ok(command.Email);
+    return TypedResults.Ok(new Success());  
   }
 }

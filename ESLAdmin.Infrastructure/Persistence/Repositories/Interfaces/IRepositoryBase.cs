@@ -7,4 +7,5 @@ namespace ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces
     IRepositoryBaseEFCore<ReadT, WriteT>
     where ReadT : class
     where WriteT : class;
+
 }

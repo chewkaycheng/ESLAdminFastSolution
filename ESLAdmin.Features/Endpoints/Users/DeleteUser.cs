@@ -1,4 +1,5 @@
-﻿using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
+﻿using ErrorOr;
+using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
@@ -12,7 +13,7 @@ namespace ESLAdmin.Features.Endpoints.Users;
 //-------------------------------------------------------------------------------
 public class DeleteUserEndpoint : Endpoint<
   DeleteUserRequest,
-  Results<Ok<string>, ProblemDetails, InternalServerError>>
+  Results<Ok<Success>, ProblemDetails, InternalServerError>>
 {
   private readonly IRepositoryManager _repositoryManager;
   private readonly ILogger<DeleteUserEndpoint> _logger;
@@ -46,7 +47,7 @@ public class DeleteUserEndpoint : Endpoint<
   //                       ExecuteAsync
   //
   //-------------------------------------------------------------------------------
-  public override async Task<Results<Ok<string>, ProblemDetails, InternalServerError>> ExecuteAsync(
+  public override async Task<Results<Ok<Success>, ProblemDetails, InternalServerError>> ExecuteAsync(
     DeleteUserRequest request,
     CancellationToken cancellationToken)
   {

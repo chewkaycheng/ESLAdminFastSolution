@@ -448,6 +448,23 @@ public static partial class AppErrors
         Error.Failure(
           "Identity.InvalidOperation", 
           description);
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       GenericIdentityError
+    //
+    //-------------------------------------------------------------------------------
+    public static Error GenericIdentityError(
+      string userId,
+      IEnumerable<IdentityError> errors)
+    {
+      var error = Error.Failure(
+        code: "Identity.Error",
+        description: $"An operation error has occurred for user: '{userId}'.");
+
+      AddMetadata(error.Metadata, errors);
+      return error;
+    }
   }
 }
 

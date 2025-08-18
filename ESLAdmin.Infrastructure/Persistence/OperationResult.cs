@@ -1,18 +1,18 @@
-﻿namespace ESLAdmin.Infrastructure.Persistence.Repositories;
+﻿//namespace ESLAdmin.Infrastructure.Persistence.Repositories;
 
 //------------------------------------------------------------------------------
 //
 //                     class OperationResultConsts
 //
 //------------------------------------------------------------------------------
-public static class OperationResultConsts
-{
-  public const string DBAPIERROR = "dbapierror";
-  public const string DUPFIELDNAME = "dupfieldname";
-  public const string REFERENCETABLE = "referencetable";
-  public const string ID = "id";
-  public const string GUID = "guid";
-}
+//public static class OperationResultConsts
+//{
+//  public const string DBAPIERROR = "dbapierror";
+//  public const string DUPFIELDNAME = "dupfieldname";
+//  public const string REFERENCETABLE = "referencetable";
+//  public const string ID = "id";
+//  public const string GUID = "guid";
+//}
 
 //------------------------------------------------------------------------------
 //

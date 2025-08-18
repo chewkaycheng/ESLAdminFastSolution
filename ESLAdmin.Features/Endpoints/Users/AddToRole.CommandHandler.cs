@@ -1,8 +1,8 @@
-﻿using ESLAdmin.Common.CustomErrors;
+﻿using ErrorOr;
+using ESLAdmin.Infrastructure.Persistence.Identity;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
 using FastEndpoints;
-using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
@@ -16,7 +16,7 @@ namespace ESLAdmin.Features.Endpoints.Users;
 //-------------------------------------------------------------------------------
 public class AddToRoleCommandHandler : ICommandHandler<
   AddToRoleCommand,
-  Results<NoContent, ProblemDetails, InternalServerError>>
+  Results<Ok<Success>, ProblemDetails, InternalServerError>>
 {
   private readonly IRepositoryManager _repositoryManager;
   private readonly ILogger<AddToRoleCommandHandler> _logger;
@@ -40,7 +40,7 @@ public class AddToRoleCommandHandler : ICommandHandler<
   //
   //-------------------------------------------------------------------------------
 
-  public async Task<Results<NoContent, ProblemDetails, InternalServerError>>
+  public async Task<Results<Ok<Success>, ProblemDetails, InternalServerError>>
     ExecuteAsync(
       AddToRoleCommand command,
       CancellationToken cancellationToken)
@@ -54,28 +54,12 @@ public class AddToRoleCommandHandler : ICommandHandler<
     if (result.IsError)
     {
       var error = result.Errors.First();
-      var statusCode = StatusCodes.Status500InternalServerError;
-      switch (error.Code)
-      {
-        case "Identity.UserNotFound":
-          statusCode = StatusCodes.Status404NotFound;
-          break;
-        case "Identity.UserAlreadyInRole":
-          statusCode = StatusCodes.Status400BadRequest;
-          break;
-        case "Identity.ConcurrencyError":
-          statusCode = StatusCodes.Status409Conflict;
-          break;
-        default:
-          return TypedResults.InternalServerError();
-      }
-      return new ProblemDetails(
-        ErrorUtils.CreateFailureList(
-          error.Code,
-          error.Description), statusCode);
+      return IdentityResultMapper.MapToResult<Success>(error);
     }
-    _logger.LogFunctionExit($"Email: {command.Email}, RoleName: {command.RoleName}");
-    return TypedResults.NoContent();
+
+    _logger.LogFunctionExit(
+      $"Email: {command.Email}, RoleName: {command.RoleName}");
+    return TypedResults.Ok(new Success());
   }
 }
 

@@ -16,7 +16,7 @@ public class GetUserMapper : Mapper<GetUserRequest, GetUserResponse, User>
   //                          ToResponse
   //
   //-------------------------------------------------------------------------------
-  public GetUserResponse ToResponse(User user, IList<string>? roles)
+  public GetUserResponse ToResponse(User user, IList<string>? roleNames)
   {
     GetUserResponse response = new GetUserResponse()
     {
@@ -26,7 +26,7 @@ public class GetUserMapper : Mapper<GetUserRequest, GetUserResponse, User>
       UserName = user.UserName,
       Email = user.Email,
       PhoneNumber = user.PhoneNumber,
-      Roles = roles
+      Roles = roleNames
     };
     return response;
   }

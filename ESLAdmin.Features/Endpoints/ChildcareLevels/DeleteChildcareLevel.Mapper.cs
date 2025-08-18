@@ -1,6 +1,6 @@
 ﻿using Dapper;
+using ESLAdmin.Infrastructure.Persistence;
 using ESLAdmin.Infrastructure.Persistence.Constants;
-using ESLAdmin.Infrastructure.Persistence.Repositories;
 using FastEndpoints;
 
 namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
@@ -29,10 +29,10 @@ public class DeleteChildcareLevelMapper : Mapper<
 
     // Output parameters
     parameters.AddStringOutputParam(
-      OperationResultConsts.REFERENCETABLE,
+      DbConstsOperationResult.REFERENCETABLE,
       64);
     parameters.AddInt32OutputParam(
-      OperationResultConsts.DBAPIERROR);
+      DbConstsOperationResult.DBAPIERROR);
 
     return parameters;
   }
@@ -45,8 +45,8 @@ public class DeleteChildcareLevelMapper : Mapper<
   public OperationResult FromParameters(DynamicParameters parameters) => new()
   {
     DbApiError = parameters.Get<int>(
-        OperationResultConsts.DBAPIERROR),
+        DbConstsOperationResult.DBAPIERROR),
     ReferenceTable = parameters.Get<string?>(
-        OperationResultConsts.REFERENCETABLE),
+        DbConstsOperationResult.REFERENCETABLE),
   };
 }

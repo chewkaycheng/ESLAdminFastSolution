@@ -43,21 +43,42 @@ public class GetUsersCommandHandler :
   //------------------------------------------------------------------------------
   public async Task<Results<Ok<IEnumerable<GetUserResponse>>, ProblemDetails, InternalServerError>> ExecuteAsync(GetUsersCommand command, CancellationToken ct)
   {
-    try
+    var usersResult = await _repositoryManager.IdentityRepository.GetAllUsersAsync();
+    if (usersResult.IsError)
     {
-      var userDtos = await _repositoryManager.IdentityRepository.GetAllUsersAsync();
-
-      IEnumerable<GetUserResponse> usersResponse =
-       userDtos.Select(
-         userDto => command.Mapper.DtoToResponse(
-           userDto)).ToList();
-     
-      return TypedResults.Ok(usersResponse);
-    }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
       return TypedResults.InternalServerError();
     }
+
+    var users = usersResult.Value;
+
+    var userRolesResults = await _repositoryManager.IdentityRepository.GetAllUserRolesAsync();
+    if (userRolesResults.IsError)
+    {
+      return TypedResults.InternalServerError();
+    }
+
+    var userRoles = userRolesResults.Value;
+
+    var usersResponse = new List<GetUserResponse>();
+    foreach (var user in users)
+    {
+      var userResponse = new GetUserResponse
+      {
+        Id = user.Id,
+        FirstName = user.FirstName,
+        LastName = user.LastName,
+        UserName = user.UserName,
+        Email = user.Email,
+        PhoneNumber = user.PhoneNumber,
+        Roles = userRoles == null ? new List<string>() :
+          userRoles
+            .Where(ur => ur.UserId == user.Id)
+            .Select(ur => ur.Name)
+            .ToList()
+      };
+      usersResponse.Add(userResponse);
+    }
+
+    return TypedResults.Ok(usersResponse as IEnumerable<GetUserResponse>);
   }
 }

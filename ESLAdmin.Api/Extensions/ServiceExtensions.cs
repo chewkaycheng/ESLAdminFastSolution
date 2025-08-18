@@ -235,11 +235,9 @@ public static class ServiceExtensions
             OnChallenge = async ctx =>
             {
               ctx.HandleResponse();
-              var requiresAuth =
-                ctx.HttpContext
-                   .GetEndpoint()
-                   .Metadata.OfType<IAuthorizeData>()
-                   .Any();          
+              var endpoint = ctx.HttpContext.GetEndpoint();
+              var requiresAuth = endpoint?.Metadata.OfType<IAuthorizeData>().Any() ?? false;
+                        
               if (ctx.AuthenticateFailure is not null || requiresAuth is true)
               {
                 await ctx.Response.SendErrorsAsync(

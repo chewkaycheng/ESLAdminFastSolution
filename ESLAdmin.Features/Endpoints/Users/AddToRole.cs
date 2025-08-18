@@ -1,4 +1,5 @@
-﻿using FastEndpoints;
+﻿using ErrorOr;
+using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
@@ -11,7 +12,7 @@ namespace ESLAdmin.Features.Endpoints.Users;
 //-------------------------------------------------------------------------------
 public class AddToRoleEndpoint : Endpoint<
   AddToRoleRequest,
-  Results<NoContent, ProblemDetails, InternalServerError>>
+  Results<Ok<Success>, ProblemDetails, InternalServerError>>
 {
   private readonly ILogger<AddToRoleEndpoint> _logger;
 
@@ -41,7 +42,7 @@ public class AddToRoleEndpoint : Endpoint<
   //                       ExecuteAsync
   //
   //-------------------------------------------------------------------------------
-  public override async Task<Results<NoContent, ProblemDetails, InternalServerError>>
+  public override async Task<Results<Ok<Success>, ProblemDetails, InternalServerError>>
   ExecuteAsync(AddToRoleRequest request, CancellationToken cancellationToken)
   {
     return await new AddToRoleCommand

@@ -1,11 +1,4 @@
-﻿using ESLAdmin.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ESLAdmin.Domain.Dtos
+﻿namespace ESLAdmin.Domain.Dtos
 {
   public class UserDto 
   {

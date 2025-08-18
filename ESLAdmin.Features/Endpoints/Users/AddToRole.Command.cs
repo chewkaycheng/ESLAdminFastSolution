@@ -1,4 +1,5 @@
-﻿using FastEndpoints;
+﻿using ErrorOr;
+using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ESLAdmin.Features.Endpoints.Users;
@@ -9,7 +10,7 @@ namespace ESLAdmin.Features.Endpoints.Users;
 //
 //-------------------------------------------------------------------------------
 public class AddToRoleCommand : 
-  ICommand<Results<NoContent, ProblemDetails, InternalServerError>>
+  ICommand<Results<Ok<Success>, ProblemDetails, InternalServerError>>
 {
   public string Email { get; set; } = string.Empty;
   public string RoleName { get; set; } = string.Empty;

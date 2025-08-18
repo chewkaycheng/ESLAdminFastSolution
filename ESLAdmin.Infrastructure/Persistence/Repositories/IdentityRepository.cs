@@ -2,16 +2,15 @@
 using ErrorOr;
 using ESLAdmin.Common.CustomErrors;
 using ESLAdmin.Domain.Dtos;
-using ESLAdmin.Domain.Entities;
 using ESLAdmin.Infrastructure.Persistence.Constants;
 using ESLAdmin.Infrastructure.Persistence.DatabaseContexts;
 using ESLAdmin.Infrastructure.Persistence.DatabaseContexts.Interfaces;
 using ESLAdmin.Infrastructure.Persistence.Entities;
+using ESLAdmin.Infrastructure.Persistence.Identity;
 using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Extensions;
 using ESLAdmin.Logging.Interface;
-using FirebirdSql.Data.FirebirdClient;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -63,69 +62,58 @@ public class IdentityRepository : IIdentityRepository
   //                       AddToRoleAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<ErrorOr<string>> AddToRoleAsync(
+  public async Task<ErrorOr<Success>> AddToRoleAsync(
     string email,
     string roleName)
   {
-    var user = await _userManager.FindByEmailAsync(email);
-    if (user == null)
-    {
-      return AppErrors.IdentityErrors.UserEmailNotFound(email);
-    }
-
-    //var role = await _roleManager.FindByNameAsync(roleName);
-    //if (role == null)
-    //{
-    //  return Errors.IdentityErrors.RoleNotFound(roleName);
-    //}
+    _logger.LogFunctionEntry(
+      $"Adding user: '{email}' to role: '{roleName}'.");
 
     try
     {
-      _logger.LogFunctionEntry($"Adding user: '{user.Id}' to role: '{roleName}'.");
+      var user = await _userManager.FindByEmailAsync(email);
+      if (user == null)
+      {
+        return AppErrors.IdentityErrors.UserEmailNotFound(email);
+      }
+
+      //var role = await _roleManager.FindByNameAsync(roleName);
+      //if (role == null)
+      //{
+      //  return Errors.IdentityErrors.RoleNotFound(roleName);
+      //}
 
       var result = await _userManager.AddToRoleAsync(user, roleName);
 
       if (!result.Succeeded)
       {
-        _logger.LogIdentityErrors("_userManager.AddToRoleAsync", email, result.Errors.ToFormattedString());
-        var firstError = result.Errors.FirstOrDefault();
-        return firstError?.Code switch
-        {
-          "UserNotFound" => AppErrors.IdentityErrors.UserNotFound(user.Id),
-          //"RoleNotFound" => Errors.IdentityErrors.RoleNotFound(roleName),
-          "UserAlreadyInRole" => AppErrors.IdentityErrors.UserAlreadyInRole(user.Id, roleName),
-          "ConcurrencyFailure" => AppErrors.IdentityErrors.ConcurrencyFailure(user.Id),
-          _ => AppErrors.IdentityErrors.AddToRoleFailed(user.Id, roleName, result.Errors)
-        };
+
+        // Errors: 
+        // 1) UserNotFound
+        // 2) RoleNotFound
+        // 3) UserAlreadyInRole
+        // 4) Concurrency Failure
+        // 5) Invalid Role Name
+        _logger.LogIdentityErrors(
+          "_userManager.AddToRoleAsync", 
+          email, 
+          result.Errors.ToFormattedString());
+
+        return IdentityErrorHandler.HandleIdentityErrors(
+          result,
+          _logger,
+          IdentityOperation.AddToRole,
+          userId: user.Id,
+          roleName: roleName);
       }
 
       _logger.LogFunctionExit();
-      return roleName;
-    }
-    catch (ArgumentNullException ex)
-    {
-      _logger.LogException(ex);
-      return AppErrors.IdentityErrors.InvalidArgument(ex.Message);
-    }
-    catch (FbException ex)
-    {
-      _logger.LogException(ex);
-      return AppErrors.DatabaseErrors.DatabaseError($"Firebird error: {ex.Message} (ErrorCode: {ex.ErrorCode})");
-    }
-    catch (InvalidOperationException ex)
-    {
-      _logger.LogException(ex);
-      return AppErrors.IdentityErrors.InvalidOperation(ex.Message);
-    }
-    catch (OperationCanceledException ex)
-    {
-      _logger.LogException(ex);
-      return AppErrors.DatabaseErrors.OperationCanceled();
+      return new ErrorOr.Success();
     }
     catch (Exception ex)
     {
-      _logger.LogException(ex);
-      return AppErrors.CommonErrors.Exception(ex.Message);
+      return DatabaseExceptionHandler
+          .HandleException(ex, _logger);
     }
   }
 
@@ -134,7 +122,7 @@ public class IdentityRepository : IIdentityRepository
   //                       DeleteUserByEmailAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<ErrorOr<string>> DeleteUserByEmailAsync(string email)
+  public async Task<ErrorOr<Success>> DeleteUserByEmailAsync(string email)
   {
     _logger.LogFunctionEntry($"Deleting user by email: '{email}'.");
 
@@ -166,37 +154,24 @@ public class IdentityRepository : IIdentityRepository
       if (!result.Succeeded)
       {
         _logger.LogError($"Failed to delete user with email '{email}': {result.Errors.ToFormattedString()}");
-        var firstError = result.Errors.FirstOrDefault();
-        return firstError?.Code switch
-        {
-          "UserNotFound" => AppErrors.IdentityErrors.UserNotFound(user.Id),
-          "ConcurrencyFailure" => AppErrors.IdentityErrors.ConcurrencyFailure(user.Id),
-          _ => AppErrors.IdentityErrors.DeleteUserFailed(user.Id, result.Errors)
-        };
+
+        // Errors:
+        // 1) UserNotFound
+        // 2) ConcurrencyFailure
+        return IdentityErrorHandler.HandleIdentityErrors(
+          result,
+          _logger,
+          IdentityOperation.DeleteUser,
+          userId: user.Id);
       }
 
       _logger.LogFunctionExit($"User with email '{email}' deleted successfully.");
-      return email;
-    }
-    catch (ArgumentNullException ex)
-    {
-      _logger.LogException(ex);
-      return AppErrors.IdentityErrors.InvalidArgument(ex.Message);
-    }
-    catch (DbUpdateException ex)
-    {
-      _logger.LogException(ex);
-      return AppErrors.DatabaseErrors.DatabaseError(ex.InnerException?.Message ?? ex.Message);
-    }
-    catch (OperationCanceledException ex)
-    {
-      _logger.LogException(ex);
-      return AppErrors.DatabaseErrors.OperationCanceled();
+      return new ErrorOr.Success();
     }
     catch (Exception ex)
     {
-      _logger.LogException(ex);
-      return AppErrors.CommonErrors.Exception(ex.Message);
+      return DatabaseExceptionHandler
+          .HandleException(ex, _logger);
     }
   }
 
@@ -205,18 +180,87 @@ public class IdentityRepository : IIdentityRepository
   //                       GetUserByEmailAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<ErrorOr<UserDto>> GetUserByEmailAsync(
+  public async Task<ErrorOr<User>> GetUserByEmailAsync(
     string email)
   {
-    var user = await _userManager.FindByEmailAsync(email);
-
-    if (user == null)
+    _logger.LogFunctionEntry($"Get user by email: '{email}'.");
+    try
     {
-      return AppErrors.IdentityErrors.UserEmailNotFound(email);
-    }
+      var user = await _userManager.FindByEmailAsync(email);
 
-    var roles = await _userManager.GetRolesAsync(user);
-    return MapToDto(user, roles);
+      if (user == null)
+      {
+        return AppErrors.IdentityErrors.UserEmailNotFound(email);
+      }
+
+      _logger.LogFunctionExit();
+      return user;
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return DatabaseExceptionHandler
+          .HandleException(ex, _logger);
+    }
+  }
+
+
+  //------------------------------------------------------------------------------
+  //
+  //                       GetRolesForUserAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<List<string>>> GetRolesForUserAsync(
+    User user)
+  {
+    _logger.LogFunctionEntry($"Get roles for by user: '{user.Email}'.");
+    try
+    {
+      if (user == null)
+      {
+        return AppErrors.IdentityErrors.InvalidUser("User cannot be null.");
+      }
+
+      var roles =  await _userManager.GetRolesAsync(user);
+      _logger.LogFunctionExit();
+      return roles.ToList();
+    }
+    catch (Exception ex)
+    {
+      return DatabaseExceptionHandler
+          .HandleException(ex, _logger);
+    }
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       GetAllUserRolesAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<IEnumerable<UserRole>>> GetAllUserRolesAsync()
+  {
+    try
+    {
+      var connectionResult = await _dbContextDapper.GetConnectionAsync();
+      if (connectionResult.IsError)
+      {
+        _logger.LogError("Failed to get database connection: {Error}", connectionResult.Errors.ToFormattedString());
+        return AppErrors.DatabaseErrors.DatabaseConnectionError(
+          "Failed to get database connection");
+      }
+
+      using IDbConnection connection = connectionResult.Value;
+      var userRoles = await connection.QueryAsync<UserRole>(
+        DbConstsIdentity.SQL_GETUSERROLES,
+        commandType: CommandType.Text);
+      return userRoles.ToList();
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return DatabaseExceptionHandler
+          .HandleException(ex, _logger);
+    }
   }
 
   //------------------------------------------------------------------------------
@@ -224,47 +268,105 @@ public class IdentityRepository : IIdentityRepository
   //                       GetAllUsersAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
+  public async Task<ErrorOr<IEnumerable<User>>> GetAllUsersAsync()
   {
-    var sql = DbConstsIdentity.SQL_GETALL;
-
-    var connectionResult = await _dbContextDapper.GetConnectionAsync();
-    if (connectionResult.IsError)
+    try
     {
-      _logger.LogError("Failed to get database connection: {Error}", connectionResult.Errors);
-      return Enumerable.Empty<UserDto>();
-    }
+      var sql = DbConstsIdentity.SQL_GETALL;
 
-    using IDbConnection connection = connectionResult.Value;
-    var users = await connection.QueryAsync<User>(
-      sql,
-      commandType: CommandType.Text);
-
-    var userRoles = await connection.QueryAsync<UserRole>(
-      DbConstsIdentity.SQL_GETUSERROLES,
-      commandType: CommandType.Text);
-
-    var userDtos = new List<UserDto>();
-    foreach (var user in users)
-    {
-      var userDto = new UserDto
+      var connectionResult = await _dbContextDapper.GetConnectionAsync();
+      if (connectionResult.IsError)
       {
-        Id = user.Id,
-        FirstName = user.FirstName,
-        LastName = user.LastName,
-        UserName = user.UserName,
-        Email = user.Email,
-        PhoneNumber = user.PhoneNumber,
-        Roles = userRoles == null ? new List<string>() :
-          userRoles.Where(r => r.UserId == user.Id)
-          .Select(r => r.Name)
-          .ToList()
-      };
-      userDtos.Add(userDto);
-    }
+        _logger.LogError("Failed to get database connection: {Error}", connectionResult.Errors);
+        return AppErrors.DatabaseErrors.DatabaseConnectionError(
+            "Failed to get database connection");
+      }
 
-    return userDtos;
+      using IDbConnection connection = connectionResult.Value;
+      var users = await connection.QueryAsync<User>(
+        sql,
+        commandType: CommandType.Text);
+
+      //var userRoles = await connection.QueryAsync<UserRole>(
+      //  DbConstsIdentity.SQL_GETUSERROLES,
+      //  commandType: CommandType.Text);
+
+      //var userDtos = new List<UserDto>();
+      //foreach (var user in users)
+      //{
+      //  var userDto = new UserDto
+      //  {
+      //    Id = user.Id,
+      //    FirstName = user.FirstName,
+      //    LastName = user.LastName,
+      //    UserName = user.UserName,
+      //    Email = user.Email,
+      //    PhoneNumber = user.PhoneNumber,
+      //    Roles = userRoles == null ? new List<string>() :
+      //      userRoles.Where(r => r.UserId == user.Id)
+      //      .Select(r => r.Name)
+      //      .ToList()
+      //  };
+      //  userDtos.Add(userDto);
+      //}
+
+      return users.ToList();
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return DatabaseExceptionHandler
+         .HandleException(ex, _logger);
+    }
   }
+
+
+  //------------------------------------------------------------------------------
+  //
+  //                       GetAllUsersAsync
+  //
+  //-------------------------------------------------------------------------------
+  //public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
+  //{
+  //  var sql = DbConstsIdentity.SQL_GETALL;
+
+  //  var connectionResult = await _dbContextDapper.GetConnectionAsync();
+  //  if (connectionResult.IsError)
+  //  {
+  //    _logger.LogError("Failed to get database connection: {Error}", connectionResult.Errors);
+  //    return Enumerable.Empty<UserDto>();
+  //  }
+
+  //  using IDbConnection connection = connectionResult.Value;
+  //  var users = await connection.QueryAsync<User>(
+  //    sql,
+  //    commandType: CommandType.Text);
+
+  //  var userRoles = await connection.QueryAsync<UserRole>(
+  //    DbConstsIdentity.SQL_GETUSERROLES,
+  //    commandType: CommandType.Text);
+
+  //  var userDtos = new List<UserDto>();
+  //  foreach (var user in users)
+  //  {
+  //    var userDto = new UserDto
+  //    {
+  //      Id = user.Id,
+  //      FirstName = user.FirstName,
+  //      LastName = user.LastName,
+  //      UserName = user.UserName,
+  //      Email = user.Email,
+  //      PhoneNumber = user.PhoneNumber,
+  //      Roles = userRoles == null ? new List<string>() :
+  //        userRoles.Where(r => r.UserId == user.Id)
+  //        .Select(r => r.Name)
+  //        .ToList()
+  //    };
+  //    userDtos.Add(userDto);
+  //  }
+
+  //  return userDtos;
+  //}
 
   //------------------------------------------------------------------------------
   //
@@ -549,17 +651,14 @@ public class IdentityRepository : IIdentityRepository
         await transaction.RollbackAsync();
         _logger.LogError(
           $"Failed to create user with email '{user.Email}': {result.Errors.ToFormattedString()}");
-        
-        var firstError = result.Errors.FirstOrDefault();
-        return firstError?.Code switch
-        {
-          "DuplicateUserName" => AppErrors.IdentityErrors.DuplicateUserName(user.UserName),
-          "DuplicateEmail" => AppErrors.IdentityErrors.DuplicateEmail(user.Email),
-          "InvalidUserName" => AppErrors.IdentityErrors.InvalidUserName(user.UserName),
-          "InvalidEmail" => AppErrors.IdentityErrors.InvalidEmail(user.Email ?? "null"),
-          "ConcurrencyFailure" => AppErrors.IdentityErrors.ConcurrencyFailure(user.UserName),
-          _ => AppErrors.IdentityErrors.CreateUserFailed(user.UserName, user.Email, result.Errors)
-        };
+
+        return IdentityErrorHandler.HandleIdentityErrors(
+          result,
+          _logger,
+          IdentityOperation.CreateUser,
+          userId: user.Id,
+          userName: user.UserName ?? "",
+          email: user.Email);
       }
 
       if (roles != null && roles.Any())
@@ -572,15 +671,13 @@ public class IdentityRepository : IIdentityRepository
           _logger.LogError(
             $"Failed to add roles to user with email '{user.Email}': {roleResult.Errors.ToFormattedString()}");
 
-          var firstError = result.Errors.FirstOrDefault();
-          return firstError?.Code switch
-          {
-            "UserNotFound" => AppErrors.IdentityErrors.UserNotFound(user.Id),
-            "RoleNotFound" => AppErrors.IdentityErrors.RoleNotFound(string.Join(", ", roles)),
-            "UserAlreadyInRole" => AppErrors.IdentityErrors.UserAlreadyInRole(user.Id, string.Join(", ", roles)),
-            "ConcurrencyFailure" => AppErrors.IdentityErrors.ConcurrencyFailure(user.Id),
-            _ => AppErrors.IdentityErrors.AddToRolesFailed(user.Id, roles, result.Errors)
-          };
+          return IdentityErrorHandler.HandleIdentityErrors(
+            result,
+            _logger,
+            IdentityOperation.AddToRoles,
+            userId: user.Id,
+            roles: string.Join(", ", roles)
+          );
         }
       }
 
@@ -620,16 +717,17 @@ public class IdentityRepository : IIdentityRepository
     var result = await _userManager.RemoveFromRoleAsync(user, roleName);
     if (!result.Succeeded)
     {
-      _logger.LogIdentityErrors("_userManager.AddToRoleAsync", email, result.Errors.ToFormattedString());
-      var firstError = result.Errors.FirstOrDefault();
-      return firstError?.Code switch
-      {
-        "UserNotFound" => AppErrors.IdentityErrors.UserNotFound(user.Id),
-        "RoleNotFound" => AppErrors.IdentityErrors.RoleNotFound(roleName),
-        "UserNotInRole" => AppErrors.IdentityErrors.UserNotInRole(user.Id, roleName),
-        "ConcurrencyFailure" => AppErrors.IdentityErrors.ConcurrencyFailure(user.Id),
-        _ => AppErrors.IdentityErrors.RemoveFromRoleFailed(user.Id, roleName, result.Errors)
-      };
+      _logger.LogIdentityErrors(
+        "_userManager.AddToRoleAsync", 
+        email, 
+        result.Errors.ToFormattedString());
+
+      return IdentityErrorHandler.HandleIdentityErrors(
+        result,
+        _logger,
+        IdentityOperation.RemoveFromRole,
+        userId: user.Id,
+        roleName: roleName);
     }
 
     return roleName;
@@ -684,15 +782,11 @@ public class IdentityRepository : IIdentityRepository
     {
       _logger.LogIdentityErrors("_roleManager.CreateAsync", roleName, result.Errors.ToFormattedString());
 
-      // Map specific Identity errors to ErrorOr
-      var firstError = result.Errors.FirstOrDefault();
-      return firstError?.Code switch
-      {
-        "DuplicateRoleName" => AppErrors.IdentityErrors.DuplicateRoleName(roleName),
-        "InvalidRoleName" => AppErrors.IdentityErrors.InvalidRoleName(roleName),
-        "ConcurrencyFailure" => AppErrors.IdentityErrors.ConcurrencyFailure(roleName),
-        _ => AppErrors.IdentityErrors.CreateRoleFailed(roleName, result.Errors)
-      };
+      return IdentityErrorHandler.HandleIdentityErrors(
+        result,
+        _logger,
+        IdentityOperation.RemoveFromRole,
+        roleName: roleName);
     }
 
     return role;
@@ -715,14 +809,16 @@ public class IdentityRepository : IIdentityRepository
     var result = await _roleManager.DeleteAsync(role);
     if (!result.Succeeded)
     {
-      _logger.LogIdentityErrors("_roleManager.DeleteAsync", "roleName", result.Errors.ToFormattedString());
-      var firstError = result.Errors.FirstOrDefault();
-      return firstError?.Code switch
-      {
-        "RoleNotFound" => AppErrors.IdentityErrors.RoleNotFound(roleName),
-        "ConcurrencyFailure" => AppErrors.IdentityErrors.ConcurrencyFailure(roleName),
-        _ => AppErrors.IdentityErrors.DeleteRoleFailed(roleName, result.Errors)
-      };
+      _logger.LogIdentityErrors(
+        "_roleManager.DeleteAsync", 
+        "roleName", 
+        result.Errors.ToFormattedString());
+
+      return IdentityErrorHandler.HandleIdentityErrors(
+        result,
+        _logger,
+        IdentityOperation.DeleteRole,
+        roleName: roleName);
     }
 
     return role.Id;
@@ -761,16 +857,18 @@ public class IdentityRepository : IIdentityRepository
     var result = await _roleManager.UpdateAsync(role);
     if (!result.Succeeded)
     {
-      _logger.LogIdentityErrors("_roleManager.UpdateAsync", newRoleName, result.Errors.ToFormattedString());
-      var firstError = result.Errors.First();
-      return firstError.Code switch
-      {
-        "RoleNotFound" => AppErrors.IdentityErrors.RoleNotFound(role.Name),
-        "DuplicateRoleName" => AppErrors.IdentityErrors.DuplicateRoleName(role.Name),
-        "InvalidRoleName" => AppErrors.IdentityErrors.InvalidRoleName(role.Name),
-        "ConcurrencyFailure" => AppErrors.IdentityErrors.ConcurrencyFailure(role.Name),
-        _ => AppErrors.IdentityErrors.UpdateRoleFailed(oldRoleName, newRoleName, result.Errors)
-      };
+      _logger.LogIdentityErrors(
+        "_roleManager.UpdateAsync", 
+        newRoleName, 
+        result.Errors.ToFormattedString());
+
+      return IdentityErrorHandler.HandleIdentityErrors(
+        result,
+        _logger,
+        IdentityOperation.DeleteRole,
+        roleName: role.Name,
+        oldRoleName: oldRoleName,
+        newRoleName: newRoleName);
     }
 
     return newRoleName;

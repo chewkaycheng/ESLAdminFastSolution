@@ -1,6 +1,6 @@
 ﻿using Dapper;
+using ESLAdmin.Infrastructure.Persistence;
 using ESLAdmin.Infrastructure.Persistence.Constants;
-using ESLAdmin.Infrastructure.Persistence.Repositories;
 using FastEndpoints;
 
 namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
@@ -42,12 +42,12 @@ public class UpdateChildcareLevelMapper : Mapper<
 
     // Output parameters
     parameters.AddInt32OutputParam(
-      OperationResultConsts.DBAPIERROR);
+      DbConstsOperationResult.DBAPIERROR);
     parameters.AddStringOutputParam(
-      OperationResultConsts.DUPFIELDNAME,
+      DbConstsOperationResult.DUPFIELDNAME,
       128);
     parameters.AddStringOutputParam(
-      OperationResultConsts.GUID,
+      DbConstsOperationResult.GUID,
       38);
 
     return parameters;
@@ -61,10 +61,10 @@ public class UpdateChildcareLevelMapper : Mapper<
   public OperationResult FromParameters(DynamicParameters parameters) => new()
   {
     DbApiError = parameters.Get<int>(
-      OperationResultConsts.DBAPIERROR),
+      DbConstsOperationResult.DBAPIERROR),
     DupFieldName = parameters.Get<string?>(
-      OperationResultConsts.DUPFIELDNAME),
+      DbConstsOperationResult.DUPFIELDNAME),
     Guid = parameters.Get<string?>(
-      OperationResultConsts.GUID),
+      DbConstsOperationResult.GUID),
   };
 }

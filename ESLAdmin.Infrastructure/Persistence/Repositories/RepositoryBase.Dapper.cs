@@ -1,8 +1,8 @@
 ﻿using Dapper;
 using ErrorOr;
 using ESLAdmin.Common.CustomErrors;
-using ESLAdmin.Common.Exceptions;
-using ESLAdmin.Infrastructure.Persistence.Repositories;
+using ESLAdmin.Infrastructure.Persistence;
+using ESLAdmin.Infrastructure.Persistence.Constants;
 using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 using ESLAdmin.Logging;
 using FirebirdSql.Data.FirebirdClient;
@@ -242,7 +242,7 @@ public partial class RepositoryBase<ReadT, WriteT> :
               commandType: commandType);
 
       var dbApiError = parameters.Get<int>(
-        OperationResultConsts.DBAPIERROR
+        DbConstsOperationResult.DBAPIERROR
       );
 
       if (dbApiError == 0)

@@ -54,21 +54,25 @@ public class GetUserCommandHandler : ICommandHandler<
     _logger.LogFunctionEntry($"Email: {command.Email}");
     try
     {
-      var result = await _repositoryManager.IdentityRepository.GetUserByEmailAsync(
+      var userResult = await _repositoryManager.IdentityRepository.GetUserByEmailAsync(
         command.Email);
-
-      if (result.IsError)
+      
+      if (userResult.IsError)
       {
-        var error = result.Errors.First();
+        var error = userResult.Errors.First();
         return new ProblemDetails(
           ErrorUtils.CreateFailureList(error.Code, error.Description),
           StatusCodes.Status404NotFound );
       }
 
-      var userDto = result.Value;
-      var response = command.Mapper.DtoToResponse(result.Value);
+      var user = userResult.Value;
 
-      DebugLogFunctionExit(userDto);
+      var roleResult = await _repositoryManager.IdentityRepository.GetRolesForUserAsync(user);
+      var roleNames = roleResult.Value;
+
+      var response = command.Mapper.ToResponse(user, roleNames);
+
+      DebugLogFunctionExit(response);
 
       return TypedResults.Ok(response);
     }
@@ -79,7 +83,7 @@ public class GetUserCommandHandler : ICommandHandler<
     }
   }
 
-  private void DebugLogFunctionExit(UserDto userDto)
+  private void DebugLogFunctionExit(GetUserResponse userDto)
   {
     if (_logger.IsEnabled(LogLevel.Debug))
     {
