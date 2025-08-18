@@ -287,29 +287,6 @@ public class IdentityRepository : IIdentityRepository
         sql,
         commandType: CommandType.Text);
 
-      //var userRoles = await connection.QueryAsync<UserRole>(
-      //  DbConstsIdentity.SQL_GETUSERROLES,
-      //  commandType: CommandType.Text);
-
-      //var userDtos = new List<UserDto>();
-      //foreach (var user in users)
-      //{
-      //  var userDto = new UserDto
-      //  {
-      //    Id = user.Id,
-      //    FirstName = user.FirstName,
-      //    LastName = user.LastName,
-      //    UserName = user.UserName,
-      //    Email = user.Email,
-      //    PhoneNumber = user.PhoneNumber,
-      //    Roles = userRoles == null ? new List<string>() :
-      //      userRoles.Where(r => r.UserId == user.Id)
-      //      .Select(r => r.Name)
-      //      .ToList()
-      //  };
-      //  userDtos.Add(userDto);
-      //}
-
       return users.ToList();
     }
     catch (Exception ex)
@@ -319,54 +296,6 @@ public class IdentityRepository : IIdentityRepository
          .HandleException(ex, _logger);
     }
   }
-
-
-  //------------------------------------------------------------------------------
-  //
-  //                       GetAllUsersAsync
-  //
-  //-------------------------------------------------------------------------------
-  //public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
-  //{
-  //  var sql = DbConstsIdentity.SQL_GETALL;
-
-  //  var connectionResult = await _dbContextDapper.GetConnectionAsync();
-  //  if (connectionResult.IsError)
-  //  {
-  //    _logger.LogError("Failed to get database connection: {Error}", connectionResult.Errors);
-  //    return Enumerable.Empty<UserDto>();
-  //  }
-
-  //  using IDbConnection connection = connectionResult.Value;
-  //  var users = await connection.QueryAsync<User>(
-  //    sql,
-  //    commandType: CommandType.Text);
-
-  //  var userRoles = await connection.QueryAsync<UserRole>(
-  //    DbConstsIdentity.SQL_GETUSERROLES,
-  //    commandType: CommandType.Text);
-
-  //  var userDtos = new List<UserDto>();
-  //  foreach (var user in users)
-  //  {
-  //    var userDto = new UserDto
-  //    {
-  //      Id = user.Id,
-  //      FirstName = user.FirstName,
-  //      LastName = user.LastName,
-  //      UserName = user.UserName,
-  //      Email = user.Email,
-  //      PhoneNumber = user.PhoneNumber,
-  //      Roles = userRoles == null ? new List<string>() :
-  //        userRoles.Where(r => r.UserId == user.Id)
-  //        .Select(r => r.Name)
-  //        .ToList()
-  //    };
-  //    userDtos.Add(userDto);
-  //  }
-
-  //  return userDtos;
-  //}
 
   //------------------------------------------------------------------------------
   //
