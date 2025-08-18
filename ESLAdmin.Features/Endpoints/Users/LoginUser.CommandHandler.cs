@@ -57,29 +57,27 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
   {
     try
     {
-      var userResult = await _repositoryManager.IdentityRepository.LoginAsync(
+      var userResult = await _repositoryManager
+        .IdentityRepository
+        .LoginAsync(
           command.Email, command.Password);
 
       if (userResult.IsError)
       {
         var error = userResult.Errors.First();
-        
+
         if (error.Code == "Identity.IsLockedOut" ||
             error.Code == "Identity.IsNotAllowed" ||
-            error.Code == "Identity.RequiresTwoFactor"||
+            error.Code == "Identity.RequiresTwoFactor" ||
             error.Code == "Identity.InvalidCredentials")
         {
           return new ProblemDetails(
             ErrorUtils.CreateFailureList(
-              error.Code,
-              error.Description), StatusCodes.Status401Unauthorized);
+              "Identity.LoginFailed",
+              "Username or password is invalid."), StatusCodes.Status401Unauthorized);
         }
-        else
-        {
-          return TypedResults.InternalServerError();
-        }   
+        return TypedResults.InternalServerError();
       }
-
       var user = userResult.Value;
 
       var rolesResult = await _repositoryManager
@@ -87,10 +85,7 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
         .GetRolesForUserAsync(user);
 
       if (rolesResult.IsError)
-      {
         return TypedResults.InternalServerError();
-      }
-
       var roles = rolesResult.Value;
 
       // Generate JWT token
@@ -127,7 +122,7 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
       //    }
       //    o.ExpireAt = DateTime.UtcNow.AddDays(7);
       //  });
-      
+
       var configKeys = _configurationParams.Settings;
       var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configKeys["Jwt:Key"]));
       var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -147,9 +142,12 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
         IsRevoked = false
       };
 
-      await _repositoryManager
+      var refreshTokenResult = await _repositoryManager
         .IdentityRepository
         .AddRefreshTokenAsync(refreshToken);
+
+      if (refreshTokenResult.IsError)
+        return TypedResults.InternalServerError();
 
       LoginUserResponse response = new LoginUserResponse
       {
@@ -161,7 +159,6 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
       };
 
       return TypedResults.Ok(response);
-
     }
     catch (Exception ex)
     {
