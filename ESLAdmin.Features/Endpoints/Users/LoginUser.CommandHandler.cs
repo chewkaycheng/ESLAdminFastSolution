@@ -57,28 +57,50 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
   {
     try
     {
-      var result = await _repositoryManager.IdentityRepository.LoginAsync(
+      var userResult = await _repositoryManager.IdentityRepository.LoginAsync(
           command.Email, command.Password);
 
-      if (result.IsError)
+      if (userResult.IsError)
       {
-        var error = result.Errors.First();
-        return new ProblemDetails(
-          ErrorUtils.CreateFailureList(
-            error.Code,
-            error.Description), StatusCodes.Status401Unauthorized);
+        var error = userResult.Errors.First();
+        
+        if (error.Code == "Identity.IsLockedOut" ||
+            error.Code == "Identity.IsNotAllowed" ||
+            error.Code == "Identity.RequiresTwoFactor"||
+            error.Code == "Identity.InvalidCredentials")
+        {
+          return new ProblemDetails(
+            ErrorUtils.CreateFailureList(
+              error.Code,
+              error.Description), StatusCodes.Status401Unauthorized);
+        }
+        else
+        {
+          return TypedResults.InternalServerError();
+        }   
       }
 
-      var userLoginDto = result.Value;
+      var user = userResult.Value;
+
+      var rolesResult = await _repositoryManager
+        .IdentityRepository
+        .GetRolesForUserAsync(user);
+
+      if (rolesResult.IsError)
+      {
+        return TypedResults.InternalServerError();
+      }
+
+      var roles = rolesResult.Value;
 
       // Generate JWT token
       var claims = new List<Claim>
       {
-        new Claim(JwtRegisteredClaimNames.Sub, userLoginDto.Id),
+        new Claim(JwtRegisteredClaimNames.Sub, user.Id),
         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        new Claim(ClaimTypes.Name, userLoginDto.UserName ?? "")
+        new Claim(ClaimTypes.Name, user.UserName ?? "")
       };
-      claims.AddRange(userLoginDto.Roles.Select(role => new Claim(ClaimTypes.Role, role)));
+      claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
 
       //var token = JwtBearer.CreateToken(
@@ -118,7 +140,7 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
 
       var refreshToken = new RefreshToken
       {
-        UserId = userLoginDto.Id,
+        UserId = user.Id,
         Token = Guid.NewGuid().ToString(),
         IssuedAt = DateTime.UtcNow,
         ExpiresAt = DateTime.UtcNow.AddDays(7),
@@ -131,8 +153,8 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
 
       LoginUserResponse response = new LoginUserResponse
       {
-        UserId = userLoginDto.Id,
-        Email = userLoginDto.Email,
+        UserId = user.Id,
+        Email = user.Email,
         AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
         RefreshToken = refreshToken.Token,
         Expires = token.ValidTo

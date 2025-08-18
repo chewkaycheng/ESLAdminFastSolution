@@ -19,6 +19,7 @@ public enum IdentityOperation
   UpdateRole,
   DeleteUser,
   CreateUser,
+  LoginUser,
   // Add future operations here
 }
 
@@ -64,6 +65,9 @@ public static class IdentityErrorHandler
       "DuplicateEmail" => AppErrors.IdentityErrors.DuplicateEmail(email),
       "InvalidUserName" => AppErrors.IdentityErrors.InvalidUserName(userName),
       "InvalidEmail" => AppErrors.IdentityErrors.InvalidEmail(email ?? "null"),
+      "UserLockedOut" => AppErrors.IdentityErrors.UserLockedOut(email),
+      "IsNotAllowed" => AppErrors.IdentityErrors.IsNotAllowed(email),
+      "RequiresTwoFactor" => AppErrors.IdentityErrors.RequiresTwoFactor(email),
 
       _ => operation switch
       {
@@ -75,8 +79,7 @@ public static class IdentityErrorHandler
         IdentityOperation.DeleteUser => AppErrors.IdentityErrors.DeleteUserFailed(userId, result.Errors),
         IdentityOperation.CreateUser => AppErrors.IdentityErrors.CreateUserFailed(userId, email, result.Errors),
         IdentityOperation.UpdateRole => AppErrors.IdentityErrors.UpdateRoleFailed(oldRoleName, newRoleName, result.Errors),
-
-        _ => AppErrors.IdentityErrors.GenericIdentityError(userId, result.Errors)
+        IdentityOperation.LoginUser => AppErrors.IdentityErrors.InvalidCredentials(email)
       }
     };
   }

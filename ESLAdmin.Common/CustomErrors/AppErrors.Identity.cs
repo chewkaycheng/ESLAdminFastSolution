@@ -71,6 +71,16 @@ public static partial class AppErrors
 
     //-------------------------------------------------------------------------------
     //
+    //                       InvalidToken
+    //
+    //-------------------------------------------------------------------------------
+    public static Error InvalidToken() =>
+      Error.Validation(
+        code: "Identity.InvalidToken",
+        description: "The token is invalid.");
+
+    //-------------------------------------------------------------------------------
+    //
     //                       AddToRoleFailed
     //
     //-------------------------------------------------------------------------------
@@ -463,6 +473,58 @@ public static partial class AppErrors
         description: $"An operation error has occurred for user: '{userId}'.");
 
       AddMetadata(error.Metadata, errors);
+      return error;
+    }
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       UserLockedOut
+    //
+    //-------------------------------------------------------------------------------
+    public static Error UserLockedOut(string email)
+    {
+      var error = Error.Failure(
+        code: "Identity.UserLockedOut",
+        description: $"The user: '{email}' has been locked out.");
+      return error;
+    }
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       IsNotAllowed
+    //
+    //-------------------------------------------------------------------------------
+    public static Error IsNotAllowed(string email)
+    {
+      var error = Error.Failure(
+        code: "Identity.UserNotAllowed",
+        description: $"The user: '{email}' is not allowed to log in.");
+      return error;
+    }
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       RequiresTwoFactor
+    //
+    //-------------------------------------------------------------------------------
+    public static Error RequiresTwoFactor(string email)
+    {
+      var error = Error.Failure(
+        code: "Identity.RequiresTwoFactor",
+        description: $"The user: '{email}' requires two-factor authentication.");
+      return error;
+    }
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       InvalidCredentials
+    //
+    //-------------------------------------------------------------------------------
+    public static Error InvalidCredentials(string email)
+    {
+      var error = Error.Failure(
+        code: "Identity.InvalidCredentials",
+        description: $"The user: '{email}' has invalid credentials.");
       return error;
     }
   }

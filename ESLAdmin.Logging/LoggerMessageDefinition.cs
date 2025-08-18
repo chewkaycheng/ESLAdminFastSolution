@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 
 namespace ESLAdmin.Logging;
 
@@ -172,4 +173,20 @@ public static partial class MessageLoggerDefs
   public static partial void LogMissingConfigKey(
     this ILogger logger,
     string key);
+
+  //------------------------------------------------------------------------------
+  //
+  //                     AuthenticationFailure
+  //
+  //------------------------------------------------------------------------------
+  [LoggerMessage(
+    EventId = 14,
+    Level = LogLevel.Warning,
+    Message = "Sign-in failed for user '{UserId}': IsLockedOut={IsLockedOut}, IsNotAllowed={IsNotAllowed}, RequiresTwoFactor={RequiresTwoFactor}")]
+  public static partial void AuthenticationFailure(
+    this ILogger logger,
+    string userId,
+    bool IsLockedOut,
+    bool IsNotAllowed,
+    bool RequiresTwoFactor);
 }

@@ -1,4 +1,5 @@
-﻿using ESLAdmin.Common.Configuration;
+﻿using ErrorOr;
+using ESLAdmin.Common.Configuration;
 using ESLAdmin.Common.CustomErrors;
 using ESLAdmin.Infrastructure.Persistence.Entities;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
@@ -30,6 +31,16 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
     _configurationParams = configurationParams;
     _logger = logger;
   }
+
+  private ProblemDetails InvalidTokenError()
+  {
+    return new ProblemDetails(
+      ErrorUtils.CreateFailureList(
+        "Identity.InvalidToken",
+        "The provided token is invalid."),
+      StatusCodes.Status400BadRequest);
+  }
+
   public async Task<Results<Ok<RefreshTokenResponse>, ProblemDetails, InternalServerError>>
     ExecuteAsync(RefreshTokenCommand command, CancellationToken ct)
   {
@@ -42,9 +53,11 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
       if (result.IsError)
       {
         var error = result.Errors.First();
-        return new ProblemDetails(ErrorUtils.CreateFailureList(
-          "Invalid refresh token",
-          "The provided refresh token is invalid or has expired."), StatusCodes.Status400BadRequest);
+        if (error.Code == "Identity.RefreshTokenNotFound")
+        {
+          return InvalidTokenError();
+        }
+        return TypedResults.InternalServerError();
       }
 
       var refreshToken = result.Value;
@@ -52,16 +65,20 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
       var tokenHandler = new JwtSecurityTokenHandler();
       var key = new SymmetricSecurityKey(
         Encoding.UTF8.GetBytes(settings["Jwt:Key"]));
-      tokenHandler.ValidateToken(command.AccessToken, new TokenValidationParameters
-      {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = false, // Allow expired token
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = settings["Jwt:Issuer"],
-        ValidAudience = settings["Jwt:Audience"],
-        IssuerSigningKey = key
-      }, out SecurityToken validatedToken);
+
+      tokenHandler.ValidateToken(
+        command.AccessToken,
+        new TokenValidationParameters
+        {
+          ValidateIssuer = true,
+          ValidateAudience = true,
+          ValidateLifetime = false, // Allow expired token
+          ValidateIssuerSigningKey = true,
+          ValidIssuer = settings["Jwt:Issuer"],
+          ValidAudience = settings["Jwt:Audience"],
+          IssuerSigningKey = key
+        },
+        out SecurityToken validatedToken);
 
       var jwtToken = (JwtSecurityToken)validatedToken;
       var userId = jwtToken.Claims.First(c => c.Type == JwtRegisteredClaimNames.Sub).Value;
@@ -73,21 +90,17 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
       if (userResult.IsError)
       {
         var error = userResult.Errors.First();
-        return new ProblemDetails(
-          ErrorUtils.CreateFailureList(
-            error.Code,
-            error.Description),
-          StatusCodes.Status404NotFound);
+        if (error.Code == "Identity.NotFound")
+        {
+          return InvalidTokenError();
+        }
+        return TypedResults.InternalServerError();
       }
 
       var user = userResult.Value;
       if (user.Id != refreshToken.UserId)
       {
-        return new ProblemDetails(
-         ErrorUtils.CreateFailureList(
-           "Invalid token",
-           "The access token does not match the refresh token."),
-         StatusCodes.Status400BadRequest);
+        return InvalidTokenError();
       }
 
       // Revoke old refresh token
@@ -97,24 +110,29 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
       if (tokenResult.IsError)
       {
         var error = userResult.Errors.First();
-        return new ProblemDetails(
-          ErrorUtils.CreateFailureList(
-            error.Code,
-            error.Description),
-          StatusCodes.Status404NotFound);
+        if (error.Code == "Identity.InvalidToken")
+        {
+          return InvalidTokenError();
+        }
+        return TypedResults.InternalServerError();
       }
 
       // Generate new access token
-      var userRoles = await _repositoryManager
+      var rolesResult = await _repositoryManager
         .IdentityRepository
         .GetRolesAsync(user);
+
+      if (rolesResult.IsError)
+        return TypedResults.InternalServerError();
+
+      var roles = rolesResult.Value;
       var claims = new List<Claim>
       {
         new Claim(JwtRegisteredClaimNames.Sub, user.Id),
         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         new Claim(ClaimTypes.Name, user.UserName ?? "")
       };
-      claims.AddRange(userRoles.Select(role => new Claim(ClaimTypes.Role, role)));
+      claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
       var newKey = new SymmetricSecurityKey(
         Encoding.UTF8.GetBytes(
@@ -139,9 +157,13 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
         ExpiresAt = DateTime.UtcNow.AddDays(7),
         IsRevoked = false
       };
-      await _repositoryManager
+
+      var refreshTokenResult = await _repositoryManager
         .IdentityRepository
         .AddRefreshTokenAsync(newRefreshToken);
+
+      if (refreshTokenResult.IsError)
+        return TypedResults.InternalServerError();
 
       return TypedResults.Ok(new RefreshTokenResponse
       {
@@ -150,55 +172,18 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
         Expires = newToken.ValidTo
       });
     }
-    catch (SecurityTokenInvalidSignatureException ex)
-    {
-      _logger.LogException(ex);
-      return new ProblemDetails(
-        ErrorUtils.CreateFailureList(
-          "Token Validation Failed",
-          "Invalid token signature"),
-          statusCode: StatusCodes.Status401Unauthorized);
-    }
-    catch (SecurityTokenInvalidIssuerException ex)
-    {
-      _logger.LogException(ex);
-      return new ProblemDetails(
-        ErrorUtils.CreateFailureList(
-          "Token Validation Failed",
-          "Invalid token issuer."),
-          statusCode: StatusCodes.Status401Unauthorized);
-    }
-    catch (SecurityTokenInvalidAudienceException ex)
-    {
-      _logger.LogException(ex);
-      return new ProblemDetails(
-        ErrorUtils.CreateFailureList(
-          "Token Validation Failed",
-          "Invalid token audience."),
-          statusCode: StatusCodes.Status401Unauthorized);
-    }
-    catch (SecurityTokenMalformedException ex)
-    {
-      _logger.LogException(ex);
-      return new ProblemDetails(
-        ErrorUtils.CreateFailureList(
-        "Token Validation Failed",
-        "Malformed token."),
-        statusCode: StatusCodes.Status400BadRequest);
-    }
-    catch (SecurityTokenValidationException ex)
-    {
-      _logger.LogException(ex);
-      return new ProblemDetails(
-        ErrorUtils.CreateFailureList(
-        "Token Validation Failed",
-        ex.Message),
-        statusCode: StatusCodes.Status401Unauthorized);
-    }
     catch (Exception ex)
     {
       _logger.LogException(ex);
-      return TypedResults.InternalServerError();
+      return ex switch
+      {
+        SecurityTokenInvalidSignatureException secex => InvalidTokenError(),
+        SecurityTokenInvalidIssuerException secex => InvalidTokenError(),
+        SecurityTokenInvalidAudienceException secex => InvalidTokenError(),
+        SecurityTokenMalformedException secex => InvalidTokenError(),
+        SecurityTokenValidationException secex => InvalidTokenError(),
+        _ => TypedResults.InternalServerError()
+      };
     }
   }
 }

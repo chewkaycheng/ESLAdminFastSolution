@@ -74,6 +74,7 @@ public class IdentityRepository : IIdentityRepository
       var user = await _userManager.FindByEmailAsync(email);
       if (user == null)
       {
+        _logger.LogWarning("User is null");
         return AppErrors.IdentityErrors.UserEmailNotFound(email);
       }
 
@@ -128,7 +129,6 @@ public class IdentityRepository : IIdentityRepository
 
     try
     {
-      
       var user = await _userManager.FindByEmailAsync(email);
       if (user == null)
       {
@@ -153,7 +153,10 @@ public class IdentityRepository : IIdentityRepository
       var result = await _userManager.DeleteAsync(user);
       if (!result.Succeeded)
       {
-        _logger.LogError($"Failed to delete user with email '{email}': {result.Errors.ToFormattedString()}");
+        _logger.LogIdentityErrors(
+         "_userManager.DeleteAsync",
+         email,
+         result.Errors.ToFormattedString());
 
         // Errors:
         // 1) UserNotFound
@@ -190,6 +193,7 @@ public class IdentityRepository : IIdentityRepository
 
       if (user == null)
       {
+        _logger.LogWarning("User is null");
         return AppErrors.IdentityErrors.UserEmailNotFound(email);
       }
 
@@ -204,7 +208,6 @@ public class IdentityRepository : IIdentityRepository
     }
   }
 
-
   //------------------------------------------------------------------------------
   //
   //                       GetRolesForUserAsync
@@ -218,11 +221,12 @@ public class IdentityRepository : IIdentityRepository
     {
       if (user == null)
       {
+        _logger.LogError("User is null.");
         return AppErrors.IdentityErrors.InvalidUser("User cannot be null.");
       }
 
       var roles =  await _userManager.GetRolesAsync(user);
-      _logger.LogFunctionExit();
+      _logger.LogFunctionExit();                  
       return roles.ToList();
     }
     catch (Exception ex)
@@ -241,6 +245,8 @@ public class IdentityRepository : IIdentityRepository
   {
     try
     {
+      _logger.LogFunctionEntry();
+
       var connectionResult = await _dbContextDapper.GetConnectionAsync();
       if (connectionResult.IsError)
       {
@@ -253,6 +259,8 @@ public class IdentityRepository : IIdentityRepository
       var userRoles = await connection.QueryAsync<UserRole>(
         DbConstsIdentity.SQL_GETUSERROLES,
         commandType: CommandType.Text);
+
+      _logger.LogFunctionExit();
       return userRoles.ToList();
     }
     catch (Exception ex)
@@ -272,6 +280,7 @@ public class IdentityRepository : IIdentityRepository
   {
     try
     {
+      _logger.LogFunctionEntry();
       var sql = DbConstsIdentity.SQL_GETALL;
 
       var connectionResult = await _dbContextDapper.GetConnectionAsync();
@@ -287,6 +296,7 @@ public class IdentityRepository : IIdentityRepository
         sql,
         commandType: CommandType.Text);
 
+      _logger.LogFunctionExit();
       return users.ToList();
     }
     catch (Exception ex)
@@ -302,29 +312,62 @@ public class IdentityRepository : IIdentityRepository
   //                       LoginAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<ErrorOr<UserDto>> LoginAsync(string email, string password)
+  public async Task<ErrorOr<User>> LoginAsync(string email, string password)
   {
-    var user = await _userManager.FindByEmailAsync(email);
-    if (user == null)
+    try
     {
-      return AppErrors.IdentityErrors.UserLoginFailed();
-    }
+      _logger.LogFunctionEntry();
 
-    var result = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: false);
-    if (!result.Succeeded)
+      var user = await _userManager.FindByEmailAsync(email);
+      if (user == null)
+      {
+        _logger.LogWarning("User is null.");
+        return AppErrors.IdentityErrors.InvalidCredentials(email);
+      }
+
+      var result = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: false);
+
+      if (result.Succeeded)
+      {
+        _logger.LogFunctionExit();
+        return user;
+      }
+      else
+      {
+        _logger.AuthenticationFailure(
+                      user.Id,
+                      result.IsLockedOut,
+                      result.IsNotAllowed,
+                      result.RequiresTwoFactor);
+
+        if (result.IsLockedOut)
+        {
+          _logger.LogWarning("User with email {Email} is locked out", email);
+          return AppErrors.IdentityErrors.UserLockedOut(email);
+        }
+
+        if (result.IsNotAllowed)
+        {
+          _logger.LogWarning("User with email {Email} is not allowed to sign in", email);
+          return AppErrors.IdentityErrors.IsNotAllowed(email);
+        }
+
+        if (result.RequiresTwoFactor)
+        {
+          _logger.LogWarning("User with email {Email} requires two-factor authentication", email);
+          return AppErrors.IdentityErrors.RequiresTwoFactor(email);
+        }
+
+        _logger.LogWarning("Invalid credentials for user with email {Email}", email);
+        return AppErrors.IdentityErrors.InvalidCredentials(email);
+      }
+    }
+    catch (Exception ex)
     {
-      _logger.LogWarning(
-                    "Sign-in failed for user '{UserId}': IsLockedOut={IsLockedOut}, IsNotAllowed={IsNotAllowed}, RequiresTwoFactor={RequiresTwoFactor}",
-                    user.Id,
-                    result.IsLockedOut,
-                    result.IsNotAllowed,
-                    result.RequiresTwoFactor);
-
-      return AppErrors.IdentityErrors.UserLoginFailed();
+      _logger.LogException(ex);
+      return DatabaseExceptionHandler
+         .HandleException(ex, _logger);
     }
-
-    var roles = await _userManager.GetRolesAsync(user);
-    return MapToDto(user, roles);
   }
 
   //------------------------------------------------------------------------------
@@ -338,29 +381,32 @@ public class IdentityRepository : IIdentityRepository
   {
     try
     {
+      _logger.LogFunctionEntry();
+
       var refreshToken = await _dbContext.RefreshTokens
         .FirstOrDefaultAsync(rt => rt.Token == token,
           cancellationToken);
 
       if (refreshToken == null)
       {
-        _logger.LogCustomError("Refresh token not found.");
+        _logger.LogWarning("Refresh token not found.");
         return AppErrors.IdentityErrors.RefreshTokenNotFound(token);
       }
 
       if (refreshToken.IsRevoked || refreshToken.ExpiresAt < DateTime.UtcNow)
       {
-        _logger.LogCustomError($"Refresh token is revoked or expired for user '{refreshToken.UserId}'.");
+        _logger.LogWarning($"Refresh token is revoked or expired for user '{refreshToken.UserId}'.");
         return AppErrors.IdentityErrors.RefreshTokenInvalid("Refresh token is revoked or expired.");
       }
 
       var user = await _userManager.FindByIdAsync(refreshToken.UserId);
       if (user == null)
       {
-        _logger.LogCustomError($"User: '{refreshToken.UserId}' not found for refresh token.");
+        _logger.LogWarning($"User: '{refreshToken.UserId}' not found for refresh token.");
         return AppErrors.IdentityErrors.UserIdNotFound(refreshToken.UserId);
       }
 
+      _logger.LogFunctionExit();
       return new RefreshToken
       {
         UserId = refreshToken.UserId,
@@ -368,15 +414,11 @@ public class IdentityRepository : IIdentityRepository
         ExpiresAt = refreshToken.ExpiresAt
       };
     }
-    catch (OperationCanceledException ex)
-    {
-      _logger.LogException(ex);
-      return AppErrors.IdentityErrors.OperationCanceled();
-    }
     catch (Exception ex)
     {
       _logger.LogException(ex);
-      return AppErrors.IdentityErrors.RefreshTokenInvalid($"Unexpected error: {ex.Message}");
+      return DatabaseExceptionHandler
+           .HandleException(ex, _logger);
     }
   }
 
@@ -391,10 +433,12 @@ public class IdentityRepository : IIdentityRepository
   {
     try
     {
+      _logger.LogFunctionEntry();
+
       var user = await _userManager.FindByIdAsync(userId);
       if (user == null)
       {
-        _logger.LogCustomError("User: '{userId}' not found.");
+        _logger.LogWarning($"User: '{userId}' not found.");
         return AppErrors.IdentityErrors.UserIdNotFound(userId);
       }
 
@@ -412,23 +456,14 @@ public class IdentityRepository : IIdentityRepository
       _dbContext.RefreshTokens.Add(refreshToken);
       await _dbContext.SaveChangesAsync(cancellationToken);
 
-      _logger.LogCustomInformation("Generated refresh token for user '{userId}'.");
+      _logger.LogFunctionExit("Generated refresh token for user '{userId}'.");
       return token;
-    }
-    catch (DbUpdateException ex)
-    {
-      _logger.LogException(ex);
-      return AppErrors.IdentityErrors.TokenGenerationFailed(userId, ex.Message);
-    }
-    catch (OperationCanceledException ex)
-    {
-      _logger.LogException(ex);
-      return AppErrors.IdentityErrors.OperationCanceled();
     }
     catch (Exception ex)
     {
       _logger.LogException(ex);
-      return AppErrors.IdentityErrors.TokenGenerationFailed(userId, ex.Message);
+      return DatabaseExceptionHandler
+          .HandleException(ex, _logger);
     }
   }
 
@@ -439,16 +474,27 @@ public class IdentityRepository : IIdentityRepository
   //-------------------------------------------------------------------------------
   public async Task<ErrorOr<RefreshToken>> GetRefreshTokenAsync(string token)
   {
-    var refreshToken = await _dbContext.RefreshTokens
-      .FirstOrDefaultAsync(
-        rt => rt.Token == token &&
-        !rt.IsRevoked &&
-        rt.ExpiresAt > DateTime.UtcNow);
-    if (refreshToken == null)
+    try
     {
-      return AppErrors.IdentityErrors.RefreshTokenNotFound(token);
+      var refreshToken = await _dbContext.RefreshTokens
+        .FirstOrDefaultAsync(
+          rt => rt.Token == token &&
+          !rt.IsRevoked &&
+          rt.ExpiresAt > DateTime.UtcNow);
+      if (refreshToken == null)
+      {
+        _logger.LogWarning($"Refresh token: '{token}' is null.");
+        return AppErrors.IdentityErrors.RefreshTokenNotFound(token);
+      }
+      _logger.LogFunctionExit();
+      return refreshToken;
     }
-    return refreshToken;
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return DatabaseExceptionHandler
+          .HandleException(ex, _logger);
+    }
   }
 
   //------------------------------------------------------------------------------
@@ -456,10 +502,20 @@ public class IdentityRepository : IIdentityRepository
   //                       AddRefreshTokenAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task AddRefreshTokenAsync(RefreshToken refreshToken)
+  public async Task<ErrorOr<Success>> AddRefreshTokenAsync(RefreshToken refreshToken)
   {
-    await _dbContext.RefreshTokens.AddAsync(refreshToken);
-    await _dbContext.SaveChangesAsync();
+    try
+    {
+      await _dbContext.RefreshTokens.AddAsync(refreshToken);
+      await _dbContext.SaveChangesAsync();
+      return new Success();
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return DatabaseExceptionHandler
+          .HandleException(ex, _logger);
+    }
   }
 
   //------------------------------------------------------------------------------
@@ -467,19 +523,28 @@ public class IdentityRepository : IIdentityRepository
   //                       RevokeRefreshTokenAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<ErrorOr<bool>> RevokeRefreshTokenAsync(string token)
+  public async Task<ErrorOr<Success>> RevokeRefreshTokenAsync(string token)
   {
-    var refreshToken = await _dbContext
-                               .RefreshTokens
-                               .FirstOrDefaultAsync(
-                                 rt => rt.Token == token);
-    if (refreshToken == null)
+    try
     {
-      return AppErrors.IdentityErrors.RefreshTokenNotFound(token);
+      var refreshToken = await _dbContext
+                                 .RefreshTokens
+                                 .FirstOrDefaultAsync(
+                                   rt => rt.Token == token);
+      if (refreshToken == null)
+      {
+        return AppErrors.IdentityErrors.InvalidToken();
+      }
+      refreshToken.IsRevoked = true;
+      await _dbContext.SaveChangesAsync();
+      return new Success();
     }
-    refreshToken.IsRevoked = true;
-    await _dbContext.SaveChangesAsync();
-    return true;
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return DatabaseExceptionHandler
+          .HandleException(ex, _logger);
+    }
   }
 
   //------------------------------------------------------------------------------
@@ -669,12 +734,20 @@ public class IdentityRepository : IIdentityRepository
   //-------------------------------------------------------------------------------
   public async Task<ErrorOr<User>> FindByIdAsync(string userId)
   {
-    var user = await _userManager.FindByIdAsync(userId);
-    if (user == null)
+    try
     {
-      return AppErrors.IdentityErrors.UserIdNotFound(userId);
+      var user = await _userManager.FindByIdAsync(userId);
+      if (user == null)
+      {
+        return AppErrors.IdentityErrors.UserIdNotFound(userId);
+      }
+      return user;
     }
-    return user;
+    catch (Exception ex)
+    {
+      return DatabaseExceptionHandler
+          .HandleException(ex, _logger);
+    }
   }
 
   //------------------------------------------------------------------------------
@@ -758,10 +831,19 @@ public class IdentityRepository : IIdentityRepository
   //                       GetRoleAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<List<string>> GetRolesAsync(User user)
+  public async Task<ErrorOr<List<string>>> GetRolesAsync(User user)
   {
-    IList<string> roles = await _userManager.GetRolesAsync(user);
-    return roles.ToList();
+    try
+    {
+      IList<string> roles = await _userManager.GetRolesAsync(user);
+      return roles.ToList();
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return DatabaseExceptionHandler
+        .HandleException(ex, _logger);
+    }
   }
 
   //------------------------------------------------------------------------------
