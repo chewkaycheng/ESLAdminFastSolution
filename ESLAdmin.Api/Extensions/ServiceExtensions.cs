@@ -58,19 +58,18 @@ public static class ServiceExtensions
   // ==================================================
   public static void ConfigureIdentity(
     this IServiceCollection services,
-    IConfiguration configuration)
+    IConfigurationParams configParams)
   {
-    var passwordLength = configuration
-      .GetValue<int>("Identity:Password:RequiredLength", 5);
-
+    var identitySettings = configParams.IdentitySettings;
+    
     var builder =
       services.AddIdentity<User, IdentityRole>(o =>
       {
-        o.Password.RequireDigit = true;
-        o.Password.RequireLowercase = false;
-        o.Password.RequireUppercase = false;
-        o.Password.RequireNonAlphanumeric = false;
-        o.Password.RequiredLength = passwordLength;
+        o.Password.RequireDigit = identitySettings.Password.RequireDigit;
+        o.Password.RequireLowercase = identitySettings.Password.RequireLowercase;
+        o.Password.RequireUppercase = identitySettings.Password.RequireUppercase;
+        o.Password.RequireNonAlphanumeric = identitySettings.Password.RequireNonAlphanumeric;
+        o.Password.RequiredLength = identitySettings.Password.RequiredLength;
         o.User.RequireUniqueEmail = true;
       })
       .AddEntityFrameworkStores<UserDbContext>()
@@ -208,10 +207,11 @@ public static class ServiceExtensions
     this IServiceCollection services,
     IConfigurationParams configParams)
   {
-    var configKeys = configParams.Settings;
-    var jwtKey = configKeys["Jwt:Key"];
-    var issuer = configKeys["Jwt:Issuer"];
-    var audience = configKeys["Jwt:Audience"];
+    var jwtSettings = configParams.JwtSettings;
+    var identitySettings = configParams.IdentitySettings;
+    var jwtKey = jwtSettings.Key;
+    var issuer = jwtSettings.Issuer;
+    var audience = jwtSettings.Audience;
 
     services
       .AddAuthenticationJwtBearer(
@@ -222,10 +222,10 @@ public static class ServiceExtensions
           o.Audience = audience;
           o.TokenValidationParameters = new TokenValidationParameters
           {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
+            ValidateIssuer = jwtSettings.TokenValidation.ValidateIssuer,
+            ValidateAudience = jwtSettings.TokenValidation.ValidateAudience,
+            ValidateLifetime = jwtSettings.TokenValidation.ValidateLifetime,
+            ValidateIssuerSigningKey = jwtSettings.TokenValidation.ValidateIssuerSigningKey,
             ValidIssuer = issuer,
             ValidAudience = audience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))

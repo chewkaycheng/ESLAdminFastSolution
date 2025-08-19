@@ -23,7 +23,7 @@ builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 builder.Services.ConfigureFastEndpoints();
 builder.Services.ConfigureBlacklistService();
-builder.Services.ConfigureIdentity(builder.Configuration);
+builder.Services.ConfigureIdentity(configParams);
 builder.Services.ConfigureFirebirdDbContexts(builder.Configuration);
 builder.Services.ConfigureRepositoryManager();
 
@@ -68,3 +68,11 @@ app.UseAuthorization();
 app.UseFastEndpointsMiddleware();
 
 app.Run();
+
+public class ClsJwtSettings
+{
+  public string Key { get; init; }
+  public string Secret { get; init; }
+  public string Audience { get; init; }
+
+}

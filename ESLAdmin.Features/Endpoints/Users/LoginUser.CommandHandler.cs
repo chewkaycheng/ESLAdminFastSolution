@@ -5,6 +5,7 @@ using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
+using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
@@ -66,14 +67,21 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
       {
         var error = userResult.Errors.First();
 
-        if (error.Code == "Identity.IsLockedOut" ||
-            error.Code == "Identity.IsNotAllowed" ||
+        if (error.Code == "Identity.IsLockedOut")
+        {
+          return new ProblemDetails(
+            ErrorUtils.CreateFailureList(
+              "LockedOut",
+              "Your account has been locked. Please contact your administrator to unlock your account."), StatusCodes.Status401Unauthorized);
+        }
+
+        if (error.Code == "Identity.IsNotAllowed" ||
             error.Code == "Identity.RequiresTwoFactor" ||
             error.Code == "Identity.InvalidCredentials")
         {
           return new ProblemDetails(
             ErrorUtils.CreateFailureList(
-              "Identity.LoginFailed",
+              "LoginFailed",
               "Username or password is invalid."), StatusCodes.Status401Unauthorized);
         }
         return TypedResults.InternalServerError();
@@ -123,12 +131,12 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
       //    o.ExpireAt = DateTime.UtcNow.AddDays(7);
       //  });
 
-      var configKeys = _configurationParams.Settings;
-      var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configKeys["Jwt:Key"]));
+      var jetSettings = _configurationParams.JwtSettings;
+      var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jetSettings.Key));
       var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
       var token = new JwtSecurityToken(
-          issuer: configKeys["Jwt:Issuer"],
-          audience: configKeys["Jwt:Audience"],
+          issuer: jetSettings.Issuer,
+          audience: jetSettings.Audience,
           claims: claims,
           expires: DateTime.Now.AddHours(1),
           signingCredentials: creds);

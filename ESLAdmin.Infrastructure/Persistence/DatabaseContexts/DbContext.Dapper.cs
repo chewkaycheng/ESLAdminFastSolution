@@ -31,7 +31,7 @@ public class DbContextDapper : IDbContextDapper
     IConfigurationParams configParams)
   {
     _logger = logger;
-    _connectionString = configParams.Settings["ConnectionStrings:ESLAdminConnection"]!;
+    _connectionString = configParams.ConnectionStringsSettings.ESLAdminConnection;
   }
 
   //------------------------------------------------------------------------------

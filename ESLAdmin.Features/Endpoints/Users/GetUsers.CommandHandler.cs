@@ -41,9 +41,13 @@ public class GetUsersCommandHandler :
   //                        ExecuteAsync
   //
   //------------------------------------------------------------------------------
-  public async Task<Results<Ok<IEnumerable<GetUserResponse>>, ProblemDetails, InternalServerError>> ExecuteAsync(GetUsersCommand command, CancellationToken ct)
+  public async Task<Results<Ok<IEnumerable<GetUserResponse>>, ProblemDetails, InternalServerError>> 
+    ExecuteAsync(GetUsersCommand command, CancellationToken ct)
   {
-    var usersResult = await _repositoryManager.IdentityRepository.GetAllUsersAsync();
+    var usersResult = await _repositoryManager
+      .IdentityRepository
+      .GetAllUsersAsync();
+
     if (usersResult.IsError)
     {
       return TypedResults.InternalServerError();
@@ -51,7 +55,10 @@ public class GetUsersCommandHandler :
 
     var users = usersResult.Value;
 
-    var userRolesResults = await _repositoryManager.IdentityRepository.GetAllUserRolesAsync();
+    var userRolesResults = await _repositoryManager
+      .IdentityRepository
+      .GetAllUserRolesAsync();
+
     if (userRolesResults.IsError)
     {
       return TypedResults.InternalServerError();
@@ -79,6 +86,7 @@ public class GetUsersCommandHandler :
       usersResponse.Add(userResponse);
     }
 
-    return TypedResults.Ok(usersResponse as IEnumerable<GetUserResponse>);
+    return TypedResults.Ok(
+      usersResponse as IEnumerable<GetUserResponse>);
   }
 }

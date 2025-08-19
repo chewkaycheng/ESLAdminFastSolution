@@ -20,7 +20,7 @@ public interface IIdentityRepository
   string email,
   string roleName);
   Task<ErrorOr<User>> LoginAsync(string email, string password);
-  Task<ErrorOr<User>> RegisterUserAsync(
+  Task<ErrorOr<Success>> RegisterUserAsync(
     User user,
     string password,
     ICollection<string>? roles);

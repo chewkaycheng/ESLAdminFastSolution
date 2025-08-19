@@ -245,12 +245,14 @@ public class IdentityRepository : IIdentityRepository
   {
     try
     {
-      _logger.LogFunctionEntry();
+      _logger.LogFunctionEntry("Get all user roles");
 
       var connectionResult = await _dbContextDapper.GetConnectionAsync();
       if (connectionResult.IsError)
       {
-        _logger.LogError("Failed to get database connection: {Error}", connectionResult.Errors.ToFormattedString());
+        _logger.LogError(
+          "Failed to get database connection: {Error}", 
+          connectionResult.Errors.ToFormattedString());
         return AppErrors.DatabaseErrors.DatabaseConnectionError(
           "Failed to get database connection");
       }
@@ -280,15 +282,17 @@ public class IdentityRepository : IIdentityRepository
   {
     try
     {
-      _logger.LogFunctionEntry();
+      _logger.LogFunctionEntry("Get all users");
       var sql = DbConstsIdentity.SQL_GETALL;
 
       var connectionResult = await _dbContextDapper.GetConnectionAsync();
       if (connectionResult.IsError)
       {
-        _logger.LogError("Failed to get database connection: {Error}", connectionResult.Errors);
+        _logger.LogError(
+          "Failed to get database connection: {Error}", 
+          connectionResult.Errors);
         return AppErrors.DatabaseErrors.DatabaseConnectionError(
-            "Failed to get database connection");
+          "Failed to get database connection");
       }
 
       using IDbConnection connection = connectionResult.Value;
@@ -476,6 +480,7 @@ public class IdentityRepository : IIdentityRepository
   {
     try
     {
+      _logger.LogFunctionEntry();
       var refreshToken = await _dbContext.RefreshTokens
         .FirstOrDefaultAsync(
           rt => rt.Token == token &&
@@ -506,8 +511,10 @@ public class IdentityRepository : IIdentityRepository
   {
     try
     {
+      _logger.LogFunctionEntry();
       await _dbContext.RefreshTokens.AddAsync(refreshToken);
       await _dbContext.SaveChangesAsync();
+      _logger.LogFunctionExit();
       return new Success();
     }
     catch (Exception ex)
@@ -527,6 +534,7 @@ public class IdentityRepository : IIdentityRepository
   {
     try
     {
+      _logger.LogFunctionEntry();
       var refreshToken = await _dbContext
                                  .RefreshTokens
                                  .FirstOrDefaultAsync(
@@ -537,6 +545,7 @@ public class IdentityRepository : IIdentityRepository
       }
       refreshToken.IsRevoked = true;
       await _dbContext.SaveChangesAsync();
+      _logger.LogFunctionExit();
       return new Success();
     }
     catch (Exception ex)
@@ -558,10 +567,11 @@ public class IdentityRepository : IIdentityRepository
   {
     try
     {
+      _logger.LogFunctionEntry();
       var user = await _userManager.FindByIdAsync(userId);
       if (user == null)
       {
-        _logger.LogCustomError($"User: '{userId}' not found.");
+        _logger.LogWarning($"User: '{userId}' not found.");
         return AppErrors.IdentityErrors.UserIdNotFound(userId);
       }
 
@@ -571,7 +581,7 @@ public class IdentityRepository : IIdentityRepository
 
       if (!tokens.Any())
       {
-        _logger.LogCustomInformation($"No active refresh tokens found for user: '{userId}'.");
+        _logger.LogWarning($"No active refresh tokens found for user: '{userId}'.");
         return Result.Success;
       }
 
@@ -581,7 +591,7 @@ public class IdentityRepository : IIdentityRepository
       }
 
       await _dbContext.SaveChangesAsync(cancellationToken);
-      _logger.LogCustomInformation($"Revoked {tokens.Count} refresh tokens for user: '{userId}'.");
+      _logger.LogInformation($"Revoked {tokens.Count} refresh tokens for user: '{userId}'.");
       return Result.Success;
     }
     catch (DbUpdateException ex)
@@ -606,12 +616,12 @@ public class IdentityRepository : IIdentityRepository
   //                       RegisterUserAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<ErrorOr<User>> RegisterUserAsync(
+  public async Task<ErrorOr<Success>> RegisterUserAsync(
     User user,
     string password,
     ICollection<string>? roles)
   {
-    _logger.LogInformation($"Registering user with email: '{user.Email}'");
+    _logger.LogFunctionEntry($"Registering user with email: '{user.Email}'");
 
     if (string.IsNullOrEmpty(user.Email))
     {
@@ -677,7 +687,7 @@ public class IdentityRepository : IIdentityRepository
 
       await transaction.CommitAsync();
       _logger.LogFunctionExit($"User with email '{user.Email}' registered successfully.");
-      return user;
+      return new Success();
     }
     catch (Exception ex)
     {
@@ -835,7 +845,9 @@ public class IdentityRepository : IIdentityRepository
   {
     try
     {
+      _logger.LogFunctionExit();
       IList<string> roles = await _userManager.GetRolesAsync(user);
+      _logger.LogFunctionExit();
       return roles.ToList();
     }
     catch (Exception ex)

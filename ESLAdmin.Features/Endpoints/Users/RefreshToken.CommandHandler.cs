@@ -1,5 +1,4 @@
-﻿using ErrorOr;
-using ESLAdmin.Common.Configuration;
+﻿using ESLAdmin.Common.Configuration;
 using ESLAdmin.Common.CustomErrors;
 using ESLAdmin.Infrastructure.Persistence.Entities;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
@@ -36,7 +35,7 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
   {
     return new ProblemDetails(
       ErrorUtils.CreateFailureList(
-        "Identity.InvalidToken",
+        "InvalidToken",
         "The provided token is invalid."),
       StatusCodes.Status400BadRequest);
   }
@@ -61,11 +60,12 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
       }
 
       var refreshToken = result.Value;
-      var settings = _configurationParams.Settings;
+      var jwtSettings = _configurationParams.JwtSettings;
       var tokenHandler = new JwtSecurityTokenHandler();
       var key = new SymmetricSecurityKey(
-        Encoding.UTF8.GetBytes(settings["Jwt:Key"]));
+        Encoding.UTF8.GetBytes(jwtSettings.Key));
 
+      // Throws exception if validation fails
       tokenHandler.ValidateToken(
         command.AccessToken,
         new TokenValidationParameters
@@ -74,14 +74,16 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
           ValidateAudience = true,
           ValidateLifetime = false, // Allow expired token
           ValidateIssuerSigningKey = true,
-          ValidIssuer = settings["Jwt:Issuer"],
-          ValidAudience = settings["Jwt:Audience"],
+          ValidIssuer = jwtSettings.Issuer,
+          ValidAudience = jwtSettings.Audience,
           IssuerSigningKey = key
         },
         out SecurityToken validatedToken);
 
       var jwtToken = (JwtSecurityToken)validatedToken;
       var userId = jwtToken.Claims.First(c => c.Type == JwtRegisteredClaimNames.Sub).Value;
+      if (userId == null)
+        return InvalidTokenError();
 
       // Verify user
       var userResult = await _repositoryManager
@@ -136,12 +138,12 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
 
       var newKey = new SymmetricSecurityKey(
         Encoding.UTF8.GetBytes(
-          settings["Jwt:Key"]));
+          jwtSettings.Key));
       var creds = new SigningCredentials(
         newKey, SecurityAlgorithms.HmacSha256);
       var newToken = new JwtSecurityToken(
-        issuer: settings["Jwt:Issuer"],
-        audience: settings["Jwt:Audience"],
+        issuer: jwtSettings.Issuer,
+        audience: jwtSettings.Audience,
         claims: claims,
         expires: DateTime.Now.AddHours(1),
         signingCredentials: creds);
@@ -177,11 +179,12 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
       _logger.LogException(ex);
       return ex switch
       {
-        SecurityTokenInvalidSignatureException secex => InvalidTokenError(),
-        SecurityTokenInvalidIssuerException secex => InvalidTokenError(),
-        SecurityTokenInvalidAudienceException secex => InvalidTokenError(),
-        SecurityTokenMalformedException secex => InvalidTokenError(),
-        SecurityTokenValidationException secex => InvalidTokenError(),
+        SecurityTokenInvalidSignatureException tokenException => InvalidTokenError(),
+        SecurityTokenInvalidIssuerException tokenException => InvalidTokenError(),
+        SecurityTokenInvalidAudienceException tokenException => InvalidTokenError(),
+        SecurityTokenMalformedException tokenException => InvalidTokenError(),
+        SecurityTokenValidationException tokenException => InvalidTokenError(),
+        SecurityTokenException tokenException => InvalidTokenError(),
         _ => TypedResults.InternalServerError()
       };
     }

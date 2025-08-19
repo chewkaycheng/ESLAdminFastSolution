@@ -47,8 +47,7 @@ public class ConfigurationBootstrapper
   {
     // Create abd reguster IConfigurationParams
     var configParams = new ConfigurationParams(_configuration);
-    _services.AddSingleton<IConfigurationParams>(configParams);
-
+    
     // Validate the configuration
     var result = configParams.ValidateConfiguration(_tempLogger);
     if (result.IsError)
@@ -58,6 +57,7 @@ public class ConfigurationBootstrapper
       throw new InvalidOperationException(
           $"Configuration validation failed: {string.Join("; ", result.Errors.Select(e => e.Description))}");
     }
+    _services.AddSingleton<IConfigurationParams>(configParams);
 
     return configParams;
   }

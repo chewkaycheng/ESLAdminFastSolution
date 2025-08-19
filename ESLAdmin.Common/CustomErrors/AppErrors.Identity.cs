@@ -527,6 +527,17 @@ public static partial class AppErrors
         description: $"The user: '{email}' has invalid credentials.");
       return error;
     }
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       Unauthorized
+    //
+    //-------------------------------------------------------------------------------
+    public static ErrorOr.Error Unauthorized() =>
+        Error.Unauthorized(
+          code: "Identity.Unauthorized",
+          description: "User is not authorized.");
+
   }
 }
 

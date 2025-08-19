@@ -66,15 +66,14 @@ public static partial class AppErrors
             "Configuration.Error",
             string.Join("; ", errors.Select(e => e.Description)));
 
-
     //-------------------------------------------------------------------------------
     //
-    //                       Unauthorized
+    //                       ConfigurationInvalidValue
     //
     //-------------------------------------------------------------------------------
-    public static ErrorOr.Error Unauthorized() =>
-        Error.Unauthorized(
-          code: "Auth.Unauthorized", 
-          description: "User is not authorized.");
+    public static Error ConfigurationInvalidValue(string key, string description) =>
+        Error.Failure(
+          $"Configuration.Invalid.{key}", 
+          $"Invalid configuration for '{key}': {description}");
   }
 }

@@ -85,7 +85,7 @@ public class RegisterUserCommandHandler : ICommandHandler<
           statusCode);
       }
 
-      _logger.LogFunctionExit($"User Id: {result.Value.Id}");
+      _logger.LogFunctionExit($"User Id: {user.Id}");
       return TypedResults.NoContent();
     }
     catch (Exception ex)

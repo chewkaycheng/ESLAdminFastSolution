@@ -1,5 +1,6 @@
 ﻿using ErrorOr;
 using Microsoft.Extensions.Logging;
+using static ESLAdmin.Common.Configuration.ConfigurationParams;
 
 namespace ESLAdmin.Common.Configuration;
 
@@ -10,8 +11,9 @@ namespace ESLAdmin.Common.Configuration;
 //-------------------------------------------------------------------------------
 public interface IConfigurationParams
 {
-
-  IReadOnlyDictionary<string, string> Settings { get; }
+  JwtSettingsClass JwtSettings { get; }
+  IdentitySettingsClass IdentitySettings { get; }
+  ConnectionStringsClass ConnectionStringsSettings { get; }
 
   //------------------------------------------------------------------------------
   //
