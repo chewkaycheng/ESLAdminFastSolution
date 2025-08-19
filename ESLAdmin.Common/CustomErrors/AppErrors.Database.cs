@@ -121,5 +121,15 @@ public static partial class AppErrors
         Error.Failure(
           "Database.OperationCanceled", 
           "Operation was canceled");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       ConcurrencyFailure
+    //
+    //-------------------------------------------------------------------------------
+    public static Error ConcurrencyFailure() =>
+        Error.Failure(
+          "Database.ConcurrencyFailure",
+          "There is a concurrency failure in the operation.");
   }
 }

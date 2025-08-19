@@ -93,19 +93,19 @@ public class IdentityRepository : IIdentityRepository
         // 1) UserNotFound
         // 2) RoleNotFound
         // 3) UserAlreadyInRole
-        // 4) Concurrency Failure
-        // 5) Invalid Role Name
+        // 4) ConcurrencyFailure
+        // 5) InvalidRoleName
         _logger.LogIdentityErrors(
           "_userManager.AddToRoleAsync", 
           email, 
           result.Errors.ToFormattedString());
 
-        return IdentityErrorHandler.HandleIdentityErrors(
-          result,
-          _logger,
-          IdentityOperation.AddToRole,
-          userId: user.Id,
-          roleName: roleName);
+        var firstError = result.Errors.FirstOrDefault();
+        return firstError.Code switch
+        {
+          "ConcurrencyFailure" => AppErrors.DatabaseErrors.ConcurrencyFailure(),
+          _ => AppErrors.IdentityErrors.AddToRoleFailed()
+        };
       }
 
       _logger.LogFunctionExit();
@@ -158,14 +158,12 @@ public class IdentityRepository : IIdentityRepository
          email,
          result.Errors.ToFormattedString());
 
-        // Errors:
-        // 1) UserNotFound
-        // 2) ConcurrencyFailure
-        return IdentityErrorHandler.HandleIdentityErrors(
-          result,
-          _logger,
-          IdentityOperation.DeleteUser,
-          userId: user.Id);
+        var firstError = result.Errors.FirstOrDefault();
+        return firstError.Code switch
+        {
+          "UserNotFound" => AppErrors.IdentityErrors.DeleteUserFailed(),
+          "ConcurrencyFailure" => AppErrors.DatabaseErrors.ConcurrencyFailure()
+        };
       }
 
       _logger.LogFunctionExit($"User with email '{email}' deleted successfully.");
@@ -691,7 +689,7 @@ public class IdentityRepository : IIdentityRepository
             "RoleNotFound" => AppErrors.IdentityErrors.AddToRolesError(),
             "UserAlreadyInRole" => AppErrors.IdentityErrors.AddToRolesError(),
             "InvalidRoleName" => AppErrors.IdentityErrors.AddToRolesError(),
-            "ConcurrencyFailure" => AppErrors.IdentityErrors.ConcurrencyFailure(),
+            "ConcurrencyFailure" => AppErrors.DatabaseErrors.ConcurrencyFailure(),
           };
         }
       }
@@ -718,35 +716,48 @@ public class IdentityRepository : IIdentityRepository
     string email,
     string roleName)
   {
-    var user = await _userManager.FindByEmailAsync(email);
-    if (user == null)
+    try
     {
-      return AppErrors.IdentityErrors.UserEmailNotFound(email);
-    }
+      _logger.LogFunctionEntry();
 
-    var role = await _roleManager.FindByNameAsync(roleName);
-    if (role == null)
+      var user = await _userManager.FindByEmailAsync(email);
+      if (user == null)
+      {
+        return AppErrors.IdentityErrors.UserEmailNotFound(email);
+      }
+
+      var role = await _roleManager.FindByNameAsync(roleName);
+      if (role == null)
+      {
+        return AppErrors.IdentityErrors.RoleNotFound(roleName);
+      }
+
+      var result = await _userManager.RemoveFromRoleAsync(user, roleName);
+      if (!result.Succeeded)
+      {
+        _logger.LogIdentityErrors(
+          "_userManager.RemoveFromRoleAsync",
+          email,
+          result.Errors.ToFormattedString());
+
+        return IdentityErrorHandler.HandleIdentityErrors(
+          result,
+          _logger,
+          IdentityOperation.RemoveFromRole,
+          userId: user.Id,
+          roleName: roleName);
+      }
+
+      _logger.LogFunctionExit();
+      return roleName;
+    }
+    catch (Exception ex)
     {
-      return AppErrors.IdentityErrors.RoleNotFound(roleName);
+      _logger.LogException(ex);
+      return DatabaseExceptionHandler
+          .HandleException(ex, _logger);
+
     }
-
-    var result = await _userManager.RemoveFromRoleAsync(user, roleName);
-    if (!result.Succeeded)
-    {
-      _logger.LogIdentityErrors(
-        "_userManager.AddToRoleAsync", 
-        email, 
-        result.Errors.ToFormattedString());
-
-      return IdentityErrorHandler.HandleIdentityErrors(
-        result,
-        _logger,
-        IdentityOperation.RemoveFromRole,
-        userId: user.Id,
-        roleName: roleName);
-    }
-
-    return roleName;
   }
 
   //------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 ﻿using ErrorOr;
-using ESLAdmin.Infrastructure.Persistence.Identity;
+using ESLAdmin.Common.CustomErrors;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
 using FastEndpoints;
@@ -54,7 +54,22 @@ public class AddToRoleCommandHandler : ICommandHandler<
     if (result.IsError)
     {
       var error = result.Errors.First();
-      return IdentityResultMapper.MapToResult<Success>(error);
+      var statusCode = error.Code switch
+      {
+        "Database.ConcurrencyFailure" => StatusCodes.Status409Conflict,
+        "Identity.AddToRoleFailed" => StatusCodes.Status400BadRequest,
+        _ => StatusCodes.Status500InternalServerError
+      };
+
+      if (statusCode == StatusCodes.Status500InternalServerError) 
+      {
+        return TypedResults.InternalServerError();
+      }
+      return new ProblemDetails(
+        ErrorUtils.CreateFailureList(
+          error.Code, 
+          error.Description),
+          statusCode);
     }
 
     _logger.LogFunctionExit(

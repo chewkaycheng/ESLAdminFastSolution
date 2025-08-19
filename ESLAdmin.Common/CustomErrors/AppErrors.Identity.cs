@@ -1,7 +1,6 @@
 ﻿using ErrorOr;
 using ESLAdmin.Common.Configuration;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 
 namespace ESLAdmin.Common.CustomErrors;
 
@@ -217,13 +216,12 @@ public static partial class AppErrors
     //                       DeleteUserFailed
     //
     //-------------------------------------------------------------------------------
-    public static Error DeleteUserFailed(string email, IEnumerable<IdentityError> errors)
+    public static Error DeleteUserFailed()
     {
       var error = Error.Failure(
         code: "Identity.DeleteUserFailed",
-        description: $"Failed to delete user: '{email}'.");
+        description: "Failed to delete user.");
 
-      AddMetadata(error.Metadata, errors);
       return error;
     }
 
@@ -353,29 +351,31 @@ public static partial class AppErrors
     public static Error UserNotInRole(string userId, string role) =>
         Error.Failure("Identity.UserNotInRole", $"User '{userId}' is not in role '{role}'");
 
-    //-------------------------------------------------------------------------------
-    //
-    //                       ConcurrencyFailure
-    //
-    //-------------------------------------------------------------------------------
-    public static Error ConcurrencyFailure() =>
-        Error.Failure(
-          "Identity.ConcurrencyFailure", 
-          "There is a concurrency failure in the operation.");
 
     //-------------------------------------------------------------------------------
     //
     //                       RemoveFromRoleFailed
     //
     //-------------------------------------------------------------------------------
-    public static Error RemoveFromRoleFailed(string userId, string role, IEnumerable<IdentityError> errors)
+    public static Error RemoveFromRoleFailed()
     {
       var error = Error.Failure("Identity.RemoveFromRoleFailed",
-          $"Failed to remove role '{role}' from user '{userId}.");
-      AddMetadata(error.Metadata, errors);
+          $"Failed to remove user from role.");
       return error;
     }
 
+    //-------------------------------------------------------------------------------
+    //
+    //                       AddToRoleFailed
+    //
+    //-------------------------------------------------------------------------------
+    public static Error AddToRoleFailed()
+    {
+      var error = Error.Failure(
+        "Identity.AddToRoleFailed",
+        $"Failed to add user to role.");
+      return error;
+    }
 
     //-------------------------------------------------------------------------------
     //
