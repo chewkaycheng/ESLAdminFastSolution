@@ -16,7 +16,7 @@ public class GetUserMapper : Mapper<GetUserRequest, GetUserResponse, User>
   //                          ToResponse
   //
   //-------------------------------------------------------------------------------
-  public GetUserResponse ToResponse(User user, IList<string>? roleNames)
+  public GetUserResponse EntityToResponse(User user, IList<string>? roleNames)
   {
     GetUserResponse response = new GetUserResponse()
     {

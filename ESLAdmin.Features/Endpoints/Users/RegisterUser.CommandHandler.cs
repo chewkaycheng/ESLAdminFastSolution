@@ -1,9 +1,8 @@
-﻿using ESLAdmin.Common.CustomErrors;
+﻿using ErrorOr;
+using ESLAdmin.Common.CustomErrors;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
-using ESLAdmin.Logging.Interface;
 using FastEndpoints;
-using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
@@ -17,7 +16,7 @@ namespace ESLAdmin.Features.Endpoints.Users;
 //-------------------------------------------------------------------------------
 public class RegisterUserCommandHandler : ICommandHandler<
       RegisterUserCommand,
-      Results<NoContent, ProblemDetails, InternalServerError>>
+      Results<Ok<Success>, ProblemDetails, InternalServerError>>
 {
   private readonly IRepositoryManager _repositoryManager;
   private readonly ILogger<RegisterUserCommandHandler> _logger;
@@ -40,7 +39,7 @@ public class RegisterUserCommandHandler : ICommandHandler<
   //                       ExecuteAsync
   //
   //-------------------------------------------------------------------------------
-  public async Task<Results<NoContent, ProblemDetails, InternalServerError>>
+  public async Task<Results<Ok<Success>, ProblemDetails, InternalServerError>>
     ExecuteAsync(
       RegisterUserCommand command,
       CancellationToken cancellationToken)
@@ -49,35 +48,37 @@ public class RegisterUserCommandHandler : ICommandHandler<
     {
       var user = command.Mapper.CommandToEntity(command);
 
-      var result = await _repositoryManager.IdentityRepository.RegisterUserAsync(
-        user,
-        command.Password,
-        command.Roles);
+      var result = await _repositoryManager
+        .IdentityRepository
+        .RegisterUserAsync(
+          user,
+          command.Password,
+          command.Roles);
 
       if (result.IsError)
       {
         var error = result.Errors.First();
-        var statusCode = StatusCodes.Status500InternalServerError;
-        switch (error.Code)
+        var statusCode = error.Code switch
         {
-          case "Identity.UserNotFound":
-          case "Identity.RoleNotFound":
-            statusCode = StatusCodes.Status404NotFound;
-            break;
-          case "Identity.UserAlreadyInRole":
-          case "Identity.DuplicateUserName":
-          case "Identity.DuplicateEmail":
-          case "Identity.InvalidUserName":
-          case "Identity.InvalidEmail":
-            statusCode = StatusCodes.Status400BadRequest;
-            break;
-          case "Identity.ConcurrencyError":
-            statusCode = StatusCodes.Status409Conflict;
-            break;
-          default:
-            return TypedResults.InternalServerError();
-        }
+          "Identity.AddToRolesError" => StatusCodes.Status400BadRequest,
+          "Identity.DuplicateUserName" => StatusCodes.Status400BadRequest,
+          "Identity.DuplicateEmail" => StatusCodes.Status400BadRequest,
+          "Identity.InvalidUserName" => StatusCodes.Status400BadRequest,
+          "Identity.InvalidEmail" => StatusCodes.Status400BadRequest,
+          "Identity.PasswordTooShort" => StatusCodes.Status400BadRequest,
+          "Identity.PasswordRequiresNonAlphanumeric" => StatusCodes.Status400BadRequest,
+          "Identity.PasswordRequiresDigit" => StatusCodes.Status400BadRequest,
+          "Identity.PasswordRequiresLower" => StatusCodes.Status400BadRequest,
+          "Identity.PasswordRequiresUpper" => StatusCodes.Status400BadRequest,
+          "Identity.CreateUserFailed" => StatusCodes.Status400BadRequest,
+          _ => StatusCodes.Status500InternalServerError
+        };
 
+        if (statusCode == StatusCodes.Status500InternalServerError)
+        {
+          return TypedResults.InternalServerError();
+        }
+       
         return new ProblemDetails(
           ErrorUtils.CreateFailureList(
             error.Code,
@@ -86,7 +87,7 @@ public class RegisterUserCommandHandler : ICommandHandler<
       }
 
       _logger.LogFunctionExit($"User Id: {user.Id}");
-      return TypedResults.NoContent();
+      return TypedResults.Ok(new Success());
     }
     catch (Exception ex)
     {

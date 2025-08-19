@@ -1,4 +1,5 @@
-﻿using FastEndpoints;
+﻿using ErrorOr;
+using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ESLAdmin.Features.Endpoints.Users;
@@ -8,7 +9,7 @@ namespace ESLAdmin.Features.Endpoints.Users;
 //                       class RegisterUserCommand
 //
 //-------------------------------------------------------------------------------
-public class RegisterUserCommand : ICommand<Results<NoContent, ProblemDetails, InternalServerError>>
+public class RegisterUserCommand : ICommand<Results<Ok<Success>, ProblemDetails, InternalServerError>>
 {
   public required string UserName { get; init; }
   public string? FirstName { get; init; }

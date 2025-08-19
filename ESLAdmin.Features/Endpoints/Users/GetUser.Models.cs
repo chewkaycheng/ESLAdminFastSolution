@@ -39,6 +39,8 @@ public class GetUserValidator : Validator<GetUserRequest>
   public GetUserValidator()
   {
     RuleFor(x => x.Email)
-            .NotEmpty().WithMessage("Email is required.");
+      .NotEmpty().WithMessage("Email is required.")
+      .EmailAddress().WithMessage("Invalid email format.")
+      .MaximumLength(256).WithMessage("Email cannot exceed 256 characters.");
   }
 }

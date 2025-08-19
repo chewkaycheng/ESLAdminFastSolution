@@ -14,7 +14,7 @@ public class LoginUserMapper : Mapper<LoginUserRequest, LoginUserResponse, Login
   //                       LoginUserCommand
   //
   //-------------------------------------------------------------------------------
-  public LoginUserCommand ToCommand(LoginUserRequest loginRequest)
+  public LoginUserCommand RequestToCommand(LoginUserRequest loginRequest)
   {
     return new LoginUserCommand
     {

@@ -623,12 +623,6 @@ public class IdentityRepository : IIdentityRepository
   {
     _logger.LogFunctionEntry($"Registering user with email: '{user.Email}'");
 
-    if (string.IsNullOrEmpty(user.Email))
-    {
-      _logger.LogWarning("User email cannot be empty.");
-      return AppErrors.IdentityErrors.UserEmailCannotBeEmpty();
-    }
-
     // Check for any invalid roles before doing transaction
     if (roles != null && roles.Any())
     {
@@ -651,11 +645,20 @@ public class IdentityRepository : IIdentityRepository
 
       if (!result.Succeeded)
       {
-
         await transaction.RollbackAsync();
         _logger.LogError(
           $"Failed to create user with email '{user.Email}': {result.Errors.ToFormattedString()}");
 
+        // Errors:
+        // 1) DuplicateUserName
+        // 2) DuplicateEmail
+        // 3) InvalidUserName
+        // 4) InvalidEmail
+        // 5) PasswordTooShort
+        // 6) PasswordRequiresNonAlphanumeric
+        // 7) PasswordRequiresDigit
+        // 8) PasswordRequiresLower
+        // 9) PasswordRequiresUpper
         return IdentityErrorHandler.HandleIdentityErrors(
           result,
           _logger,
@@ -675,13 +678,21 @@ public class IdentityRepository : IIdentityRepository
           _logger.LogError(
             $"Failed to add roles to user with email '{user.Email}': {roleResult.Errors.ToFormattedString()}");
 
-          return IdentityErrorHandler.HandleIdentityErrors(
-            result,
-            _logger,
-            IdentityOperation.AddToRoles,
-            userId: user.Id,
-            roles: string.Join(", ", roles)
-          );
+          // Errors
+          // 1) UserNotFound
+          // 2) RoleNotFound
+          // 3) UserAlreadyInRole
+          // 4) InvalidRoleName
+          // 5) ConcurrencyFailure
+          var firstError = result.Errors.FirstOrDefault();
+          return firstError?.Code switch
+          {
+            "UserNotFound" => AppErrors.IdentityErrors.AddToRolesError(),
+            "RoleNotFound" => AppErrors.IdentityErrors.AddToRolesError(),
+            "UserAlreadyInRole" => AppErrors.IdentityErrors.AddToRolesError(),
+            "InvalidRoleName" => AppErrors.IdentityErrors.AddToRolesError(),
+            "ConcurrencyFailure" => AppErrors.IdentityErrors.ConcurrencyFailure(),
+          };
         }
       }
 
@@ -693,7 +704,8 @@ public class IdentityRepository : IIdentityRepository
     {
       await transaction.RollbackAsync();
       _logger.LogException(ex);
-      return AppErrors.CommonErrors.Exception(ex.Message);
+      return DatabaseExceptionHandler
+          .HandleException(ex, _logger);
     }
   }
 

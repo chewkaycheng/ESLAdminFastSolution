@@ -70,7 +70,7 @@ public class GetUserCommandHandler : ICommandHandler<
       var roleResult = await _repositoryManager.IdentityRepository.GetRolesForUserAsync(user);
       var roleNames = roleResult.Value;
 
-      var response = command.Mapper.ToResponse(user, roleNames);
+      var response = command.Mapper.EntityToResponse(user, roleNames);
 
       DebugLogFunctionExit(response);
 

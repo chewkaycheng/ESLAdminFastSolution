@@ -1,5 +1,7 @@
 ﻿using ErrorOr;
+using ESLAdmin.Common.Configuration;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 
 namespace ESLAdmin.Common.CustomErrors;
 
@@ -10,6 +12,13 @@ namespace ESLAdmin.Common.CustomErrors;
 //-------------------------------------------------------------------------------
 public static partial class AppErrors
 {
+  private static IConfigurationParams? _configParams;
+
+  public static void Initialize(IConfigurationParams configParams)
+  {
+    _configParams = configParams;
+  }
+
   //-------------------------------------------------------------------------------
   //
   //                       class IdentityErrors
@@ -349,8 +358,10 @@ public static partial class AppErrors
     //                       ConcurrencyFailure
     //
     //-------------------------------------------------------------------------------
-    public static Error ConcurrencyFailure(string userId) =>
-        Error.Failure("Identity.ConcurrencyFailure", $"Concurrency failure for user '{userId}'");
+    public static Error ConcurrencyFailure() =>
+        Error.Failure(
+          "Identity.ConcurrencyFailure", 
+          "There is a concurrency failure in the operation.");
 
     //-------------------------------------------------------------------------------
     //
@@ -483,7 +494,7 @@ public static partial class AppErrors
     //-------------------------------------------------------------------------------
     public static Error UserLockedOut(string email)
     {
-      var error = Error.Failure(
+      var error = Error.Unauthorized(
         code: "Identity.UserLockedOut",
         description: $"The user: '{email}' has been locked out.");
       return error;
@@ -496,7 +507,7 @@ public static partial class AppErrors
     //-------------------------------------------------------------------------------
     public static Error IsNotAllowed(string email)
     {
-      var error = Error.Failure(
+      var error = Error.Unauthorized(
         code: "Identity.UserNotAllowed",
         description: $"The user: '{email}' is not allowed to log in.");
       return error;
@@ -509,7 +520,7 @@ public static partial class AppErrors
     //-------------------------------------------------------------------------------
     public static Error RequiresTwoFactor(string email)
     {
-      var error = Error.Failure(
+      var error = Error.Unauthorized(
         code: "Identity.RequiresTwoFactor",
         description: $"The user: '{email}' requires two-factor authentication.");
       return error;
@@ -522,7 +533,7 @@ public static partial class AppErrors
     //-------------------------------------------------------------------------------
     public static Error InvalidCredentials(string email)
     {
-      var error = Error.Failure(
+      var error = Error.Unauthorized(
         code: "Identity.InvalidCredentials",
         description: $"The user: '{email}' has invalid credentials.");
       return error;
@@ -538,6 +549,75 @@ public static partial class AppErrors
           code: "Identity.Unauthorized",
           description: "User is not authorized.");
 
+    //-------------------------------------------------------------------------------
+    //
+    //                       PasswordTooShort
+    //
+    //-------------------------------------------------------------------------------
+    public static ErrorOr.Error PasswordTooShort() =>
+        Error.Unauthorized(
+          code: "Identity.PasswordTooShort",
+          description: $"Password must be at least {_configParams.IdentitySettings.Password.RequiredLength} characters.");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       PasswordRequiresNonAlphanumeric
+    //
+    //-------------------------------------------------------------------------------
+    public static ErrorOr.Error PasswordRequiresNonAlphanumeric() =>
+        Error.Unauthorized(
+          code: "Identity.PasswordRequiresNonAlphanumeric",
+          description: "Password must contain at least one non-alphanumeric character (e.g., !, @, #).");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       PasswordRequiresDigit
+    //
+    //-------------------------------------------------------------------------------
+    public static ErrorOr.Error PasswordRequiresDigit() =>
+        Error.Unauthorized(
+          code: "Identity.PasswordRequiresDigit",
+          description: "Password must contain at least one digit (0-9).");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       PasswordRequiresLower
+    //
+    //-------------------------------------------------------------------------------
+    public static ErrorOr.Error PasswordRequiresLower() =>
+        Error.Unauthorized(
+          code: "Identity.PasswordRequiresLower",
+          description: "Password must contain at least one lowercase letter (a-z).");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       PasswordRequiresUpper
+    //
+    //-------------------------------------------------------------------------------
+    public static ErrorOr.Error PasswordRequiresUpper() =>
+        Error.Unauthorized(
+          code: "Identity.PasswordRequiresUpper",
+          description: "Password must contain at least one uppercase letter (A-Z).");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       PasswordRequiresUniqueChars
+    //
+    //-------------------------------------------------------------------------------
+    public static ErrorOr.Error PasswordRequiresUniqueChars() =>
+        Error.Unauthorized(
+          code: "Identity.PasswordRequiresUniqueChars",
+          description: "Password must contain at least one non-alphanumeric character (e.g., !, @, #).");
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       AddToRolesError
+    //
+    //-------------------------------------------------------------------------------
+    public static ErrorOr.Error AddToRolesError() =>
+        Error.Unauthorized(
+          code: "Identity.AddToRolesError",
+          description: "Failed to add roles: Invalid user or roles.");
   }
 }
 

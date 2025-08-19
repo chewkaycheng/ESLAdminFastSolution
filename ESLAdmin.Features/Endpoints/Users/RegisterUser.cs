@@ -1,6 +1,6 @@
-﻿using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
+﻿using ErrorOr;
+using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
-using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -15,7 +15,7 @@ namespace ESLAdmin.Features.Endpoints.Users;
 //-------------------------------------------------------------------------------
 public class RegisterUserEndpoint : Endpoint<
   RegisterUserRequest,
-  Results<NoContent,
+  Results<Ok<Success>,
     ProblemDetails,
     InternalServerError>,
   RegisterUserMapper>
@@ -53,7 +53,7 @@ public class RegisterUserEndpoint : Endpoint<
   //
   //-------------------------------------------------------------------------------
   public override async
-    Task<Results<NoContent,
+    Task<Results<Ok<Success>,
       ProblemDetails,
       InternalServerError>>
     ExecuteAsync(
