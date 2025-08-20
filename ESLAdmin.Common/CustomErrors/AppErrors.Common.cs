@@ -23,10 +23,10 @@ public static partial class AppErrors
     //                       Exception
     //
     //------------------------------------------------------------------------------
-    public static Error Exception() =>
+    public static Error Exception(string message) =>
       Error.Failure(
         code: "Exception",
-        description: "An exception has occurred");
+        description: "An exception has occurred. Message: {message}");
 
     //-------------------------------------------------------------------------------
     //

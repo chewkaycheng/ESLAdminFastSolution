@@ -1,4 +1,5 @@
-﻿using ESLAdmin.Domain.Dtos;
+﻿using ESLAdmin.Common.CustomErrors;
+using ESLAdmin.Domain.Dtos;
 using ESLAdmin.Domain.Entities;
 using ESLAdmin.Features.Endpoints.ChildcareLevels;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
@@ -50,7 +51,12 @@ public class GetUsersCommandHandler :
 
     if (usersResult.IsError)
     {
-      return TypedResults.InternalServerError();
+      var error = usersResult.Errors.FirstOrDefault();
+      return new ProblemDetails(
+          ErrorUtils.CreateFailureList(
+            error.Code,
+            error.Description),
+            StatusCodes.Status500InternalServerError);
     }
 
     var users = usersResult.Value;
@@ -61,7 +67,12 @@ public class GetUsersCommandHandler :
 
     if (userRolesResults.IsError)
     {
-      return TypedResults.InternalServerError();
+      var error = userRolesResults.Errors.FirstOrDefault();
+      return new ProblemDetails(
+          ErrorUtils.CreateFailureList(
+            error.Code, 
+            error.Description),
+            StatusCodes.Status500InternalServerError);
     }
 
     var userRoles = userRolesResults.Value;

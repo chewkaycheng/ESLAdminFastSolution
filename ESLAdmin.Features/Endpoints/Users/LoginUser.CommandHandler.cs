@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using static Dapper.SqlMapper;
 
 namespace ESLAdmin.Features.Endpoints.Users;
 
@@ -66,26 +67,27 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
       if (userResult.IsError)
       {
         var error = userResult.Errors.First();
-
-        if (error.Code == "Identity.IsLockedOut")
+        return error.Code switch
         {
-          return new ProblemDetails(
+          string code when code.Contains("Exception") =>
+            TypedResults.InternalServerError(),
+          "Identity.IsLockedOut" =>
+            new ProblemDetails(
             ErrorUtils.CreateFailureList(
               "LockedOut",
-              "Your account has been locked. Please contact your administrator to unlock your account."), StatusCodes.Status401Unauthorized);
-        }
-
-        if (error.Code == "Identity.IsNotAllowed" ||
-            error.Code == "Identity.RequiresTwoFactor" ||
-            error.Code == "Identity.InvalidCredentials")
-        {
-          return new ProblemDetails(
+              "Your account has been locked. Please contact your administrator to unlock your account."), StatusCodes.Status401Unauthorized),
+          "Identity.RequiresTwoFactor" =>
+            new ProblemDetails(
+              ErrorUtils.CreateFailureList(
+                "requiresTwoFactor",
+                "Two-factor authentication required."), StatusCodes.Status401Unauthorized),
+          _ => new ProblemDetails(
             ErrorUtils.CreateFailureList(
               "LoginFailed",
-              "Username or password is invalid."), StatusCodes.Status401Unauthorized);
-        }
-        return TypedResults.InternalServerError();
+              "Username or password is invalid."), StatusCodes.Status401Unauthorized)
+        };
       }
+
       var user = userResult.Value;
 
       var rolesResult = await _repositoryManager
@@ -94,6 +96,7 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
 
       if (rolesResult.IsError)
         return TypedResults.InternalServerError();
+
       var roles = rolesResult.Value;
 
       // Generate JWT token

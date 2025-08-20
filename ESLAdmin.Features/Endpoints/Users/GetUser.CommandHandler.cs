@@ -1,4 +1,5 @@
-﻿using ESLAdmin.Common.CustomErrors;
+﻿using ErrorOr;
+using ESLAdmin.Common.CustomErrors;
 using ESLAdmin.Domain.Dtos;
 using ESLAdmin.Domain.Entities;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
@@ -60,6 +61,11 @@ public class GetUserCommandHandler : ICommandHandler<
       if (userResult.IsError)
       {
         var error = userResult.Errors.First();
+        var statusCode = error.Code switch
+        {
+          string code when code.Contains("Exception") => StatusCodes.Status500InternalServerError,
+          _ => StatusCodes.Status404NotFound
+        };
         return new ProblemDetails(
           ErrorUtils.CreateFailureList(error.Code, error.Description),
           StatusCodes.Status404NotFound );
@@ -68,12 +74,26 @@ public class GetUserCommandHandler : ICommandHandler<
       var user = userResult.Value;
 
       var roleResult = await _repositoryManager.IdentityRepository.GetRolesForUserAsync(user);
+
+      if (roleResult.IsError)
+      {
+        var error = roleResult.Errors.First();
+        var statusCode = error.Code switch
+        {
+          string code when code.Contains("Exception") => StatusCodes.Status500InternalServerError,
+          _ => StatusCodes.Status404NotFound
+        };
+        return new ProblemDetails(
+          ErrorUtils.CreateFailureList(error.Code, error.Description),
+          StatusCodes.Status404NotFound);
+      }
+
       var roleNames = roleResult.Value;
 
       var response = command.Mapper.EntityToResponse(user, roleNames);
 
-      DebugLogFunctionExit(response);
 
+      DebugLogFunctionExit(response);
       return TypedResults.Ok(response);
     }
     catch (Exception ex)

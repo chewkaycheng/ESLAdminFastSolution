@@ -54,14 +54,10 @@ public class DeleteUserCommandHandler : ICommandHandler<
       var statusCode = error.Code switch
       {
         "Database.ConcurrencyFailure" => StatusCodes.Status409Conflict,
-        "Identity.DeleteUserFailed" => StatusCodes.Status400BadRequest,
-        _ => StatusCodes.Status500InternalServerError
+        string code when code.Contains("Exception") => StatusCodes.Status500InternalServerError,
+        _ => StatusCodes.Status400BadRequest
       };
 
-      if (statusCode == StatusCodes.Status500InternalServerError)
-      {
-        return TypedResults.InternalServerError();
-      }
       return new ProblemDetails(
         ErrorUtils.CreateFailureList(
           error.Code,

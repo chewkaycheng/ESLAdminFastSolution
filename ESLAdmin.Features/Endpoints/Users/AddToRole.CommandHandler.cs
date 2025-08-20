@@ -54,13 +54,10 @@ public class AddToRoleCommandHandler : ICommandHandler<
     if (result.IsError)
     {
       var error = result.Errors.First();
-      if (error.Code.Contains("Exception"))
-      {
-        return TypedResults.InternalServerError();
-      }
       var statusCode = error.Code switch
       {
         "Database.ConcurrencyFailure" => StatusCodes.Status409Conflict,
+        string code when code.Contains("Exception") => StatusCodes.Status500InternalServerError,
         _ => StatusCodes.Status400BadRequest
       };
 

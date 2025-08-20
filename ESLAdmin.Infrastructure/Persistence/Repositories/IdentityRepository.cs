@@ -166,13 +166,6 @@ public class IdentityRepository : IIdentityRepository
           userId: user.Id,
           userName: user.UserName ?? "",
           email: email);
-
-        var firstError = result.Errors.FirstOrDefault();
-        return firstError.Code switch
-        {
-          "UserNotFound" => AppErrors.IdentityErrors.DeleteUserFailed(),
-          "ConcurrencyFailure" => AppErrors.DatabaseErrors.ConcurrencyFailure()
-        };
       }
 
       _logger.LogFunctionExit($"User with email '{email}' deleted successfully.");

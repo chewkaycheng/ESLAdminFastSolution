@@ -37,8 +37,8 @@ public static class DatabaseExceptionHandler
       InvalidOperationException ioe => AppErrors
         .IdentityExceptions
         .InvalidOperationException(ioe.Message),
-      OperationCanceledException => AppErrors.DatabaseErrors.OperationCanceled(),
-      _ => AppErrors.CommonErrors.Exception()
+      OperationCanceledException oce => AppErrors.DatabaseErrors.OperationCanceled(),
+      Exception exception => AppErrors.CommonErrors.Exception(exception.Message)
     };
   }
 }
