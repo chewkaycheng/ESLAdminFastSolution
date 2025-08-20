@@ -32,14 +32,14 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
     _logger = logger;
   }
 
-  private ProblemDetails InvalidTokenError()
-  {
-    return new ProblemDetails(
-      ErrorUtils.CreateFailureList(
-        "InvalidToken",
-        "The provided token is invalid."),
-      StatusCodes.Status400BadRequest);
-  }
+  //private ProblemDetails InvalidTokenError()
+  //{
+  //  return new ProblemDetails(
+  //    ErrorUtils.CreateFailureList(
+  //      "InvalidToken",
+  //      "The provided token is invalid."),
+  //    StatusCodes.Status400BadRequest);
+  //}
 
   public async Task<Results<Ok<RefreshTokenResponse>, ProblemDetails, InternalServerError>>
     ExecuteAsync(RefreshTokenCommand command, CancellationToken ct)
@@ -67,7 +67,7 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
       var key = new SymmetricSecurityKey(
         Encoding.UTF8.GetBytes(jwtSettings.Key));
 
-      // Throws exception if validation fails
+      // Return token error if validation fails
       tokenHandler.ValidateToken(
         command.AccessToken,
         new TokenValidationParameters
@@ -85,7 +85,7 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
       var jwtToken = (JwtSecurityToken)validatedToken;
       var userId = jwtToken.Claims.First(c => c.Type == JwtRegisteredClaimNames.Sub).Value;
       if (userId == null)
-        return InvalidTokenError();
+        return AppErrors.CustomProblemDetails.TokenError();
 
       // Verify user
       var userResult = await _repositoryManager
@@ -106,7 +106,7 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
       var user = userResult.Value;
       if (user.Id != refreshToken.UserId)
       {
-        return InvalidTokenError();
+        return AppErrors.CustomProblemDetails.TokenError();
       }
 
       // Generate new access token
