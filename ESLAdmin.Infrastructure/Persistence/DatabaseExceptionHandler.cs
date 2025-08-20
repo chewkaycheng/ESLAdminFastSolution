@@ -27,14 +27,18 @@ public static class DatabaseExceptionHandler
 
     return ex switch
     {
-      ArgumentNullException ane => AppErrors.IdentityErrors.InvalidArgument(ane.Message),
-      DbUpdateException dbu => AppErrors.DatabaseErrors.DatabaseError(
+      ArgumentNullException ane => AppErrors
+        .IdentityExceptions
+        .InvalidArgumentException(ane.Message),
+      DbUpdateException dbu => AppErrors.DatabaseExceptions.DatabaseException(
         ex.InnerException?.Message ?? ex.Message),
-      FbException fbe => AppErrors.DatabaseErrors.DatabaseError(
+      FbException fbe => AppErrors.DatabaseExceptions.DatabaseException(
         $"Firebird error: {fbe.Message} (ErrorCode: {fbe.ErrorCode})"),
-      InvalidOperationException ioe => AppErrors.IdentityErrors.InvalidOperation(ioe.Message),
+      InvalidOperationException ioe => AppErrors
+        .IdentityExceptions
+        .InvalidOperationException(ioe.Message),
       OperationCanceledException => AppErrors.DatabaseErrors.OperationCanceled(),
-      _ => AppErrors.CommonErrors.Exception(ex.Message)
+      _ => AppErrors.CommonErrors.Exception()
     };
   }
 }

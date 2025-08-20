@@ -20,6 +20,33 @@ public static partial class AppErrors
 
   //-------------------------------------------------------------------------------
   //
+  //                       class IdentityExceptions
+  //
+  //-------------------------------------------------------------------------------
+  public static class IdentityExceptions
+  {
+    //-------------------------------------------------------------------------------
+    //
+    //                       InvalidArgumentException
+    //
+    //-------------------------------------------------------------------------------
+    public static Error InvalidArgumentException(string description) =>
+        Error.Failure("Identity.Exception.InvalidArgument", description);
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       InvalidOperationException
+    //
+    //-------------------------------------------------------------------------------
+    public static Error InvalidOperationException(string description) =>
+        Error.Failure(
+          "Identity.Exception.InvalidOperation",
+          description);
+
+  }
+
+  //-------------------------------------------------------------------------------
+  //
   //                       class IdentityErrors
   //
   //-------------------------------------------------------------------------------
@@ -377,14 +404,7 @@ public static partial class AppErrors
       return error;
     }
 
-    //-------------------------------------------------------------------------------
-    //
-    //                       InvalidArgument
-    //
-    //-------------------------------------------------------------------------------
-    public static Error InvalidArgument(string description) =>
-        Error.Failure("Identity.InvalidArgument", description);
-
+    
     //-------------------------------------------------------------------------------
     //
     //                       DuplicateUserName
@@ -459,16 +479,6 @@ public static partial class AppErrors
     //-------------------------------------------------------------------------------
     public static Error InvalidRoleName(string roleName) =>
         Error.Failure("Identity.InvalidRoleName", $"Role name '{roleName}' is invalid.");
-
-    //-------------------------------------------------------------------------------
-    //
-    //                       InvalidOperation
-    //
-    //-------------------------------------------------------------------------------
-    public static Error InvalidOperation(string description) =>
-        Error.Failure(
-          "Identity.InvalidOperation", 
-          description);
 
     //-------------------------------------------------------------------------------
     //

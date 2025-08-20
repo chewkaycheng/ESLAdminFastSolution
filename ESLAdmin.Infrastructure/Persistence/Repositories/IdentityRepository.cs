@@ -100,12 +100,13 @@ public class IdentityRepository : IIdentityRepository
           email, 
           result.Errors.ToFormattedString());
 
-        var firstError = result.Errors.FirstOrDefault();
-        return firstError.Code switch
-        {
-          "ConcurrencyFailure" => AppErrors.DatabaseErrors.ConcurrencyFailure(),
-          _ => AppErrors.IdentityErrors.AddToRoleFailed()
-        };
+        return IdentityErrorHandler.HandleIdentityErrors(
+          result,
+          _logger,
+          IdentityOperation.AddToRole,
+          userId: user.Id,
+          userName: user.UserName ?? "",
+          email: user.Email);
       }
 
       _logger.LogFunctionExit();
@@ -157,6 +158,14 @@ public class IdentityRepository : IIdentityRepository
          "_userManager.DeleteAsync",
          email,
          result.Errors.ToFormattedString());
+
+        return IdentityErrorHandler.HandleIdentityErrors(
+          result,
+          _logger,
+          IdentityOperation.DeleteUser,
+          userId: user.Id,
+          userName: user.UserName ?? "",
+          email: email);
 
         var firstError = result.Errors.FirstOrDefault();
         return firstError.Code switch

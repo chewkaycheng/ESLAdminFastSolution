@@ -7,6 +7,24 @@ public static partial class AppErrors
 {
   //-------------------------------------------------------------------------------
   //
+  //                       class DatabaseExceptions
+  //
+  //-------------------------------------------------------------------------------\
+  public static class DatabaseExceptions
+  {
+    //-------------------------------------------------------------------------------
+    //
+    //                       DatabaseException
+    //
+    //-------------------------------------------------------------------------------
+    public static Error DatabaseException(string description) =>
+        Error.Failure(
+          "Database.Exception.DatabaseError",
+          description);
+  }
+
+  //-------------------------------------------------------------------------------
+  //
   //                       class DatabaseErrors
   //
   //-------------------------------------------------------------------------------\
@@ -57,10 +75,11 @@ public static partial class AppErrors
     //                       OperationCanceled
     //
     //-------------------------------------------------------------------------------
-    public static Error OperationCanceled(string message) =>
-      Error.Failure(
+    public static Error OperationCanceled(string message = "") =>
+      Error.Custom(
+        type: 1000,
         code: "Database.OperationCanceled",
-        description: $"Operaion has been cancelled: {message}");
+        description: $"Operaion has been cancelled. {message}");
 
     //-------------------------------------------------------------------------------
     //
@@ -104,16 +123,6 @@ public static partial class AppErrors
 
     //-------------------------------------------------------------------------------
     //
-    //                       DatabaseError
-    //
-    //-------------------------------------------------------------------------------
-    public static Error DatabaseError(string description) =>
-        Error.Failure(
-          "Database.DatabaseError", 
-          description);
-
-    //-------------------------------------------------------------------------------
-    //
     //                       OperationCanceled
     //
     //-------------------------------------------------------------------------------
@@ -131,5 +140,6 @@ public static partial class AppErrors
         Error.Failure(
           "Database.ConcurrencyFailure",
           "There is a concurrency failure in the operation.");
+
   }
 }
