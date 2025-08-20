@@ -1,7 +1,6 @@
 global using FastEndpoints;
 using ESLAdmin.Api.Configuration;
 using ESLAdmin.Api.Extensions;
-using ESLAdmin.Infrastructure.Extensions;
 using ESLAdmin.Infrastructure.Middleware;
 using ESLAdmin.Logging.Extensions;
 using FastEndpoints.Swagger;

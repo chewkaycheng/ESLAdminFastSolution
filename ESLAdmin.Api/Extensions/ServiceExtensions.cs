@@ -254,4 +254,23 @@ public static class ServiceExtensions
           JwtBearerDefaults.AuthenticationScheme;
       });
   }
+
+  // =================================================
+  // 
+  // UseFastEndpointsMiddleware
+  //
+  // ==================================================
+  public static void UseFastEndpointsMiddleware(this IApplicationBuilder app)
+  {
+    app.UseFastEndpoints(c =>
+    {
+      c.Errors.UseProblemDetails();
+      c.Endpoints.Configurator =
+        ep =>
+        {
+          if (ep.AnonymousVerbs is null)
+            ep.Description(b => b.Produces<ProblemDetails>(401));
+        };
+    });
+  }
 }
