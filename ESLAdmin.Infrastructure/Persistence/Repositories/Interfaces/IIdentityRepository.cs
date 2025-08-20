@@ -32,13 +32,16 @@ public interface IIdentityRepository
     CancellationToken cancellationToken = default);
   Task<ErrorOr<RefreshToken>> GetRefreshTokenAsync(string token);
   Task<ErrorOr<Success>> RevokeRefreshTokenAsync(string token);
+  Task<ErrorOr<Success>> AddRefreshTokenAsync(RefreshToken refreshToken);
   Task<ErrorOr<Success>> RevokeRefreshTokenAsync(
     string userId,
     CancellationToken cancellationToken = default);
+  Task<ErrorOr<Success>> ReplaceRefreshTokenAsync(
+    RefreshToken newRefreshToken,
+    string oldToken);
+
   Task<ErrorOr<User>> FindByIdAsync(string userId);
   Task<ErrorOr<User>> FindByUserNameAsync(string username);
-
-  Task<ErrorOr<Success>> AddRefreshTokenAsync(RefreshToken refreshToken);
   Task<ErrorOr<IdentityRole>> CreateRoleAsync(string roleName);
   Task<ErrorOr<string>> UpdateRoleAsync(string oldRoleName, string newRoleName);
   Task<ErrorOr<string>> DeleteRoleAsync(string roleName);

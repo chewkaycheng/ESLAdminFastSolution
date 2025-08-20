@@ -55,20 +55,28 @@ public class GetUserCommandHandler : ICommandHandler<
     _logger.LogFunctionEntry($"Email: {command.Email}");
     try
     {
-      var userResult = await _repositoryManager.IdentityRepository.GetUserByEmailAsync(
-        command.Email);
+      var userResult = await _repositoryManager
+        .IdentityRepository
+        .GetUserByEmailAsync(
+          command.Email);
       
       if (userResult.IsError)
       {
         var error = userResult.Errors.First();
         var statusCode = error.Code switch
         {
+          "Database.ConcurrencyFailure" => StatusCodes.Status409Conflict,
+          "Database.OperationCanceled" => StatusCodes.Status408RequestTimeout,
           string code when code.Contains("Exception") => StatusCodes.Status500InternalServerError,
           _ => StatusCodes.Status404NotFound
         };
-        return new ProblemDetails(
-          ErrorUtils.CreateFailureList(error.Code, error.Description),
-          StatusCodes.Status404NotFound );
+
+        return AppErrors
+          .CustomProblemDetails
+          .CreateProblemDetails(
+            error.Code,
+            error.Description,
+            statusCode);
       }
 
       var user = userResult.Value;
@@ -80,18 +88,22 @@ public class GetUserCommandHandler : ICommandHandler<
         var error = roleResult.Errors.First();
         var statusCode = error.Code switch
         {
+          "Database.ConcurrencyFailure" => StatusCodes.Status409Conflict,
+          "Database.OperationCanceled" => StatusCodes.Status408RequestTimeout,
           string code when code.Contains("Exception") => StatusCodes.Status500InternalServerError,
           _ => StatusCodes.Status404NotFound
         };
-        return new ProblemDetails(
-          ErrorUtils.CreateFailureList(error.Code, error.Description),
-          StatusCodes.Status404NotFound);
+
+        return AppErrors
+         .CustomProblemDetails
+         .CreateProblemDetails(
+           error.Code,
+           error.Description,
+           statusCode);
       }
 
       var roleNames = roleResult.Value;
-
       var response = command.Mapper.EntityToResponse(user, roleNames);
-
 
       DebugLogFunctionExit(response);
       return TypedResults.Ok(response);

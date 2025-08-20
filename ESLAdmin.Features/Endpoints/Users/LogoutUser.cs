@@ -33,24 +33,15 @@ public class LogoutUserEndpoint : EndpointWithoutRequest<
     ExecuteAsync(CancellationToken ct)
   {
     var userId = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-    if (string.IsNullOrEmpty(userId))
-    {
-      return new ProblemDetails(
-        ErrorUtils.CreateFailureList(
-          "InvalidUser",
-          "User ID is missing or invalid."),
-        StatusCodes.Status400BadRequest);
-    }
-
     var accessToken = HttpContext.Request.Headers["Authorization"]
       .ToString().Replace("Bearer ", "");
-    if (string.IsNullOrEmpty(accessToken))
+
+    if (string.IsNullOrEmpty(userId) || 
+        string.IsNullOrEmpty(accessToken))
     {
-      return new ProblemDetails(
-        ErrorUtils.CreateFailureList(
-          "Authentication Error",
-          "No JWT provided."),
-        StatusCodes.Status401Unauthorized);
+      return AppErrors
+        .CustomProblemDetails
+        .AuthenticationFailed();
     }
 
     return await new LogoutUserCommand

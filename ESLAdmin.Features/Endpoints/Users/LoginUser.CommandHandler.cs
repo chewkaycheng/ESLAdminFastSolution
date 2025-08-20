@@ -5,7 +5,6 @@ using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
-using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
@@ -13,7 +12,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using static Dapper.SqlMapper;
 
 namespace ESLAdmin.Features.Endpoints.Users;
 
@@ -69,22 +67,17 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
         var error = userResult.Errors.First();
         return error.Code switch
         {
-          string code when code.Contains("Exception") =>
+          "Database.ConcurrencyFailure" => 
+            AppErrors.CustomProblemDetails.ConcurrencyFailure(),
+          "Database.OperationCanceled" => 
+            AppErrors.CustomProblemDetails.RequestTimeout(),
+          string code when code.Contains("Exception") => 
             TypedResults.InternalServerError(),
-          "Identity.IsLockedOut" =>
-            new ProblemDetails(
-            ErrorUtils.CreateFailureList(
-              "LockedOut",
-              "Your account has been locked. Please contact your administrator to unlock your account."), StatusCodes.Status401Unauthorized),
-          "Identity.RequiresTwoFactor" =>
-            new ProblemDetails(
-              ErrorUtils.CreateFailureList(
-                "requiresTwoFactor",
-                "Two-factor authentication required."), StatusCodes.Status401Unauthorized),
-          _ => new ProblemDetails(
-            ErrorUtils.CreateFailureList(
-              "LoginFailed",
-              "Username or password is invalid."), StatusCodes.Status401Unauthorized)
+          "Identity.IsLockedOut" => 
+            AppErrors.CustomProblemDetails.LockedOut(),
+          "Identity.RequiresTwoFactor" => 
+            AppErrors.CustomProblemDetails.RequiresTwoFactor(),
+          _ => AppErrors.CustomProblemDetails.LoginFailed()
         };
       }
 

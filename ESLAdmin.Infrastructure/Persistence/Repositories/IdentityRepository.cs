@@ -16,6 +16,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Text;
+using System.Transactions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace ESLAdmin.Infrastructure.Persistence.Repositories;
 
@@ -558,6 +560,46 @@ public class IdentityRepository : IIdentityRepository
 
   //------------------------------------------------------------------------------
   //
+  //                       ReplaceRefreshTokenAsync
+  //
+  //-------------------------------------------------------------------------------
+  public async Task<ErrorOr<Success>> ReplaceRefreshTokenAsync(
+    RefreshToken newRefreshToken,
+    string oldToken)
+  {
+    using var transaction = await _dbContext.Database.BeginTransactionAsync();
+    try
+    {
+      await _dbContext.RefreshTokens.AddAsync(newRefreshToken);
+      await _dbContext.SaveChangesAsync();
+
+      var refreshToken = await _dbContext
+        .RefreshTokens
+        .FirstOrDefaultAsync(
+          rt => rt.Token == oldToken);
+
+      if (refreshToken == null)
+      {
+        transaction.Rollback();
+        return AppErrors.IdentityErrors.InvalidToken();
+      }
+      refreshToken.IsRevoked = true;
+      await _dbContext.SaveChangesAsync();
+      transaction.Commit();
+      _logger.LogFunctionExit();
+      return new Success();
+    }
+    catch (Exception ex)
+    {
+      transaction.Rollback();
+      _logger.LogException(ex);
+      return DatabaseExceptionHandler
+          .HandleException(ex, _logger);
+    }
+  }
+
+  //------------------------------------------------------------------------------
+  //
   //                       RevokeRefreshTokenAsync
   //
   //-------------------------------------------------------------------------------
@@ -594,20 +636,11 @@ public class IdentityRepository : IIdentityRepository
       _logger.LogInformation($"Revoked {tokens.Count} refresh tokens for user: '{userId}'.");
       return Result.Success;
     }
-    catch (DbUpdateException ex)
-    {
-      _logger.LogException(ex);
-      return AppErrors.IdentityErrors.TokenRevocationFailed(userId, ex.Message);
-    }
-    catch (OperationCanceledException ex)
-    {
-      _logger.LogException(ex);
-      return AppErrors.IdentityErrors.OperationCanceled();
-    }
     catch (Exception ex)
     {
       _logger.LogException(ex);
-      return AppErrors.IdentityErrors.TokenRevocationFailed(userId, ex.Message);
+      return DatabaseExceptionHandler
+          .HandleException(ex, _logger);
     }
   }
 

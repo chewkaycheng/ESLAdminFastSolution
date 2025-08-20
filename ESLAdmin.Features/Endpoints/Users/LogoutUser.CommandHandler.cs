@@ -39,27 +39,11 @@ public class LogoutUserCommandHandler : ICommandHandler<
       LogoutUserCommand command,
       CancellationToken ct)
   {
-    // Validate JWT token
-    if (string.IsNullOrEmpty(command.Token))
-    {
-      _logger.LogCustomError(
-        $"No JWT provided for user: '{command.UserId}'");
-      return new ProblemDetails(
-          ErrorUtils.CreateFailureList(
-            "Authentication Error",
-            "No JWT provided."),
-            StatusCodes.Status401Unauthorized);
-    }
-
     var handler = new JwtSecurityTokenHandler();
     if (!handler.CanReadToken(command.Token))
     {
       _logger.LogCustomError($"Invalid JWT format for user: '{command.UserId}'.");
-      return new ProblemDetails(
-          ErrorUtils.CreateFailureList(
-            "Authentication Error",
-            "Invalid JWT format."),
-            StatusCodes.Status401Unauthorized);
+      return AppErrors.CustomProblemDetails.TokenError();
     }
 
     var jwtToken = handler.ReadJwtToken(command.Token);
@@ -74,23 +58,32 @@ public class LogoutUserCommandHandler : ICommandHandler<
       if (result.IsError)
       {
         _logger.LogError($"Logout failed for user: {command.UserId}, error: {result.FirstError.Description}.");
-        if (result.FirstError.Type == ErrorType.NotFound)
+        var error = result.Errors.FirstOrDefault();
+        return error.Code switch
         {
-          return new ProblemDetails(
-            ErrorUtils.CreateFailureList(
-              result.FirstError.Code,
-              result.FirstError.Description),
-              StatusCodes.Status404NotFound);
-        }
-        return TypedResults.InternalServerError();
+          "Database.OperationCanceled" => AppErrors.CustomProblemDetails.RequestTimeout(),
+          string code when code.Contains("Exception") => TypedResults.InternalServerError(),
+          _ => AppErrors.CustomProblemDetails.InvalidLogoutRequest()
+        };
       }
 
       // Blacklist JWT
-      await _tokenBlacklistService.AddToBlacklistAsync(
+      var blackListResult  = await _tokenBlacklistService.AddToBlacklistAsync(
         command.Token,
         command.UserId,
         expiryDate,
         ct);
+
+      if (blackListResult.IsError)
+      {
+        _logger.LogError($"Logout failed for user: {command.UserId}, error: {result.FirstError.Description}.");
+        var error = result.Errors.FirstOrDefault();
+        return error.Code switch
+        {
+          "Database.OperationCanceled" => AppErrors.CustomProblemDetails.RequestTimeout(),
+         _ => TypedResults.InternalServerError(),
+        };
+      }
 
       _logger.LogCustomInformation($"Successful logout for user: '{command.UserId}'."); 
       return TypedResults.Ok();

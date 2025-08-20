@@ -1,4 +1,5 @@
-﻿using ESLAdmin.Common.Configuration;
+﻿using ErrorOr;
+using ESLAdmin.Common.Configuration;
 using ESLAdmin.Common.CustomErrors;
 using ESLAdmin.Infrastructure.Persistence.Entities;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
@@ -52,11 +53,12 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
       if (result.IsError)
       {
         var error = result.Errors.First();
-        if (error.Code == "Identity.RefreshTokenNotFound")
+        return error.Code switch
         {
-          return InvalidTokenError();
-        }
-        return TypedResults.InternalServerError();
+          "Database.OperationCanceled" => AppErrors.CustomProblemDetails.RequestTimeout(),
+          string code when code.Contains("Exception") => TypedResults.InternalServerError(),
+          _ => AppErrors.CustomProblemDetails.TokenError()
+        };
       }
 
       var refreshToken = result.Value;
@@ -89,34 +91,22 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
       var userResult = await _repositoryManager
         .IdentityRepository
         .FindByIdAsync(userId);
+
       if (userResult.IsError)
       {
         var error = userResult.Errors.First();
-        if (error.Code == "Identity.NotFound")
+        return error.Code switch
         {
-          return InvalidTokenError();
-        }
-        return TypedResults.InternalServerError();
+          "Database.OperationCanceled" => AppErrors.CustomProblemDetails.RequestTimeout(),
+          string code when code.Contains("Exception") => TypedResults.InternalServerError(),
+          _ => AppErrors.CustomProblemDetails.TokenError()
+        };
       }
 
       var user = userResult.Value;
       if (user.Id != refreshToken.UserId)
       {
         return InvalidTokenError();
-      }
-
-      // Revoke old refresh token
-      var tokenResult = await _repositoryManager
-        .IdentityRepository
-        .RevokeRefreshTokenAsync(command.RefreshToken);
-      if (tokenResult.IsError)
-      {
-        var error = userResult.Errors.First();
-        if (error.Code == "Identity.InvalidToken")
-        {
-          return InvalidTokenError();
-        }
-        return TypedResults.InternalServerError();
       }
 
       // Generate new access token
@@ -160,12 +150,45 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
         IsRevoked = false
       };
 
-      var refreshTokenResult = await _repositoryManager
+      var tokenResult = await _repositoryManager
         .IdentityRepository
-        .AddRefreshTokenAsync(newRefreshToken);
+        .ReplaceRefreshTokenAsync(newRefreshToken, command.RefreshToken);
 
-      if (refreshTokenResult.IsError)
-        return TypedResults.InternalServerError();
+      if (tokenResult.IsError)
+      {
+        var error = tokenResult.Errors.FirstOrDefault();
+        return error.Code switch
+        {
+          "Database.ConcurrencyFailure" => AppErrors.CustomProblemDetails.ConcurrencyFailure(),
+          "Database.OperationCanceled" => AppErrors.CustomProblemDetails.RequestTimeout(),
+          string code when code.Contains("Exception") => TypedResults.InternalServerError(),
+          _ => AppErrors.CustomProblemDetails.TokenError()
+        };
+      }
+
+      //var refreshTokenResult = await _repositoryManager
+      //  .IdentityRepository
+      //  .AddRefreshTokenAsync(newRefreshToken);
+
+      //if (refreshTokenResult.IsError)
+      //  return TypedResults.InternalServerError();
+
+      //// Revoke old refresh token
+      //var tokenResult = await _repositoryManager
+      //  .IdentityRepository
+      //  .RevokeRefreshTokenAsync(command.RefreshToken);
+
+      //if (tokenResult.IsError)
+      //{
+      //  var error = userResult.Errors.First();
+      //  return error.Code switch
+      //  {
+      //    "Database.ConcurrencyFailure" => AppErrors.CustomProblemDetails.ConcurrencyFailure(),
+      //    "Database.OperationCanceled" => AppErrors.CustomProblemDetails.RequestTimeout(),
+      //    string code when code.Contains("Exception") => TypedResults.InternalServerError()
+      //    _ => AppErrors.CustomProblemDetails.TokenError()
+      //  };
+      //}
 
       return TypedResults.Ok(new RefreshTokenResponse
       {
@@ -179,12 +202,18 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
       _logger.LogException(ex);
       return ex switch
       {
-        SecurityTokenInvalidSignatureException tokenException => InvalidTokenError(),
-        SecurityTokenInvalidIssuerException tokenException => InvalidTokenError(),
-        SecurityTokenInvalidAudienceException tokenException => InvalidTokenError(),
-        SecurityTokenMalformedException tokenException => InvalidTokenError(),
-        SecurityTokenValidationException tokenException => InvalidTokenError(),
-        SecurityTokenException tokenException => InvalidTokenError(),
+        SecurityTokenInvalidSignatureException tokenException => 
+          AppErrors.CustomProblemDetails.TokenError(),
+        SecurityTokenInvalidIssuerException tokenException => 
+          AppErrors.CustomProblemDetails.TokenError(),
+        SecurityTokenInvalidAudienceException tokenException => 
+          AppErrors.CustomProblemDetails.TokenError(),
+        SecurityTokenMalformedException tokenException => 
+          AppErrors.CustomProblemDetails.TokenError(),
+        SecurityTokenValidationException tokenException => 
+          AppErrors.CustomProblemDetails.TokenError(),
+        SecurityTokenException tokenException => 
+          AppErrors.CustomProblemDetails.TokenError(),
         _ => TypedResults.InternalServerError()
       };
     }
