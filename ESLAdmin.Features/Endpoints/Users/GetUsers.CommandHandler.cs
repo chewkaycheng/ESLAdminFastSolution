@@ -1,4 +1,5 @@
-﻿using ESLAdmin.Common.CustomErrors;
+﻿using ESLAdmin.Common.Configuration;
+using ESLAdmin.Common.CustomErrors;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;

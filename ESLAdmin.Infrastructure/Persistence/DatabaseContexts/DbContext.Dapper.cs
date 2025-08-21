@@ -6,6 +6,7 @@ using ESLAdmin.Infrastructure.Persistence.DatabaseContexts.Interfaces;
 using ESLAdmin.Logging;
 using FirebirdSql.Data.FirebirdClient;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Data;
 using System.Text.Json;
 
@@ -28,10 +29,21 @@ public class DbContextDapper : IDbContextDapper
   //------------------------------------------------------------------------------
   public DbContextDapper(
     ILogger<DbContextDapper> logger,
-    IConfigurationParams configParams)
+    IOptions<ApiSettings> settings)
   {
     _logger = logger;
-    _connectionString = configParams.ConnectionStringsSettings.ESLAdminConnection;
+    if (settings.Value == null || 
+        settings.Value.ConnectionStrings == null || 
+        settings.Value.ConnectionStrings.ESLAdminConnection == null)
+    {
+      _logger.LogError("Connection string ESLAdminConnection is null or invalid.");
+      throw new ArgumentNullException(
+        nameof(settings), "ESLAdminConnection is required and cannot be null.");
+    }
+    _connectionString = settings.Value.ConnectionStrings.ESLAdminConnection;
+    _logger.LogInformation(
+      "DbContextDapper initialized with connection string: {ConnectionString}",
+      _connectionString);
   }
 
   //------------------------------------------------------------------------------

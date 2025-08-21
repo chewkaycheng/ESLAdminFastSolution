@@ -7,12 +7,7 @@ using System.Numerics;
 namespace ESLAdmin.Common.CustomErrors;
 
 public static partial class AppErrors
-{
-  public class CustomProblemDetails : ProblemDetails
-  {
-    public Dictionary<string, object>? Metadata { get; set; }
-  }
-
+{ 
   public static class ProblemDetailsFactory
   {
     public static ProblemDetails CreateProblemDetails(

@@ -8,6 +8,7 @@ using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -26,7 +27,7 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
   private readonly IRepositoryManager _repositoryManager;
   private readonly ILogger<LoginUserCommandHandler> _logger;
   private readonly IMessageLogger _messageLogger;
-  private readonly IConfigurationParams _configurationParams;
+  private readonly ApiSettings _apiSettings;
 
   //-------------------------------------------------------------------------------
   //
@@ -37,12 +38,12 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
       IRepositoryManager repositoryManager,
       ILogger<LoginUserCommandHandler> logger,
       IMessageLogger messageLogger,
-      IConfigurationParams configurationParams)
+      IOptions<ApiSettings> settings)
   {
     _repositoryManager = repositoryManager;
     _logger = logger;
     _messageLogger = messageLogger;
-    _configurationParams = configurationParams;
+    _apiSettings = settings.Value;
   }
 
   //-------------------------------------------------------------------------------
@@ -127,7 +128,7 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
       //    o.ExpireAt = DateTime.UtcNow.AddDays(7);
       //  });
 
-      var jetSettings = _configurationParams.JwtSettings;
+      var jetSettings = _apiSettings.Jwt;
       var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jetSettings.Key));
       var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
       var token = new JwtSecurityToken(

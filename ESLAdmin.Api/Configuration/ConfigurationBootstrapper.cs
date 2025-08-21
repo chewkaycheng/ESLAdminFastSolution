@@ -1,6 +1,5 @@
 ﻿using ESLAdmin.Common.Configuration;
 using ESLAdmin.Logging;
-using ESLAdmin.Logging.Extensions;
 
 namespace ESLAdmin.Api.Configuration;
 
@@ -43,22 +42,24 @@ public class ConfigurationBootstrapper
   //                        Configure
   //
   //-------------------------------------------------------------------------------
-  public IConfigurationParams Configure()
+  public ApiSettings Configure()
   {
-    // Create abd reguster IConfigurationParams
-    var configParams = new ConfigurationParams(_configuration);
-    
-    // Validate the configuration
-    var result = configParams.ValidateConfiguration(_tempLogger);
-    if (result.IsError)
+    var apiSettings = _configuration.Get<ApiSettings>();
+    if (apiSettings == null) {
+      _tempLogger.LogError(
+        "Failed to bind ApiSettings from configuration.");
+      throw new InvalidOperationException("Failed to bind ApiSettings from configuration.");
+    }
+
+    var validator = new ApiSettingsValidator();
+    var validationResult = validator.Validate(null, apiSettings);
+    if (validationResult.Failed)
     {
       _tempLogger.LogError(
-        $"Configuration validation failed: {result.Errors.ToFormattedString()}");
-      throw new InvalidOperationException(
-          $"Configuration validation failed: {string.Join("; ", result.Errors.Select(e => e.Description))}");
+        $"Configuration validation failed: {validationResult.FailureMessage}");
+      throw new InvalidOperationException($"ApiSettings validation failed: {validationResult.FailureMessage}");
     }
-    _services.AddSingleton<IConfigurationParams>(configParams);
 
-    return configParams;
+    return apiSettings;
   }
 }

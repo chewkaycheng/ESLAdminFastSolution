@@ -1,28 +1,31 @@
 global using FastEndpoints;
 using ESLAdmin.Api.Configuration;
 using ESLAdmin.Api.Extensions;
+using ESLAdmin.Common.Configuration;
 using ESLAdmin.Infrastructure.Middleware;
 using ESLAdmin.Logging.Extensions;
 using FastEndpoints.Swagger;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.ConfigureLogging(builder);
-var bootstrapper = new ConfigurationBootstrapper(
-    builder.Services,
-    builder.Configuration);
-var configParams = bootstrapper.Configure();
+builder.Services.ConfigureApiSettings(builder.Configuration);
 
-builder.Services.ConfigureJwtExtensions(configParams);
+var apiSettings = new ConfigurationBootstrapper(
+    builder.Services,
+    builder.Configuration).Configure();
+
+builder.Services.ConfigureJwtExtensions(apiSettings);
 builder.Services.ConfigureCors();
 builder.Services.ConfigureIISIntegration();
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 builder.Services.ConfigureFastEndpoints();
 builder.Services.ConfigureBlacklistService();
-builder.Services.ConfigureIdentity(configParams);
+builder.Services.ConfigureIdentity(apiSettings);
 builder.Services.ConfigureFirebirdDbContexts(builder.Configuration);
 builder.Services.ConfigureRepositoryManager();
 
@@ -37,8 +40,6 @@ builder.Services.ConfigureSwagger();
 //    .GetRequiredService<ILogger<Program>>();
 
 //configParams.ValidateConfiguration(logger);
-
-
 
 var app = builder.Build();
 

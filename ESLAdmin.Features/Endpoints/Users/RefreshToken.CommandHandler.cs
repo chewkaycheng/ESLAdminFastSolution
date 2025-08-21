@@ -8,6 +8,7 @@ using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -20,15 +21,15 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
 {
   private readonly IRepositoryManager _repositoryManager;
   private readonly ILogger<RefreshTokenCommandHandler> _logger;
-  private readonly IConfigurationParams _configurationParams;
+  private readonly ApiSettings _apiSettings;
 
   public RefreshTokenCommandHandler(
     IRepositoryManager repositoryManager,
-    IConfigurationParams configurationParams,
+    IOptions<ApiSettings> settings,
     ILogger<RefreshTokenCommandHandler> logger)
   {
     _repositoryManager = repositoryManager;
-    _configurationParams = configurationParams;
+    _apiSettings = settings.Value;
     _logger = logger;
   }
 
@@ -62,7 +63,7 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
       }
 
       var refreshToken = result.Value;
-      var jwtSettings = _configurationParams.JwtSettings;
+      var jwtSettings = _apiSettings.Jwt;
       var tokenHandler = new JwtSecurityTokenHandler();
       var key = new SymmetricSecurityKey(
         Encoding.UTF8.GetBytes(jwtSettings.Key));

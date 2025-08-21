@@ -1,6 +1,7 @@
 ﻿using ErrorOr;
 using ESLAdmin.Common.Configuration;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
 namespace ESLAdmin.Common.CustomErrors;
 
@@ -11,11 +12,11 @@ namespace ESLAdmin.Common.CustomErrors;
 //-------------------------------------------------------------------------------
 public static partial class AppErrors
 {
-  private static IConfigurationParams? _configParams;
+  private static ApiSettings? _apiSettings;
 
-  public static void Initialize(IConfigurationParams configParams)
+  public static void Initialize(IOptions<ApiSettings> settings)
   {
-    _configParams = configParams;
+    _apiSettings = settings.Value;
   }
 
   //-------------------------------------------------------------------------------
@@ -600,7 +601,7 @@ public static partial class AppErrors
     public static ErrorOr.Error PasswordTooShort() =>
         Error.Unauthorized(
           code: "Identity.PasswordTooShort",
-          description: $"Password must be at least {_configParams.IdentitySettings.Password.RequiredLength} characters.");
+          description: $"Password must be at least {_apiSettings.Identity.Password.RequiredLength} characters.");
 
     //-------------------------------------------------------------------------------
     //

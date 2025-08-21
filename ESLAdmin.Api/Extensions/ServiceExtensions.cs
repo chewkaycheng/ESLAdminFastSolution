@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Diagnostics;
@@ -58,9 +59,9 @@ public static class ServiceExtensions
   // ==================================================
   public static void ConfigureIdentity(
     this IServiceCollection services,
-    IConfigurationParams configParams)
+    ApiSettings apiSettings)
   {
-    var identitySettings = configParams.IdentitySettings;
+    var identitySettings = apiSettings.Identity;
     
     var builder =
       services.AddIdentity<User, IdentityRole>(o =>
@@ -205,10 +206,10 @@ public static class ServiceExtensions
   // ==================================================
   public static void ConfigureJwtExtensions(
     this IServiceCollection services,
-    IConfigurationParams configParams)
+    ApiSettings apiSettings)
   {
-    var jwtSettings = configParams.JwtSettings;
-    var identitySettings = configParams.IdentitySettings;
+    var jwtSettings = apiSettings.Jwt;
+    var identitySettings = apiSettings.Identity;
     var jwtKey = jwtSettings.Key;
     var issuer = jwtSettings.Issuer;
     var audience = jwtSettings.Audience;
@@ -222,10 +223,10 @@ public static class ServiceExtensions
           o.Audience = audience;
           o.TokenValidationParameters = new TokenValidationParameters
           {
-            ValidateIssuer = jwtSettings.TokenValidation.ValidateIssuer,
-            ValidateAudience = jwtSettings.TokenValidation.ValidateAudience,
-            ValidateLifetime = jwtSettings.TokenValidation.ValidateLifetime,
-            ValidateIssuerSigningKey = jwtSettings.TokenValidation.ValidateIssuerSigningKey,
+            ValidateIssuer = (bool)jwtSettings.TokenValidation.ValidateIssuer,
+            ValidateAudience = (bool)jwtSettings.TokenValidation.ValidateAudience,
+            ValidateLifetime = (bool) jwtSettings.TokenValidation.ValidateLifetime,
+            ValidateIssuerSigningKey = (bool) jwtSettings.TokenValidation.ValidateIssuerSigningKey,
             ValidIssuer = issuer,
             ValidAudience = audience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
@@ -253,6 +254,22 @@ public static class ServiceExtensions
         options.DefaultChallengeScheme =
           JwtBearerDefaults.AuthenticationScheme;
       });
+  }
+
+  // =================================================
+  // 
+  // ConfigureApiSettings
+  //
+  // ==================================================
+  public static void ConfigureApiSettings(
+    this IServiceCollection services,
+    IConfiguration configuration)
+  {
+    services.AddOptions<ApiSettings>()
+      .Bind(configuration)
+      .ValidateDataAnnotations()
+      .ValidateOnStart();
+    services.AddSingleton<IValidateOptions<ApiSettings>, ApiSettingsValidator>();
   }
 
   // =================================================
