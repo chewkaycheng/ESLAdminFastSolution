@@ -40,7 +40,7 @@ public class LogoutUserEndpoint : EndpointWithoutRequest<
         string.IsNullOrEmpty(accessToken))
     {
       return AppErrors
-        .CustomProblemDetails
+        .ProblemDetailsFactory
         .AuthenticationFailed();
     }
 

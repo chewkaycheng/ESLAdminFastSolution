@@ -45,8 +45,9 @@ public class DeleteUserCommandHandler : ICommandHandler<
       CancellationToken cancellationToken)
   {
     _logger.LogFunctionEntry($"Email: {command.Email}");
-    var result = await _repositoryManager.IdentityRepository.DeleteUserByEmailAsync(
-      command.Email);
+    var result = await _repositoryManager
+      .IdentityRepository
+      .DeleteUserByEmailAsync(command.Email);
 
     if (result.IsError)
     {
@@ -60,7 +61,7 @@ public class DeleteUserCommandHandler : ICommandHandler<
       };
 
       return AppErrors
-        .CustomProblemDetails
+        .ProblemDetailsFactory
         .CreateProblemDetails(
           error.Code,
           error.Description,

@@ -17,4 +17,21 @@ public static class ErrorUtils
       }
     };
   }
+
+  public static List<ValidationFailure> CreateFailureList(
+    Dictionary<string, object> metadata)
+  {
+    var list = new List<ValidationFailure>();
+    foreach (var key in metadata.Keys) {
+      var value = metadata[key];
+      if (value != null) {
+        list.Add(new ValidationFailure
+        {
+          PropertyName = key,
+          ErrorMessage = value.ToString()
+        });
+      }
+    }
+    return list;
+  }
 }

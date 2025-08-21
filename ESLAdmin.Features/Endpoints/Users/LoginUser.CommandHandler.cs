@@ -68,16 +68,16 @@ public class LoginUserCommandHandler : ICommandHandler<LoginUserCommand,
         return error.Code switch
         {
           "Database.ConcurrencyFailure" => 
-            AppErrors.CustomProblemDetails.ConcurrencyFailure(),
+            AppErrors.ProblemDetailsFactory.ConcurrencyFailure(),
           "Database.OperationCanceled" => 
-            AppErrors.CustomProblemDetails.RequestTimeout(),
+            AppErrors.ProblemDetailsFactory.RequestTimeout(),
           string code when code.Contains("Exception") => 
             TypedResults.InternalServerError(),
           "Identity.IsLockedOut" => 
-            AppErrors.CustomProblemDetails.LockedOut(),
+            AppErrors.ProblemDetailsFactory.LockedOut(),
           "Identity.RequiresTwoFactor" => 
-            AppErrors.CustomProblemDetails.RequiresTwoFactor(),
-          _ => AppErrors.CustomProblemDetails.LoginFailed()
+            AppErrors.ProblemDetailsFactory.RequiresTwoFactor(),
+          _ => AppErrors.ProblemDetailsFactory.LoginFailed()
         };
       }
 

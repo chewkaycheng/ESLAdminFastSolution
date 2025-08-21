@@ -17,10 +17,10 @@ public static partial class AppErrors
     //                       DatabaseException
     //
     //-------------------------------------------------------------------------------
-    public static Error DatabaseException(string description) =>
+    public static Error DatabaseException(string message) =>
         Error.Failure(
           "Database.Exception.DatabaseError",
-          description);
+          message);
   }
 
   //-------------------------------------------------------------------------------

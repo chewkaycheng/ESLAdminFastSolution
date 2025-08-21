@@ -30,18 +30,18 @@ public static partial class AppErrors
     //                       InvalidArgumentException
     //
     //-------------------------------------------------------------------------------
-    public static Error InvalidArgumentException(string description) =>
-        Error.Failure("Identity.Exception.InvalidArgument", description);
+    public static Error InvalidArgumentException(string message) =>
+        Error.Failure("Identity.Exception.InvalidArgument", message);
 
     //-------------------------------------------------------------------------------
     //
     //                       InvalidOperationException
     //
     //-------------------------------------------------------------------------------
-    public static Error InvalidOperationException(string description) =>
+    public static Error InvalidOperationException(string message) =>
         Error.Failure(
           "Identity.Exception.InvalidOperation",
-          description);
+          message);
 
   }
 
@@ -502,7 +502,8 @@ public static partial class AppErrors
     //
     //-------------------------------------------------------------------------------
     public static Error DuplicateRoleName(string roleName) =>
-        Error.Failure("Identity.DuplicateRoleName", $"Role name '{roleName}' already exists.");
+        Error.Failure(
+          "Identity.DuplicateRoleName", $"Role name '{roleName}' already exists.");
 
     //-------------------------------------------------------------------------------
     //

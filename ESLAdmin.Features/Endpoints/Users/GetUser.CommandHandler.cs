@@ -72,7 +72,7 @@ public class GetUserCommandHandler : ICommandHandler<
         };
 
         return AppErrors
-          .CustomProblemDetails
+          .ProblemDetailsFactory
           .CreateProblemDetails(
             error.Code,
             error.Description,
@@ -95,7 +95,7 @@ public class GetUserCommandHandler : ICommandHandler<
         };
 
         return AppErrors
-         .CustomProblemDetails
+         .ProblemDetailsFactory
          .CreateProblemDetails(
            error.Code,
            error.Description,

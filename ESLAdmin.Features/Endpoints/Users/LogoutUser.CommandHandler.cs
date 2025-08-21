@@ -43,7 +43,7 @@ public class LogoutUserCommandHandler : ICommandHandler<
     if (!handler.CanReadToken(command.Token))
     {
       _logger.LogCustomError($"Invalid JWT format for user: '{command.UserId}'.");
-      return AppErrors.CustomProblemDetails.TokenError();
+      return AppErrors.ProblemDetailsFactory.TokenError();
     }
 
     var jwtToken = handler.ReadJwtToken(command.Token);
@@ -61,9 +61,9 @@ public class LogoutUserCommandHandler : ICommandHandler<
         var error = result.Errors.FirstOrDefault();
         return error.Code switch
         {
-          "Database.OperationCanceled" => AppErrors.CustomProblemDetails.RequestTimeout(),
+          "Database.OperationCanceled" => AppErrors.ProblemDetailsFactory.RequestTimeout(),
           string code when code.Contains("Exception") => TypedResults.InternalServerError(),
-          _ => AppErrors.CustomProblemDetails.InvalidLogoutRequest()
+          _ => AppErrors.ProblemDetailsFactory.InvalidLogoutRequest()
         };
       }
 
@@ -80,7 +80,7 @@ public class LogoutUserCommandHandler : ICommandHandler<
         var error = result.Errors.FirstOrDefault();
         return error.Code switch
         {
-          "Database.OperationCanceled" => AppErrors.CustomProblemDetails.RequestTimeout(),
+          "Database.OperationCanceled" => AppErrors.ProblemDetailsFactory.RequestTimeout(),
          _ => TypedResults.InternalServerError(),
         };
       }

@@ -55,9 +55,9 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
         var error = result.Errors.First();
         return error.Code switch
         {
-          "Database.OperationCanceled" => AppErrors.CustomProblemDetails.RequestTimeout(),
+          "Database.OperationCanceled" => AppErrors.ProblemDetailsFactory.RequestTimeout(),
           string code when code.Contains("Exception") => TypedResults.InternalServerError(),
-          _ => AppErrors.CustomProblemDetails.TokenError()
+          _ => AppErrors.ProblemDetailsFactory.TokenError()
         };
       }
 
@@ -85,7 +85,7 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
       var jwtToken = (JwtSecurityToken)validatedToken;
       var userId = jwtToken.Claims.First(c => c.Type == JwtRegisteredClaimNames.Sub).Value;
       if (userId == null)
-        return AppErrors.CustomProblemDetails.TokenError();
+        return AppErrors.ProblemDetailsFactory.TokenError();
 
       // Verify user
       var userResult = await _repositoryManager
@@ -97,16 +97,16 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
         var error = userResult.Errors.First();
         return error.Code switch
         {
-          "Database.OperationCanceled" => AppErrors.CustomProblemDetails.RequestTimeout(),
+          "Database.OperationCanceled" => AppErrors.ProblemDetailsFactory.RequestTimeout(),
           string code when code.Contains("Exception") => TypedResults.InternalServerError(),
-          _ => AppErrors.CustomProblemDetails.TokenError()
+          _ => AppErrors.ProblemDetailsFactory.TokenError()
         };
       }
 
       var user = userResult.Value;
       if (user.Id != refreshToken.UserId)
       {
-        return AppErrors.CustomProblemDetails.TokenError();
+        return AppErrors.ProblemDetailsFactory.TokenError();
       }
 
       // Generate new access token
@@ -159,10 +159,10 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
         var error = tokenResult.Errors.FirstOrDefault();
         return error.Code switch
         {
-          "Database.ConcurrencyFailure" => AppErrors.CustomProblemDetails.ConcurrencyFailure(),
-          "Database.OperationCanceled" => AppErrors.CustomProblemDetails.RequestTimeout(),
+          "Database.ConcurrencyFailure" => AppErrors.ProblemDetailsFactory.ConcurrencyFailure(),
+          "Database.OperationCanceled" => AppErrors.ProblemDetailsFactory.RequestTimeout(),
           string code when code.Contains("Exception") => TypedResults.InternalServerError(),
-          _ => AppErrors.CustomProblemDetails.TokenError()
+          _ => AppErrors.ProblemDetailsFactory.TokenError()
         };
       }
 
@@ -203,17 +203,17 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
       return ex switch
       {
         SecurityTokenInvalidSignatureException tokenException => 
-          AppErrors.CustomProblemDetails.TokenError(),
+          AppErrors.ProblemDetailsFactory.TokenError(),
         SecurityTokenInvalidIssuerException tokenException => 
-          AppErrors.CustomProblemDetails.TokenError(),
+          AppErrors.ProblemDetailsFactory.TokenError(),
         SecurityTokenInvalidAudienceException tokenException => 
-          AppErrors.CustomProblemDetails.TokenError(),
+          AppErrors.ProblemDetailsFactory.TokenError(),
         SecurityTokenMalformedException tokenException => 
-          AppErrors.CustomProblemDetails.TokenError(),
+          AppErrors.ProblemDetailsFactory.TokenError(),
         SecurityTokenValidationException tokenException => 
-          AppErrors.CustomProblemDetails.TokenError(),
+          AppErrors.ProblemDetailsFactory.TokenError(),
         SecurityTokenException tokenException => 
-          AppErrors.CustomProblemDetails.TokenError(),
+          AppErrors.ProblemDetailsFactory.TokenError(),
         _ => TypedResults.InternalServerError()
       };
     }

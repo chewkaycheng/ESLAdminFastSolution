@@ -1,4 +1,6 @@
-﻿using FastEndpoints;
+﻿using ErrorOr;
+using FastEndpoints;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using System.Numerics;
 
@@ -6,25 +8,36 @@ namespace ESLAdmin.Common.CustomErrors;
 
 public static partial class AppErrors
 {
-  public static class CustomProblemDetails
+  public class CustomProblemDetails : ProblemDetails
+  {
+    public Dictionary<string, object>? Metadata { get; set; }
+  }
+
+  public static class ProblemDetailsFactory
   {
     public static ProblemDetails CreateProblemDetails(
       string code,
       string description,
-      int statusCode)
+      int statusCode,
+      Dictionary<string, object>? metadata = null)
     {
+      if (metadata != null && metadata.Any())
+      {
+        return new ProblemDetails(
+          ErrorUtils.CreateFailureList(metadata));
+      }
+
       return new ProblemDetails(
         ErrorUtils.CreateFailureList(
           code,
           description),
         statusCode);
-
     }
 
     public static ProblemDetails AuthenticationFailed()
     {
       return CreateProblemDetails(
-        "AutenticationFailed",
+        "AuthenticationFailed",
         "Invalid request: Authentication failed.",
         StatusCodes.Status401Unauthorized);
     }

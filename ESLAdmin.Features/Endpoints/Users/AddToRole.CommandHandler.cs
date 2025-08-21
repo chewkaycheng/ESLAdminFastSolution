@@ -61,12 +61,14 @@ public class AddToRoleCommandHandler : ICommandHandler<
         string code when code.Contains("Exception") => StatusCodes.Status500InternalServerError,
         _ => StatusCodes.Status400BadRequest
       };
+      
       return AppErrors
-        .CustomProblemDetails
+        .ProblemDetailsFactory
         .CreateProblemDetails(
           error.Code,
           error.Description,
-          statusCode);
+          statusCode,
+          error.Code == "Identity.AddToRoleFailed" ? error.Metadata : null);
     }
 
     _logger.LogFunctionExit(
