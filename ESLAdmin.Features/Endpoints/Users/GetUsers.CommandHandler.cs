@@ -49,12 +49,18 @@ public class GetUsersCommandHandler :
     if (usersResult.IsError)
     {
       var error = usersResult.Errors.FirstOrDefault();
+      var statusCode = error.Code switch
+      {
+        "Database.OperationCanceled" => StatusCodes.Status408RequestTimeout,
+        _ => StatusCodes.Status500InternalServerError
+      };
+
       return AppErrors
         .ProblemDetailsFactory
         .CreateProblemDetails(
           error.Code,
           error.Description,
-          StatusCodes.Status500InternalServerError);
+          statusCode);
     }
 
     var users = usersResult.Value;
@@ -66,6 +72,12 @@ public class GetUsersCommandHandler :
     if (userRolesResults.IsError)
     {
       var error = userRolesResults.Errors.FirstOrDefault();
+      var statusCode = error.Code switch
+      {
+        "Database.OperationCanceled" => StatusCodes.Status408RequestTimeout,
+        _ => StatusCodes.Status500InternalServerError
+      };
+
       return AppErrors
        .ProblemDetailsFactory
        .CreateProblemDetails(

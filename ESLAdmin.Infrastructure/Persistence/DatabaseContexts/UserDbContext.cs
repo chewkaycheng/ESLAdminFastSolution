@@ -2,7 +2,6 @@
 using ESLAdmin.Infrastructure.Persistence.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 
 namespace ESLAdmin.Infrastructure.Persistence.DatabaseContexts;
 

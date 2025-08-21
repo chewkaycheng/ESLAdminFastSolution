@@ -1,5 +1,4 @@
-﻿using ErrorOr;
-using ESLAdmin.Common.Configuration;
+﻿using ESLAdmin.Common.Configuration;
 using ESLAdmin.Common.CustomErrors;
 using ESLAdmin.Infrastructure.Persistence.Entities;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;

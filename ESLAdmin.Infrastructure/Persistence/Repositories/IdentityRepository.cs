@@ -114,6 +114,7 @@ public class IdentityRepository : IIdentityRepository
     }
     catch (Exception ex)
     {
+      _logger.LogException(ex);
       return DatabaseExceptionHandler
           .HandleException(ex, _logger);
     }

@@ -46,19 +46,26 @@ public class RemoveFromRoleCommandHandler : ICommandHandler<
   {
     _logger.LogFunctionEntry($"Email: {command.Email}, RoleName: {command.RoleName}");
 
-    var result = await _repositoryManager.IdentityRepository.RemoveFromRoleAsync(
-      command.Email,
-      command.RoleName);
+    var result = await _repositoryManager
+      .IdentityRepository
+      .RemoveFromRoleAsync(
+        command.Email,
+        command.RoleName);
 
     if (result.IsError)
     {
-      var statusCode = StatusCodes.Status404NotFound;
       var error = result.Errors.First();
-      if (error.Code == "Identity.ConcurrencyFailure")
+      var statusCode = error.Code switch
       {
-        statusCode = StatusCodes.Status409Conflict;
-      }
-      return new ProblemDetails(ErrorUtils.CreateFailureList(error.Code, error.Description), statusCode);
+        "Identity.ConcurrencyFailure" => StatusCodes.Status409Conflict,
+        string code when code.Contains("Exception") => StatusCodes.Status500InternalServerError,
+        _ => StatusCodes.Status404NotFound
+      };
+
+      return AppErrors.ProblemDetailsFactory.CreateProblemDetails(
+        error.Code,
+        error.Description,
+        statusCode);
     }
 
     _logger.LogFunctionExit($"Email: {command.Email}, RoleName: {command.RoleName}");

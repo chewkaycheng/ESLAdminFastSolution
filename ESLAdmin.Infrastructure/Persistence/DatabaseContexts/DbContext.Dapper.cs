@@ -106,7 +106,8 @@ public class DbContextDapper : IDbContextDapper
     catch (Exception ex)
     {
       _logger.LogException(ex);
-      return AppErrors.CommonErrors.Exception(ex.Message);
+      return DatabaseExceptionHandler
+         .HandleException(ex, _logger);
     }
   }
 
