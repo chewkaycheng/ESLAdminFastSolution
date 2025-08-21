@@ -1,12 +1,8 @@
-﻿using ErrorOr;
-using ESLAdmin.Common.CustomErrors;
-using ESLAdmin.Domain.Dtos;
-using ESLAdmin.Domain.Entities;
+﻿using ESLAdmin.Common.CustomErrors;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
-using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
@@ -65,7 +61,7 @@ public class GetUserCommandHandler : ICommandHandler<
         var error = userResult.Errors.First();
         var statusCode = error.Code switch
         {
-          "Database.ConcurrencyFailure" => StatusCodes.Status409Conflict,
+          "Identity.Exception.InvalidArgument" => StatusCodes.Status400BadRequest,
           "Database.OperationCanceled" => StatusCodes.Status408RequestTimeout,
           string code when code.Contains("Exception") => StatusCodes.Status500InternalServerError,
           _ => StatusCodes.Status404NotFound
@@ -88,7 +84,7 @@ public class GetUserCommandHandler : ICommandHandler<
         var error = roleResult.Errors.First();
         var statusCode = error.Code switch
         {
-          "Database.ConcurrencyFailure" => StatusCodes.Status409Conflict,
+          "Identity.Exception.InvalidArgument" => StatusCodes.Status400BadRequest,
           "Database.OperationCanceled" => StatusCodes.Status408RequestTimeout,
           string code when code.Contains("Exception") => StatusCodes.Status500InternalServerError,
           _ => StatusCodes.Status404NotFound
@@ -121,7 +117,7 @@ public class GetUserCommandHandler : ICommandHandler<
     {
       var roleLog = userDto.Roles != null ? string.Join(", ", userDto.Roles) : "None";
       var context = $"\n=>User: \n    Username: '{userDto.UserName}', FirstName: '{userDto.FirstName}', LastName: '{userDto.LastName}', Email: '{userDto.Email}'\n    Password: '[Hidden]', PhoneNumber: '{userDto.PhoneNumber}', Roles: '{roleLog}'";
-      _logger.LogFunctionEntry(context);
+      _logger.LogFunctionExit(context);
     }
   }
 

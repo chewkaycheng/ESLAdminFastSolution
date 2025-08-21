@@ -21,6 +21,17 @@ public static partial class AppErrors
         Error.Failure(
           "Database.Exception.DatabaseError",
           message);
+
+    //-------------------------------------------------------------------------------
+    //
+    //                       ObjectDisposedException
+    //
+    //-------------------------------------------------------------------------------
+    public static Error ObjectDisposedException(string message) =>
+      Error.Failure(
+        "Invalid database configuration",
+        message);
+
   }
 
   //-------------------------------------------------------------------------------

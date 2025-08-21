@@ -39,7 +39,7 @@ public class GetUsersCommandHandler :
   //                        ExecuteAsync
   //
   //------------------------------------------------------------------------------
-  public async Task<Results<Ok<IEnumerable<GetUserResponse>>, ProblemDetails, InternalServerError>> 
+  public async Task<Results<Ok<IEnumerable<GetUserResponse>>, ProblemDetails, InternalServerError>>
     ExecuteAsync(GetUsersCommand command, CancellationToken ct)
   {
     var usersResult = await _repositoryManager
@@ -49,11 +49,12 @@ public class GetUsersCommandHandler :
     if (usersResult.IsError)
     {
       var error = usersResult.Errors.FirstOrDefault();
-      return new ProblemDetails(
-          ErrorUtils.CreateFailureList(
-            error.Code,
-            error.Description),
-            StatusCodes.Status500InternalServerError);
+      return AppErrors
+        .ProblemDetailsFactory
+        .CreateProblemDetails(
+          error.Code,
+          error.Description,
+          StatusCodes.Status500InternalServerError);
     }
 
     var users = usersResult.Value;
@@ -65,11 +66,12 @@ public class GetUsersCommandHandler :
     if (userRolesResults.IsError)
     {
       var error = userRolesResults.Errors.FirstOrDefault();
-      return new ProblemDetails(
-          ErrorUtils.CreateFailureList(
-            error.Code, 
-            error.Description),
-            StatusCodes.Status500InternalServerError);
+      return AppErrors
+       .ProblemDetailsFactory
+       .CreateProblemDetails(
+         error.Code,
+         error.Description,
+         StatusCodes.Status500InternalServerError);
     }
 
     var userRoles = userRolesResults.Value;

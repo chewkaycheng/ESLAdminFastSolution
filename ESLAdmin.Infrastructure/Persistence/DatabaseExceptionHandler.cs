@@ -27,6 +27,7 @@ public static class DatabaseExceptionHandler
 
     return ex switch
     {
+
       ArgumentNullException ane => AppErrors
         .IdentityExceptions
         .InvalidArgumentException(ane.Message),
@@ -34,6 +35,9 @@ public static class DatabaseExceptionHandler
         ex.InnerException?.Message ?? ex.Message),
       FbException fbe => AppErrors.DatabaseExceptions.DatabaseException(
         $"Firebird error: {fbe.Message} (ErrorCode: {fbe.ErrorCode})"),
+      ObjectDisposedException ode => 
+        AppErrors.DatabaseExceptions.DatabaseException(
+          $"Internal server error: Resource unavailable. {ode.Message}"),
       InvalidOperationException ioe => AppErrors
         .IdentityExceptions
         .InvalidOperationException(ioe.Message),
