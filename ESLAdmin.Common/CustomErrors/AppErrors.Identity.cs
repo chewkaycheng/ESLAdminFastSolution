@@ -119,7 +119,10 @@ public static partial class AppErrors
     //                       AddToRoleFailed
     //
     //-------------------------------------------------------------------------------
-    public static Error AddToRoleFailed(string email, string roleName, IEnumerable<IdentityError>? errors = null)
+    public static Error AddToRoleFailed(
+      string email, 
+      string roleName, 
+      IEnumerable<IdentityError>? errors = null)
     {
       var error = Error.Failure(
         code: "Identity.AddToRoleFailed",
@@ -137,7 +140,8 @@ public static partial class AppErrors
     //                       InvalidRoles
     //
     //-------------------------------------------------------------------------------
-    public static Error InvalidRoles(List<string?> invalidRoles) =>
+    public static Error InvalidRoles(
+      List<string?> invalidRoles) =>
       Error.Validation(
         code: "Identity.InvalidRoles",
         description: $"The following roles do not exist: {string.Join(", ", invalidRoles)}");
@@ -198,7 +202,9 @@ public static partial class AppErrors
     //                       CreateUserFailed
     //
     //-------------------------------------------------------------------------------
-    public static Error CreateUserFailed(string email, IEnumerable<IdentityError> errors)
+    public static Error CreateUserFailed(
+      string email, 
+      IEnumerable<IdentityError> errors)
     {
       var error = Error.Failure(
         code: "Identity.CreateUserFailed",
@@ -213,7 +219,9 @@ public static partial class AppErrors
     //                       AddToRolesFailed
     //
     //-------------------------------------------------------------------------------
-    public static Error AddToRolesFailed(string email, IEnumerable<IdentityError> errors)
+    public static Error AddToRolesFailed(
+      string email, 
+      IEnumerable<IdentityError> errors)
     {
       var error = Error.Failure(
         code: "Identity.AddToRolesFailed",
@@ -228,7 +236,9 @@ public static partial class AppErrors
     //                       RemoveRolesFailed
     //
     //-------------------------------------------------------------------------------
-    public static Error RemoveRolesFailed(string email, IEnumerable<IdentityError> errors)
+    public static Error RemoveRolesFailed(
+      string email, 
+      IEnumerable<IdentityError> errors)
     {
       var error = Error.Failure(
         code: "Identity.RemoveRolesFailed",
@@ -275,7 +285,9 @@ public static partial class AppErrors
     //                       UserAlreadyInRole
     //
     //-------------------------------------------------------------------------------
-    public static Error UserAlreadyInRole(string email, string roleName) =>
+    public static Error UserAlreadyInRole(
+      string email, 
+      string roleName) =>
       Error.Validation(
         code: "Identity.UserAlreadyInRole",
         description: $"The role: '{roleName}' is already assigned to the user: '{email}'.");
@@ -305,7 +317,9 @@ public static partial class AppErrors
     //                       CreateRoleFailed
     //
     //-------------------------------------------------------------------------------
-    public static Error CreateRoleFailed(string roleName, IEnumerable<IdentityError> errors)
+    public static Error CreateRoleFailed(
+      string roleName, 
+      IEnumerable<IdentityError> errors)
     {
 
       var error = Error.Failure(
@@ -321,7 +335,10 @@ public static partial class AppErrors
     //                       UpdateRoleFailed
     //
     //-------------------------------------------------------------------------------
-    public static Error UpdateRoleFailed(string oldRoleName, string newRoleName, IEnumerable<IdentityError> errors)
+    public static Error UpdateRoleFailed(
+      string oldRoleName, 
+      string newRoleName, 
+      IEnumerable<IdentityError> errors)
     {
       var error = Error.Failure(
         code: "Identity.UpdateRoleFailed",
@@ -336,7 +353,9 @@ public static partial class AppErrors
     //                       DeleteRoleFailed
     //
     //-------------------------------------------------------------------------------
-    public static Error DeleteRoleFailed(string roleName, IEnumerable<IdentityError> errors)
+    public static Error DeleteRoleFailed(
+      string roleName, 
+      IEnumerable<IdentityError> errors)
     {
       var error = Error.Failure(
         code: "Identity.DeleteRoleFailed",
@@ -375,8 +394,11 @@ public static partial class AppErrors
     //                       UserNotInRole
     //
     //-------------------------------------------------------------------------------
-    public static Error UserNotInRole(string userId, string role) =>
-        Error.Failure("Identity.UserNotInRole", $"User '{userId}' is not in role '{role}'");
+    public static Error UserNotInRole(
+      string userId, 
+      string role) =>
+        Error.Failure(
+          "Identity.UserNotInRole", $"User '{userId}' is not in role '{role}'");
 
 
     //-------------------------------------------------------------------------------
@@ -411,7 +433,8 @@ public static partial class AppErrors
     //
     //-------------------------------------------------------------------------------
     public static Error DuplicateUserName(string userName) =>
-        Error.Failure("Identity.DuplicateUserName", $"User name '{userName}' is already taken");
+        Error.Failure(
+          "Identity.DuplicateUserName", $"User name '{userName}' is already taken");
 
     //-------------------------------------------------------------------------------
     //
@@ -419,7 +442,8 @@ public static partial class AppErrors
     //
     //-------------------------------------------------------------------------------
     public static Error DuplicateEmail(string email) =>
-        Error.Failure("Identity.DuplicateEmail", $"Email '{email}' is already taken");
+        Error.Failure(
+          "Identity.DuplicateEmail", $"Email '{email}' is already taken");
 
     //-------------------------------------------------------------------------------
     //
@@ -427,7 +451,8 @@ public static partial class AppErrors
     //
     //-------------------------------------------------------------------------------
     public static Error InvalidUserName(string userName) =>
-        Error.Failure("Identity.InvalidUserName", $"User name '{userName}' is invalid");
+        Error.Failure(
+          "Identity.InvalidUserName", $"User name '{userName}' is invalid");
 
     //-------------------------------------------------------------------------------
     //
@@ -435,14 +460,18 @@ public static partial class AppErrors
     //
     //-------------------------------------------------------------------------------
     public static Error InvalidEmail(string email) =>
-        Error.Failure("Identity.InvalidEmail", $"Email '{email}' is not valid");
+        Error.Failure(
+          "Identity.InvalidEmail", $"Email '{email}' is not valid");
 
     //-------------------------------------------------------------------------------
     //
     //                       InvalidEmail
     //
     //-------------------------------------------------------------------------------
-    public static Error CreateUserFailed(string userName, string email, IEnumerable<IdentityError> errors)
+    public static Error CreateUserFailed(
+      string userName, 
+      string email, 
+      IEnumerable<IdentityError> errors)
     {
       var error = Error.Failure("Identity.CreateUserFailed",
           $"Failed to create user '{userName}' with email '{email}'.");
@@ -456,7 +485,10 @@ public static partial class AppErrors
     //                       AddToRolesFailed
     //
     //-------------------------------------------------------------------------------
-    public static Error AddToRolesFailed(string userId, IEnumerable<string> roles, IEnumerable<IdentityError> errors)
+    public static Error AddToRolesFailed(
+      string userId, 
+      IEnumerable<string> roles, 
+      IEnumerable<IdentityError> errors)
     {
       var error = Error.Failure("Identity.AddToRolesFailed",
           $"Failed to add roles '{string.Join(", ", roles)}' to user '{userId}'.");
