@@ -1,23 +1,29 @@
-﻿using ESLAdmin.Features.IdentityRoles.CreateRole;
-using ESLAdmin.Logging;
-using FastEndpoints;
-using Microsoft.AspNetCore.Http;
+﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Features.Endpoints.Roles;
+namespace ESLAdmin.Features.IdentityRoles.CreateRole;
 
 //------------------------------------------------------------------------------
 //
-//                        class UpdateRoleEndpoint
+//                        class CreateRoleEndpoint
 //
 //------------------------------------------------------------------------------
-public class UpdateRoleEndpoint :
-  Endpoint<UpdateRoleRequest,
-    Results<Ok<string>, ProblemDetails, InternalServerError>>
+public class CreateRoleEndpoint :
+  Endpoint<
+    CreateRoleRequest,
+    Results<Ok<CreateRoleResponse>, ProblemDetails, InternalServerError>,
+    CreateRoleMapper>
 {
   private readonly ILogger<CreateRoleEndpoint> _logger;
-  public UpdateRoleEndpoint(ILogger<CreateRoleEndpoint> logger)
+
+  //------------------------------------------------------------------------------
+  //
+  //                        CreateRoleEndpoint
+  //
+  //------------------------------------------------------------------------------
+  public CreateRoleEndpoint(
+    ILogger<CreateRoleEndpoint> logger)
   {
     _logger = logger;
   }
@@ -29,7 +35,7 @@ public class UpdateRoleEndpoint :
   //------------------------------------------------------------------------------
   public override void Configure()
   {
-    Put("/api/roles");
+    Post("/api/roles");
     AllowAnonymous();
   }
 
@@ -38,16 +44,9 @@ public class UpdateRoleEndpoint :
   //                        ExecuteAsync
   //
   //------------------------------------------------------------------------------
-  public override async Task<Results<Ok<string>, ProblemDetails, InternalServerError>>
-    ExecuteAsync(
-      UpdateRoleRequest request,
-      CancellationToken c)
+  public override async Task<Results<Ok<CreateRoleResponse>, ProblemDetails, InternalServerError>> ExecuteAsync(
+    CreateRoleRequest request, CancellationToken c)
   {
-    UpdateRoleCommand command = new UpdateRoleCommand
-    {
-      OldName = request.OldName,
-      NewName = request.NewName
-    };
-    return await command.ExecuteAsync(c);
+    return await Map.ToCommand(request, Map).ExecuteAsync();
   }
 }

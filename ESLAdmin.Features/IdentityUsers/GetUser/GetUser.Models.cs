@@ -1,7 +1,7 @@
 ﻿using FastEndpoints;
 using FluentValidation;
 
-namespace ESLAdmin.Features.Endpoints.Users;
+namespace ESLAdmin.Features.IdentityUsers.GetUser;
 
 //------------------------------------------------------------------------------
 //

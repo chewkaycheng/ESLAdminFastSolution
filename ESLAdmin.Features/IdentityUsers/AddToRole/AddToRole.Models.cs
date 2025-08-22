@@ -1,7 +1,7 @@
 ﻿using FastEndpoints;
 using FluentValidation;
 
-namespace ESLAdmin.Features.Users.AddToRole;
+namespace ESLAdmin.Features.IdentityUsers.AddToRole;
 
 //------------------------------------------------------------------------------
 //
@@ -10,8 +10,8 @@ namespace ESLAdmin.Features.Users.AddToRole;
 //-------------------------------------------------------------------------------
 public class AddToRoleRequest
 {
-  public string Email { get; set; } = string.Empty;
-  public string RoleName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string RoleName { get; set; } = string.Empty;
 }
 
 //------------------------------------------------------------------------------
@@ -21,11 +21,11 @@ public class AddToRoleRequest
 //-------------------------------------------------------------------------------
 public class AddToRoleValidator : Validator<AddToRoleRequest>
 {
-  public AddToRoleValidator()
-  {
-    RuleFor(x => x.Email)
+    public AddToRoleValidator()
+    {
+        RuleFor(x => x.Email)
             .NotEmpty().WithMessage("Email is required.");
-    RuleFor(x => x.RoleName)
+        RuleFor(x => x.RoleName)
             .NotEmpty().WithMessage("Role name is required.");
-  }
+    }
 }

@@ -1,7 +1,10 @@
-﻿using ESLAdmin.Common.Configuration;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using ESLAdmin.Common.Configuration;
 using ESLAdmin.Common.CustomErrors;
-using ESLAdmin.Infrastructure.Persistence.Entities;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
+using ESLAdmin.Infrastructure.Persistence.Entities;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
@@ -10,11 +13,8 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
-namespace ESLAdmin.Features.Endpoints.Users;
+namespace ESLAdmin.Features.IdentityUsers.LoginUser;
 
 //-------------------------------------------------------------------------------
 //

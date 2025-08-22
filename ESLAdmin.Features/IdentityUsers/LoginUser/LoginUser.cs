@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace ESLAdmin.Features.Endpoints.Users;
+namespace ESLAdmin.Features.IdentityUsers.LoginUser;
 
 //-------------------------------------------------------------------------------
 //

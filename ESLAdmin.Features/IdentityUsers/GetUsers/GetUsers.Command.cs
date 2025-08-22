@@ -1,8 +1,8 @@
-﻿using ESLAdmin.Domain.Dtos;
+﻿using ESLAdmin.Features.IdentityUsers.GetUser;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace ESLAdmin.Features.Endpoints.Users;
+namespace ESLAdmin.Features.IdentityUsers.GetUsers;
 
 //------------------------------------------------------------------------------
 //

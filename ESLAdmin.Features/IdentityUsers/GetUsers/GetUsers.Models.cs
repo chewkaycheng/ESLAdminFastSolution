@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ESLAdmin.Features.Endpoints.Users
+﻿namespace ESLAdmin.Features.IdentityUsers.GetUsers
 {
   public class GetUsersResponse
   {

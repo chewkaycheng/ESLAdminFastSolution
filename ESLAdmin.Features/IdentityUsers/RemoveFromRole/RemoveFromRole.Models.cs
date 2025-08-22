@@ -1,4 +1,4 @@
-﻿namespace ESLAdmin.Features.Endpoints.Users;
+﻿namespace ESLAdmin.Features.IdentityUsers.RemoveFromRole;
 
 //------------------------------------------------------------------------------
 //

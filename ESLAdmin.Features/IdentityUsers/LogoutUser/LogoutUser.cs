@@ -2,10 +2,9 @@
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using FastEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace ESLAdmin.Features.Endpoints.Users;
+namespace ESLAdmin.Features.IdentityUsers.LogoutUser;
 
 //------------------------------------------------------------------------------
 //

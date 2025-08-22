@@ -1,9 +1,9 @@
-﻿using FastEndpoints;
+﻿using System.ComponentModel.DataAnnotations;
+using FastEndpoints;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
-using System.ComponentModel.DataAnnotations;
 
-namespace ESLAdmin.Features.Endpoints.Users;
+namespace ESLAdmin.Features.IdentityUsers.LoginUser;
 
 //-------------------------------------------------------------------------------
 //

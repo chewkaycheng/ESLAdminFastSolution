@@ -2,7 +2,7 @@
 using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace ESLAdmin.Features.Endpoints.Users
+namespace ESLAdmin.Features.IdentityUsers.DeleteUser
 {
   public class DeleteUserCommand : ICommand<Results<Ok<Success>, ProblemDetails, InternalServerError>>
   {

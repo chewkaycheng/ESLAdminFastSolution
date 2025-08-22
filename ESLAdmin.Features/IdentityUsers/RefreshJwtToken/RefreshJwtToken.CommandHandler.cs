@@ -1,6 +1,8 @@
-﻿using ESLAdmin.Common.Configuration;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using ESLAdmin.Common.Configuration;
 using ESLAdmin.Common.CustomErrors;
-using ESLAdmin.Infrastructure.Persistence.Entities;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
 using FastEndpoints;
@@ -9,23 +11,20 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
-namespace ESLAdmin.Features.Endpoints.Users;
+namespace ESLAdmin.Features.IdentityUsers.RefreshJwtToken;
 
-public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
-  Results<Ok<RefreshTokenResponse>, ProblemDetails, InternalServerError>>
+public class RefreshTokenJwtCommandHandler : ICommandHandler<RefreshJwtTokenCommand,
+  Results<Ok<RefreshJwtTokenResponse>, ProblemDetails, InternalServerError>>
 {
   private readonly IRepositoryManager _repositoryManager;
-  private readonly ILogger<RefreshTokenCommandHandler> _logger;
+  private readonly ILogger<RefreshTokenJwtCommandHandler> _logger;
   private readonly ApiSettings _apiSettings;
 
-  public RefreshTokenCommandHandler(
+  public RefreshTokenJwtCommandHandler(
     IRepositoryManager repositoryManager,
     IOptions<ApiSettings> settings,
-    ILogger<RefreshTokenCommandHandler> logger)
+    ILogger<RefreshTokenJwtCommandHandler> logger)
   {
     _repositoryManager = repositoryManager;
     _apiSettings = settings.Value;
@@ -41,8 +40,8 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
   //    StatusCodes.Status400BadRequest);
   //}
 
-  public async Task<Results<Ok<RefreshTokenResponse>, ProblemDetails, InternalServerError>>
-    ExecuteAsync(RefreshTokenCommand command, CancellationToken ct)
+  public async Task<Results<Ok<RefreshJwtTokenResponse>, ProblemDetails, InternalServerError>>
+    ExecuteAsync(RefreshJwtTokenCommand command, CancellationToken ct)
   {
     try
     {
@@ -141,7 +140,7 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
       var newAccessToken = new JwtSecurityTokenHandler().WriteToken(newToken);
 
       // Generate new refresh token
-      var newRefreshToken = new RefreshToken
+      var newRefreshToken = new Infrastructure.Persistence.Entities.RefreshToken
       {
         UserId = user.Id,
         Token = Guid.NewGuid().ToString(),
@@ -190,7 +189,7 @@ public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand,
       //  };
       //}
 
-      return TypedResults.Ok(new RefreshTokenResponse
+      return TypedResults.Ok(new RefreshJwtTokenResponse
       {
         AccessToken = newAccessToken,
         RefreshToken = newRefreshToken.Token,

@@ -3,7 +3,7 @@ using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Features.Users.AddToRole;
+namespace ESLAdmin.Features.IdentityUsers.AddToRole;
 
 //------------------------------------------------------------------------------
 //
@@ -43,7 +43,7 @@ public class AddToRoleEndpoint : Endpoint<
   //
   //-------------------------------------------------------------------------------
   public override async Task<Results<Ok<Success>, ProblemDetails, InternalServerError>>
-  ExecuteAsync(AddToRoleRequest request, CancellationToken cancellationToken)
+    ExecuteAsync(AddToRoleRequest request, CancellationToken cancellationToken)
   {
     return await new AddToRoleCommand
     {

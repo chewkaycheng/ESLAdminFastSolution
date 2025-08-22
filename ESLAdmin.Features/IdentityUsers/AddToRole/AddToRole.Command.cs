@@ -2,7 +2,7 @@
 using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace ESLAdmin.Features.Users.AddToRole;
+namespace ESLAdmin.Features.IdentityUsers.AddToRole;
 
 //-------------------------------------------------------------------------------
 //

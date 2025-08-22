@@ -4,26 +4,26 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Features.Endpoints.Users;
+namespace ESLAdmin.Features.IdentityUsers.RefreshJwtToken;
 
 //-------------------------------------------------------------------------------
 //
 //                       class RefreshTokenEndpoint
 //
 //-------------------------------------------------------------------------------
-public class RefreshTokenEndpoint : 
-  Endpoint<RefreshTokenRequest, 
-    Results<Ok<RefreshTokenResponse>, ProblemDetails, InternalServerError>>
+public class RefreshJwtTokenEndpoint : 
+  Endpoint<RefreshJwtTokenRequest, 
+    Results<Ok<RefreshJwtTokenResponse>, ProblemDetails, InternalServerError>>
 {
-  private readonly ILogger<RefreshTokenEndpoint> _logger;
+  private readonly ILogger<RefreshJwtTokenEndpoint> _logger;
 
   //-------------------------------------------------------------------------------
   //
   //                       RefreshTokenEndpoint
   //
   //-------------------------------------------------------------------------------
-  public RefreshTokenEndpoint(
-    ILogger<RefreshTokenEndpoint> logger)
+  public RefreshJwtTokenEndpoint(
+    ILogger<RefreshJwtTokenEndpoint> logger)
   {
     _logger = logger;
   }
@@ -38,7 +38,7 @@ public class RefreshTokenEndpoint :
     Post("/api/users/refresh-token");
     AllowAnonymous(); // No JWT required, as we're validating the refresh token
     Description(b => b
-        .Produces<RefreshTokenResponse>(StatusCodes.Status200OK)
+        .Produces<RefreshJwtTokenResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .Produces(StatusCodes.Status500InternalServerError));
   }
@@ -48,14 +48,14 @@ public class RefreshTokenEndpoint :
   //                       Configure
   //
   //-------------------------------------------------------------------------------
-  public override async Task<Results<Ok<RefreshTokenResponse>, ProblemDetails, InternalServerError>>
+  public override async Task<Results<Ok<RefreshJwtTokenResponse>, ProblemDetails, InternalServerError>>
     ExecuteAsync(
-      RefreshTokenRequest req, 
+      RefreshJwtTokenRequest req, 
       CancellationToken ct)
   {
     try
     {
-      var command = new RefreshTokenCommand
+      var command = new RefreshJwtTokenCommand
       {
         AccessToken = req.AccessToken,
         RefreshToken = req.RefreshToken

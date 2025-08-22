@@ -1,4 +1,5 @@
-﻿using ESLAdmin.Common.CustomErrors;
+﻿using System.IdentityModel.Tokens.Jwt;
+using ESLAdmin.Common.CustomErrors;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Infrastructure.Services;
 using ESLAdmin.Logging;
@@ -6,9 +7,8 @@ using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
-using System.IdentityModel.Tokens.Jwt;
 
-namespace ESLAdmin.Features.Endpoints.Users;
+namespace ESLAdmin.Features.IdentityUsers.LogoutUser;
 
 //------------------------------------------------------------------------------
 //

@@ -1,6 +1,6 @@
 ﻿using FastEndpoints;
 
-namespace ESLAdmin.Features.Endpoints.Users;
+namespace ESLAdmin.Features.IdentityUsers.LoginUser;
 
 //-------------------------------------------------------------------------------
 //

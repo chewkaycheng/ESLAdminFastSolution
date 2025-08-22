@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Features.Users.AddToRole;
+namespace ESLAdmin.Features.IdentityUsers.AddToRole;
 
 //-------------------------------------------------------------------------------
 //
@@ -76,4 +76,3 @@ public class AddToRoleCommandHandler : ICommandHandler<
     return TypedResults.Ok(new Success());
   }
 }
-

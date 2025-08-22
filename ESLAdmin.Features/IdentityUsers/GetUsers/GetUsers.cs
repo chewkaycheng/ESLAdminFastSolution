@@ -1,12 +1,9 @@
-﻿using ESLAdmin.Domain.Dtos;
-using ESLAdmin.Logging;
+﻿using ESLAdmin.Features.IdentityUsers.GetUser;
 using FastEndpoints;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
-using System.Runtime.InteropServices;
 
-namespace ESLAdmin.Features.Endpoints.Users;
+namespace ESLAdmin.Features.IdentityUsers.GetUsers;
 
 //------------------------------------------------------------------------------
 //
@@ -14,8 +11,7 @@ namespace ESLAdmin.Features.Endpoints.Users;
 //
 //------------------------------------------------------------------------------
 public class GetUsersEndpoint :
-  EndpointWithoutRequest<Results<Ok<IEnumerable<GetUserResponse>>,
-    ProblemDetails, InternalServerError>, GetUserMapper>
+  EndpointWithoutRequest<Results<Ok<IEnumerable<GetUserResponse>>, ProblemDetails, InternalServerError>, GetUserMapper>
 {
   private readonly ILogger<GetUsersEndpoint> _logger;
   //------------------------------------------------------------------------------

@@ -1,12 +1,12 @@
-﻿using ESLAdmin.Common.Configuration;
-using ESLAdmin.Common.CustomErrors;
+﻿using ESLAdmin.Common.CustomErrors;
+using ESLAdmin.Features.IdentityUsers.GetUser;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Features.Endpoints.Users;
+namespace ESLAdmin.Features.IdentityUsers.GetUsers;
 
 //------------------------------------------------------------------------------
 //

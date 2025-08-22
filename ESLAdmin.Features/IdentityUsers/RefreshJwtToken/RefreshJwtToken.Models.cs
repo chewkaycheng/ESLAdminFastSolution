@@ -1,11 +1,11 @@
-﻿namespace ESLAdmin.Features.Endpoints.Users;
+﻿namespace ESLAdmin.Features.IdentityUsers.RefreshJwtToken;
 
 //-------------------------------------------------------------------------------
 //
 //                       class RefreshTokenRequest
 //
 //-------------------------------------------------------------------------------
-public class RefreshTokenRequest
+public class RefreshJwtTokenRequest
 {
   public string AccessToken { get; set; }
   public string RefreshToken { get; set; } 
@@ -16,7 +16,7 @@ public class RefreshTokenRequest
 //                       class RefreshTokenResponse
 //
 //-------------------------------------------------------------------------------
-public class RefreshTokenResponse
+public class RefreshJwtTokenResponse
 {
   public string AccessToken { get; set; }
   public string RefreshToken { get; set; }
