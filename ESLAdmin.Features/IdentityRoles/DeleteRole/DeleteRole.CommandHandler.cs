@@ -2,12 +2,11 @@
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
 using FastEndpoints;
-using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Features.Endpoints.Roles;
+namespace ESLAdmin.Features.IdentityRoles.DeleteRole;
 
 //-------------------------------------------------------------------------------
 //
@@ -16,7 +15,7 @@ namespace ESLAdmin.Features.Endpoints.Roles;
 //-------------------------------------------------------------------------------
 public class DeleteRoleCommandHandler : ICommandHandler<
   DeleteRoleCommand,
-   Results<
+  Results<
     NoContent,
     ProblemDetails,
     InternalServerError>>
@@ -47,40 +46,25 @@ public class DeleteRoleCommandHandler : ICommandHandler<
       DeleteRoleCommand command,
       CancellationToken ct)
   {
-    try
-    {
-      var result = await _repositoryManager.IdentityRepository.DeleteRoleAsync(command.Name);
-      if (result.IsError)
-      {
-        var error = result.Errors.First();
-        var statusCode = StatusCodes.Status500InternalServerError;
-        switch (error.Code)
-        {
-          case "Identity.RoleNotFound":
-            statusCode = StatusCodes.Status400BadRequest;
-            break;
-          case "Identity.ConcurrencyError":
-            statusCode = StatusCodes.Status409Conflict;
-            break;
-          default:
-            return TypedResults.InternalServerError();
-        }
-
-        return new ProblemDetails(
-          ErrorUtils.CreateFailureList(
-            error.Code,
-            error.Description),
-          statusCode);
-      }
-
+    var result = await _repositoryManager
+      .IdentityRepository
+      .DeleteRoleAsync(command.Name);
+    if (!result.IsError)
       return TypedResults.NoContent();
-    }
-    catch (Exception ex)
+
+    var error = result.Errors.First();
+    var statusCode = error.Code switch
     {
-      _logger.LogException(ex);
+      "Identity.RoleNotFound" => StatusCodes.Status400BadRequest,
+      "Identity.ConcurrencyError" => StatusCodes.Status409Conflict,
+      _ => StatusCodes.Status500InternalServerError
+    };
 
-      return TypedResults.InternalServerError();
-    }
-
+    return AppErrors
+      .ProblemDetailsFactory
+      .CreateProblemDetails(
+        error.Code,
+        error.Description,
+        statusCode);
   }
 }

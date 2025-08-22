@@ -2,12 +2,12 @@
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
 using FastEndpoints;
-using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Features.Endpoints.Roles;
+namespace ESLAdmin.Features.IdentityRoles.GetRole;
+
 //-------------------------------------------------------------------------------
 //
 //                       class GetRoleCommandHandler
@@ -47,27 +47,28 @@ public class GetRoleCommandHandler : ICommandHandler<
       GetRoleCommand command,
       CancellationToken ct)
   {
-    try
+    var result = await _repositoryManager
+      .IdentityRepository
+      .GetRoleAsync(command.Name);
+
+    if (result.IsError)
     {
-      var result = await _repositoryManager.IdentityRepository.GetRoleAsync(command.Name);
-      if (result.IsError)
+      _logger.LogNotFound("role", $"name: '{command.Name}'");
+      var error = result.Errors.First();
+      if (error.Code == "Identity.RoleNotFound")
       {
-        _logger.LogNotFound("role", $"name: '{command.Name}'");
-        var error = result.Errors.First();
-        return new ProblemDetails(
-           ErrorUtils.CreateFailureList(
-             error.Code,
-             error.Description),
-           StatusCodes.Status404NotFound);
+        AppErrors
+          .ProblemDetailsFactory
+          .CreateProblemDetails(
+            error.Code,
+            error.Description,
+            StatusCodes.Status404NotFound);
       }
 
-      var response = command.Mapper.FromEntity(result.Value);
-      return TypedResults.Ok(response);
-    }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
       return TypedResults.InternalServerError();
     }
+
+    var response = command.Mapper.FromEntity(result.Value);
+    return TypedResults.Ok(response);
   }
 }

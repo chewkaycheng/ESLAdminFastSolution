@@ -1,4 +1,4 @@
-﻿namespace ESLAdmin.Features.Endpoints.Roles;
+﻿namespace ESLAdmin.Features.IdentityRoles.GetRole;
 
 //-------------------------------------------------------------------------------
 //

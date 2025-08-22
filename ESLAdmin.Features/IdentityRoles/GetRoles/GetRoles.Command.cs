@@ -1,7 +1,8 @@
-﻿using FastEndpoints;
+﻿using ESLAdmin.Features.IdentityRoles.GetRole;
+using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace ESLAdmin.Features.Endpoints.Roles;
+namespace ESLAdmin.Features.IdentityRoles.GetRoles;
 
 //------------------------------------------------------------------------------
 //

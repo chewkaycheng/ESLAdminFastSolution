@@ -1,12 +1,11 @@
 ﻿using ESLAdmin.Common.CustomErrors;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using FastEndpoints;
-using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Features.Endpoints.Roles;
+namespace ESLAdmin.Features.IdentityRoles.CreateRole;
 
 //------------------------------------------------------------------------------
 //
@@ -43,32 +42,28 @@ public class CreateRoleCommandHandler : ICommandHandler<
       CreateRoleCommand command,
       CancellationToken ct)
   {
-    var result = await _repositoryManager.IdentityRepository.CreateRoleAsync(command.Name);
+    var result = await _repositoryManager
+      .IdentityRepository
+      .CreateRoleAsync(command.Name);
 
-    if (result.IsError)
+    if (!result.IsError)
+      return TypedResults.Ok(command.Mapper.FromEntity(result.Value));
+
+    var error = result.Errors.First();
+    var statusCode = error.Code switch
     {
-      var error = result.Errors.First();
-      var statusCode = StatusCodes.Status500InternalServerError;
-      switch (error.Code)
-      {
-        case "Identity.DuplicateRoleName":
-        case "Identity.InvalidRoleName":
-          statusCode = StatusCodes.Status400BadRequest;
-          break;
-        case "Identity.ConcurrencyError":
-          statusCode = StatusCodes.Status409Conflict;
-          break;
-        default:
-          return TypedResults.InternalServerError();
-      }
+      "Identity.DuplicateRoleName" or "Identity.InvalidRoleName" 
+        => StatusCodes.Status400BadRequest,
+      "Identity.ConcurrencyError" => StatusCodes.Status409Conflict,
+      "Database.OperationCanceled" => StatusCodes.Status400BadRequest,
+      _ => StatusCodes.Status500InternalServerError
+    };
 
-      return new ProblemDetails(
-        ErrorUtils.CreateFailureList(
-          error.Code,
-          error.Description),
+    return AppErrors
+      .ProblemDetailsFactory
+      .CreateProblemDetails(
+        error.Code,
+        error.Description,
         statusCode);
-    }
-
-    return TypedResults.Ok(command.Mapper.FromEntity(result.Value));
   }
 }

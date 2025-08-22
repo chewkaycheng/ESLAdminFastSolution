@@ -844,21 +844,30 @@ public class IdentityRepository : IIdentityRepository
     //  return Errors.IdentityErrors.RoleExists(roleName);
     //}
 
-    var role = new IdentityRole(roleName);
-    var result = await _roleManager.CreateAsync(role);
-
-    if (!result.Succeeded)
+    try
     {
-      _logger.LogIdentityErrors("_roleManager.CreateAsync", roleName, result.Errors.ToFormattedString());
+      var role = new IdentityRole(roleName);
+      var result = await _roleManager.CreateAsync(role);
 
-      return IdentityErrorHandler.HandleIdentityErrors(
-        result,
-        _logger,
-        IdentityOperation.RemoveFromRole,
-        roleName: roleName);
+      if (!result.Succeeded)
+      {
+        _logger.LogIdentityErrors("_roleManager.CreateAsync", roleName, result.Errors.ToFormattedString());
+
+        return IdentityErrorHandler.HandleIdentityErrors(
+          result,
+          _logger,
+          IdentityOperation.RemoveFromRole,
+          roleName: roleName);
+      }
+
+      return role;
     }
-
-    return role;
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return DatabaseExceptionHandler
+        .HandleException(ex, _logger);
+    }
   }
 
   //------------------------------------------------------------------------------
@@ -868,29 +877,37 @@ public class IdentityRepository : IIdentityRepository
   //-------------------------------------------------------------------------------
   public async Task<ErrorOr<string>> DeleteRoleAsync(string roleName)
   {
-
-    var role = await _roleManager.FindByNameAsync(roleName);
-    if (role == null)
+    try
     {
-      return AppErrors.IdentityErrors.RoleNotFound(roleName);
-    }
+      var role = await _roleManager.FindByNameAsync(roleName);
+      if (role == null)
+      {
+        return AppErrors.IdentityErrors.RoleNotFound(roleName);
+      }
 
-    var result = await _roleManager.DeleteAsync(role);
-    if (!result.Succeeded)
+      var result = await _roleManager.DeleteAsync(role);
+      if (!result.Succeeded)
+      {
+        _logger.LogIdentityErrors(
+          "_roleManager.DeleteAsync", 
+          "roleName", 
+          result.Errors.ToFormattedString());
+
+        return IdentityErrorHandler.HandleIdentityErrors(
+          result,
+          _logger,
+          IdentityOperation.DeleteRole,
+          roleName: roleName);
+      }
+
+      return role.Id;
+    }
+    catch (Exception ex)
     {
-      _logger.LogIdentityErrors(
-        "_roleManager.DeleteAsync", 
-        "roleName", 
-        result.Errors.ToFormattedString());
-
-      return IdentityErrorHandler.HandleIdentityErrors(
-        result,
-        _logger,
-        IdentityOperation.DeleteRole,
-        roleName: roleName);
+      _logger.LogException(ex);;
+      return DatabaseExceptionHandler
+        .HandleException(ex, _logger);
     }
-
-    return role.Id;
   }
 
   //------------------------------------------------------------------------------
@@ -922,36 +939,46 @@ public class IdentityRepository : IIdentityRepository
   //-------------------------------------------------------------------------------
   public async Task<ErrorOr<string>> UpdateRoleAsync(string oldRoleName, string newRoleName)
   {
-    var role = await _roleManager.FindByNameAsync(oldRoleName);
-    if (role == null)
+    try
     {
-      return AppErrors.IdentityErrors.RoleNotFound(oldRoleName);
+      var role = await _roleManager.FindByNameAsync(oldRoleName);
+      if (role == null)
+      {
+        return AppErrors.IdentityErrors.RoleNotFound(oldRoleName);
+      }
+
+      //if (await _roleManager.RoleExistsAsync(newRoleName))
+      //{
+      //  return Errors.IdentityErrors.RoleExists(newRoleName);
+      //}
+
+      role.Name = newRoleName;
+      var result = await _roleManager.UpdateAsync(role);
+      if (!result.Succeeded)
+      {
+        _logger.LogIdentityErrors(
+          "_roleManager.UpdateAsync", 
+          newRoleName, 
+          result.Errors.ToFormattedString());
+
+        return IdentityErrorHandler.HandleIdentityErrors(
+          result,
+          _logger,
+          IdentityOperation.DeleteRole,
+          roleName: role.Name,
+          oldRoleName: oldRoleName,
+          newRoleName: newRoleName);
+      }
+
+      return newRoleName;
     }
-
-    //if (await _roleManager.RoleExistsAsync(newRoleName))
-    //{
-    //  return Errors.IdentityErrors.RoleExists(newRoleName);
-    //}
-
-    role.Name = newRoleName;
-    var result = await _roleManager.UpdateAsync(role);
-    if (!result.Succeeded)
+    catch (Exception ex)
     {
-      _logger.LogIdentityErrors(
-        "_roleManager.UpdateAsync", 
-        newRoleName, 
-        result.Errors.ToFormattedString());
-
-      return IdentityErrorHandler.HandleIdentityErrors(
-        result,
-        _logger,
-        IdentityOperation.DeleteRole,
-        roleName: role.Name,
-        oldRoleName: oldRoleName,
-        newRoleName: newRoleName);
+      _logger.LogException(ex);
+      return DatabaseExceptionHandler
+        .HandleException(ex, _logger);
     }
-
-    return newRoleName;
+    
   }
 
   //------------------------------------------------------------------------------
@@ -961,12 +988,22 @@ public class IdentityRepository : IIdentityRepository
   //-------------------------------------------------------------------------------
   public async Task<ErrorOr<IdentityRole>> GetRoleAsync(string roleName)
   {
-    var role = await _roleManager.FindByNameAsync(roleName);
-    if (role == null)
+    try
     {
-      return AppErrors.IdentityErrors.RoleNotFound(roleName);
+      var role = await _roleManager.FindByNameAsync(roleName);
+      if (role == null)
+      {
+        return AppErrors.IdentityErrors.RoleNotFound(roleName);
+      }
+
+      return role;
     }
-    return role;
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return DatabaseExceptionHandler
+        .HandleException(ex, _logger);
+    }
   }
 
   //------------------------------------------------------------------------------
@@ -983,8 +1020,8 @@ public class IdentityRepository : IIdentityRepository
     catch (Exception ex)
     {
       _logger.LogException(ex);
-
-      return AppErrors.CommonErrors.Exception(ex.Message);
+      return DatabaseExceptionHandler
+        .HandleException(ex, _logger);
     }
   }
 

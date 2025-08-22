@@ -1,11 +1,12 @@
-﻿using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
-using ESLAdmin.Logging;
+﻿using ESLAdmin.Features.IdentityRoles.GetRole;
+using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using FastEndpoints;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Features.Endpoints.Roles;
+namespace ESLAdmin.Features.IdentityRoles.GetRoles;
 
 //------------------------------------------------------------------------------
 //
@@ -38,37 +39,33 @@ public class GetRolesCommandHandler : ICommandHandler<
   //
   //------------------------------------------------------------------------------
   public async Task<
-    Results<Ok<IEnumerable<GetRoleResponse>>, ProblemDetails, InternalServerError>>
+      Results<Ok<IEnumerable<GetRoleResponse>>, ProblemDetails, InternalServerError>>
     ExecuteAsync(
       GetRolesCommand command,
       CancellationToken ct)
   {
-    try
+    var result = await _repositoryManager
+      .IdentityRepository
+      .GetAllRolesAsync();
+    
+    if (result.IsError)
     {
-      var result = await _repositoryManager.IdentityRepository.GetAllRolesAsync();
-      if (result.IsError)
-      {
-        foreach (var error in result.Errors)
-        {
-          if (error.Code == "Exception")
-            return TypedResults.InternalServerError();
-        }
-      }
+      var errorList = 
+        result.Errors.Select(error => new ValidationFailure 
+          { PropertyName = error.Code, 
+            ErrorMessage = error.Description }).ToList();
 
-      var roles = result.Value;
-
-      IEnumerable<GetRoleResponse> response =
-        roles.Select(
-          role => command.Mapper.FromEntity(role)
-          ).ToList();
-
-      return TypedResults.Ok(response);
+      return new ProblemDetails(
+        errorList,
+        StatusCodes.Status500InternalServerError);
     }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
 
-      return TypedResults.InternalServerError();
-    }
+    var roles = result.Value;
+
+    IEnumerable<GetRoleResponse> response =
+      roles.Select(role => command.Mapper.FromEntity(role)
+      ).ToList();
+
+    return TypedResults.Ok(response);
   }
 }
