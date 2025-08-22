@@ -3,7 +3,7 @@ using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Features.Endpoints.Users;
+namespace ESLAdmin.Features.Users.AddToRole;
 
 //------------------------------------------------------------------------------
 //
