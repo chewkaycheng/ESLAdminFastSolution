@@ -22,7 +22,7 @@ public class RemoveFromRoleCommandHandler : ICommandHandler<
 
   //-------------------------------------------------------------------------------
   //
-  //                       AddToRoleRoleCommandHandler
+  //                       RemoveFromRoleCommandHandler
   //
   //-------------------------------------------------------------------------------
   public RemoveFromRoleCommandHandler(
