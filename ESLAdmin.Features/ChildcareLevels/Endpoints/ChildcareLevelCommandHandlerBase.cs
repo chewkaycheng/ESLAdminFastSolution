@@ -1,8 +1,7 @@
 ﻿using ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Repositories;
-using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Features.ChildcareLevels;
+namespace ESLAdmin.Features.ChildcareLevels.Endpoints;
 
 public abstract class ChildcareLevelCommandHandlerBase<THandler>(
   IChildcareLevelRepository repository,
