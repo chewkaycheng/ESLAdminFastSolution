@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using ESLAdmin.Common.CustomErrors;
+using ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Repositories;
 using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
@@ -17,13 +18,10 @@ namespace ESLAdmin.Features.ChildcareLevels.DeleteChildcareLevel;
 //
 //------------------------------------------------------------------------------
 public class DeleteChildcareLevelCommandHandler :
+  ChildcareLevelCommandHandlerBase<DeleteChildcareLevelCommandHandler>, 
   ICommandHandler<DeleteChildcareLevelCommand,
     Results<NoContent, ProblemDetails, InternalServerError>>
 {
-  private readonly IChildcareLevelRepository _repository;
-  private readonly ILogger<DeleteChildcareLevelCommandHandler> _logger;
-  private readonly IMessageLogger _messageLogger;
-
   //------------------------------------------------------------------------------
   //
   //                    DeleteChildcareLevelCommandHandler
@@ -31,12 +29,9 @@ public class DeleteChildcareLevelCommandHandler :
   //------------------------------------------------------------------------------
   public DeleteChildcareLevelCommandHandler(
     IChildcareLevelRepository repository,
-    ILogger<DeleteChildcareLevelCommandHandler> logger,
-    IMessageLogger messageLogger)
+    ILogger<DeleteChildcareLevelCommandHandler> logger) :
+    base(repository, logger)
   {
-    _repository = repository;
-    _logger = logger;
-    _messageLogger = messageLogger;
   }
 
   //------------------------------------------------------------------------------

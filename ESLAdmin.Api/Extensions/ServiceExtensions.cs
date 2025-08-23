@@ -18,6 +18,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Diagnostics;
 using System.Text;
+using ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Repositories;
+using ESLAdmin.Infrastructure.Persistence.Repositories;
 
 namespace ESLAdmin.Api.Extensions;
 
@@ -118,6 +120,8 @@ public static class ServiceExtensions
     this IServiceCollection services)
   {
     services.AddScoped<IRepositoryManager, RepositoryManager>();
+    //services.AddScoped<IIdentityRepository, IdentityRepository>();
+    services.AddScoped<IChildcareLevelRepository, ChildcareLevelRepository>();
   }
 
   // =================================================

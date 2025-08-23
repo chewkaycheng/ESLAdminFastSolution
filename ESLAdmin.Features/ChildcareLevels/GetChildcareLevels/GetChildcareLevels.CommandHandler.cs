@@ -1,4 +1,5 @@
 ﻿using ESLAdmin.Common.CustomErrors;
+using ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Repositories;
 using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
@@ -14,19 +15,17 @@ namespace ESLAdmin.Features.ChildcareLevels.GetChildcareLevel;
 //                        class GetChildcareLevelsCommandHandler
 //
 //------------------------------------------------------------------------------
-public class GetChildcareLevelsCommandHandler : ICommandHandler<
+public class GetChildcareLevelsCommandHandler :
+  ChildcareLevelCommandHandlerBase<GetChildcareLevelsCommandHandler>,
+  ICommandHandler<
   GetChildcareLevelsCommand,
   Results<Ok<IEnumerable<GetChildcareLevelResponse>>, ProblemDetails, InternalServerError>>
 {
-  private readonly IChildcareLevelRepository _repository;
-  private readonly ILogger<GetChildcareLevelsCommandHandler> _logger;
-
   public GetChildcareLevelsCommandHandler(
     IChildcareLevelRepository repository,
-    ILogger<GetChildcareLevelsCommandHandler> logger)
+    ILogger<GetChildcareLevelsCommandHandler> logger) :
+    base(repository, logger)
   {
-    _repository = repository;
-    _logger = logger;
   }
 
   public async Task<Results<Ok<IEnumerable<GetChildcareLevelResponse>>, ProblemDetails, InternalServerError>>

@@ -1,9 +1,6 @@
 ﻿using Dapper;
 using ESLAdmin.Common.CustomErrors;
-using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
-using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
-using ESLAdmin.Logging;
-using ESLAdmin.Logging.Interface;
+using ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Repositories;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -11,22 +8,16 @@ using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Features.ChildcareLevels;
 
-public class CreateChildcareLevelCommandHandler : ICommandHandler<
-  CreateChildcareLevelCommand,
+public class CreateChildcareLevelCommandHandler :
+  ChildcareLevelCommandHandlerBase<CreateChildcareLevelCommandHandler>,
+  ICommandHandler<CreateChildcareLevelCommand,
   Results<Ok<CreateChildcareLevelResponse>, ProblemDetails, InternalServerError>>
 {
-  private readonly IChildcareLevelRepository _repository;
-  private readonly ILogger<CreateChildcareLevelCommandHandler> _logger;
-  private readonly IMessageLogger _messageLogger;
-
   public CreateChildcareLevelCommandHandler(
     IChildcareLevelRepository repository,
-    ILogger<CreateChildcareLevelCommandHandler> logger,
-    IMessageLogger messageLogger)
+    ILogger<CreateChildcareLevelCommandHandler> logger) :
+    base(repository, logger)
   {
-    _repository = repository;
-    _logger = logger;
-    _messageLogger = messageLogger;
   }
 
   public async Task<Results<Ok<CreateChildcareLevelResponse>, ProblemDetails, InternalServerError>>

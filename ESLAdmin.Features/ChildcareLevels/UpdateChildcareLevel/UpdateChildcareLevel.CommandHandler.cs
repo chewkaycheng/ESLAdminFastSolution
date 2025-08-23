@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using ESLAdmin.Common.CustomErrors;
+using ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Repositories;
 using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
@@ -12,22 +13,16 @@ using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Features.ChildcareLevels.UpdateChildcareLevel;
 
-public class UpdateChildcareLevelCommandHandler : ICommandHandler<
-  UpdateChildcareLevelCommand,
-  Results<Ok<UpdateChildcareLevelResponse>, ProblemDetails, InternalServerError>>
+public class UpdateChildcareLevelCommandHandler : 
+  ChildcareLevelCommandHandlerBase<UpdateChildcareLevelCommandHandler>,
+  ICommandHandler<UpdateChildcareLevelCommand,
+    Results<Ok<UpdateChildcareLevelResponse>, ProblemDetails, InternalServerError>>
 {
-  private readonly IChildcareLevelRepository _repository;
-  private readonly ILogger<CreateChildcareLevelCommandHandler> _logger;
-  private readonly IMessageLogger _messageLogger;
-
   public UpdateChildcareLevelCommandHandler(
     IChildcareLevelRepository repository,
-    ILogger<CreateChildcareLevelCommandHandler> logger,
-    IMessageLogger messageLogger)
+    ILogger<UpdateChildcareLevelCommandHandler> logger) :
+    base(repository, logger)
   {
-    _repository = repository;
-    _logger = logger;
-    _messageLogger = messageLogger;
   }
 
   public async Task<Results<Ok<UpdateChildcareLevelResponse>, ProblemDetails, InternalServerError>>

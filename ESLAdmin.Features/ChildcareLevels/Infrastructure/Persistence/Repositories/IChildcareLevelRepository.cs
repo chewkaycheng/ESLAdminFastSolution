@@ -1,10 +1,8 @@
 ﻿using Dapper;
 using ErrorOr;
-using ESLAdmin.Domain.Entities;
 using ESLAdmin.Features.ChildcareLevels.Entities;
-using ESLAdmin.Infrastructure.Persistence.Entities;
 
-namespace ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces
+namespace ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Repositories
 {
   public interface IChildcareLevelRepository
   {

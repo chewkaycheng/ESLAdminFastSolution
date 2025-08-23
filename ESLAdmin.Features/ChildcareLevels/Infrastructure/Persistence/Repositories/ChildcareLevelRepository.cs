@@ -4,8 +4,6 @@ using ESLAdmin.Features.ChildcareLevels.Entities;
 using ESLAdmin.Features.Repositories;
 using ESLAdmin.Infrastructure.Persistence.Constants;
 using ESLAdmin.Infrastructure.Persistence.DatabaseContexts.Interfaces;
-using ESLAdmin.Infrastructure.Persistence.Entities;
-using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
 using Microsoft.Extensions.Logging;
 
@@ -27,7 +25,7 @@ public class ChildcareLevelRepository :
   //------------------------------------------------------------------------------
   public ChildcareLevelRepository(
     IDbContextDapper dbContextDapper,
-    ILogger logger,
+    ILogger<ChildcareLevelRepository> logger,
     IMessageLogger messageLogger)
     : base(dbContextDapper, logger, messageLogger)
   {

@@ -1,30 +1,29 @@
 ﻿using ESLAdmin.Common.CustomErrors;
+using ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Repositories;
 using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Features.ChildcareLevels.GetChildcareLevel;
 
 //------------------------------------------------------------------------------
 //
-//                        class GetChildcareLevelHandler
+//                        class GetChildcareLevelCommandHandler
 //
 //------------------------------------------------------------------------------
-public class GetChildcareLevelHandler : ICommandHandler<
-  GetChildcareLevelCommand,
-  Results<Ok<GetChildcareLevelResponse>, ProblemDetails, InternalServerError>>
+public class GetChildcareLevelCommandHandler : 
+  ChildcareLevelCommandHandlerBase<GetChildcareLevelCommandHandler>, 
+  ICommandHandler<GetChildcareLevelCommand,
+    Results<Ok<GetChildcareLevelResponse>, ProblemDetails, InternalServerError>>
 {
-  private readonly IChildcareLevelRepository _repository;
-  private readonly IMessageLogger _messageLogger;
-
-  public GetChildcareLevelHandler(
+  public GetChildcareLevelCommandHandler(
     IChildcareLevelRepository repository,
-    IMessageLogger messageLogger)
+    ILogger<GetChildcareLevelCommandHandler> logger) :
+    base(repository, logger)
   {
-    _repository = repository;
-    _messageLogger = messageLogger;
   }
 
   public async Task<Results<Ok<GetChildcareLevelResponse>, ProblemDetails, InternalServerError>>
