@@ -1,12 +1,13 @@
-﻿using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
+﻿using ESLAdmin.Features.Endpoints.ChildcareLevels;
+using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
+using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
-using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
+namespace ESLAdmin.Features.ChildcareLevels.GetChildcareLevel;
 
 //------------------------------------------------------------------------------
 //
@@ -17,14 +18,14 @@ public class GetChildcareLevelsCommandHandler : ICommandHandler<
   GetChildcareLevelsCommand,
   Results<Ok<IEnumerable<GetChildcareLevelResponse>>, ProblemDetails, InternalServerError>>
 {
-  private readonly IRepositoryManager _repositoryManager;
+  private readonly IChildcareLevelRepository _repository;
   private readonly ILogger<GetChildcareLevelsCommandHandler> _logger;
 
   public GetChildcareLevelsCommandHandler(
-    IRepositoryManager repositoryManager,
+    IChildcareLevelRepository repository,
     ILogger<GetChildcareLevelsCommandHandler> logger)
   {
-    _repositoryManager = repositoryManager;
+    _repository = repository;
     _logger = logger;
   }
 
@@ -35,9 +36,10 @@ public class GetChildcareLevelsCommandHandler : ICommandHandler<
   {
     try
     {
-      var childcareLevelsResult = await _repositoryManager
-                                    .ChildcareLevelRepository
-                                    .GetChildcareLevelsAsync();
+      var childcareLevelsResult = 
+        await _repository
+          .GetChildcareLevelsAsync();
+      
       if (childcareLevelsResult.IsError)
       {
         return TypedResults.InternalServerError();

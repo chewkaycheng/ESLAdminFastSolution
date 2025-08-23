@@ -1,4 +1,5 @@
 ﻿using ESLAdmin.Common.CustomErrors;
+using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
@@ -16,14 +17,14 @@ public class GetChildcareLevelHandler : ICommandHandler<
   GetChildcareLevelCommand,
   Results<Ok<GetChildcareLevelResponse>, ProblemDetails, InternalServerError>>
 {
-  private readonly IRepositoryManager _repositoryManager;
+  private readonly IChildcareLevelRepository _repository;
   private readonly IMessageLogger _messageLogger;
 
   public GetChildcareLevelHandler(
-    IRepositoryManager repositoryManager,
+    IChildcareLevelRepository repository,
     IMessageLogger messageLogger)
   {
-    _repositoryManager = repositoryManager;
+    _repository = repository;
     _messageLogger = messageLogger;
   }
 
@@ -35,9 +36,8 @@ public class GetChildcareLevelHandler : ICommandHandler<
     try
     {
       var parameters = command.Mapper.ToParameters(command.Id);
-      var childcareLevelResult = await _repositoryManager
-                                        .ChildcareLevelRepository
-                                        .GetChildcareLevelAsync(parameters);
+      var childcareLevelResult = await _repository
+        .GetChildcareLevelAsync(parameters);
       if (childcareLevelResult.IsError)
       {
         return TypedResults.InternalServerError();

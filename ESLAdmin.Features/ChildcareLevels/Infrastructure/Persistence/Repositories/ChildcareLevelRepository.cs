@@ -1,14 +1,15 @@
 ﻿using Dapper;
 using ErrorOr;
-using ESLAdmin.Domain.Entities;
+using ESLAdmin.Features.ChildcareLevels.Entities;
 using ESLAdmin.Features.Repositories;
 using ESLAdmin.Infrastructure.Persistence.Constants;
 using ESLAdmin.Infrastructure.Persistence.DatabaseContexts.Interfaces;
+using ESLAdmin.Infrastructure.Persistence.Entities;
 using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 using ESLAdmin.Logging.Interface;
 using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Infrastructure.Persistence.Repositories;
+namespace ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Repositories;
 
 //------------------------------------------------------------------------------
 //

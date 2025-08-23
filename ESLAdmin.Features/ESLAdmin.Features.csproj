@@ -38,8 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Auth\Entities\" />
-    <Folder Include="ChildcareLevels\Entities\" />
+    <Folder Include="IdentityRoles\Entities\" />
   </ItemGroup>
 
 </Project>

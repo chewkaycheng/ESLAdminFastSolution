@@ -83,26 +83,6 @@ public class DbContextDapper : IDbContextDapper
       _logger.LogDebug("Database connection opened successfully.");
       return connection;
     }
-    //catch (FbException ex)
-    //{
-    //  _logger.LogException(ex);
-    //  return Errors.DatabaseErrors.DatabaseConnectionError(ex.Message);
-    //}
-    //catch (ArgumentException ex)
-    //{
-    //  _logger.LogException(ex);
-    //  return Errors.DatabaseErrors.InvalidConnectionString(ex.Message);
-    //}
-    //catch (InvalidOperationException ex)
-    //{
-    //  _logger.LogException(ex);
-    //  return Errors.DatabaseErrors.InvalidOperation(ex.Message);
-    //}
-    //catch (OperationCanceledException ex)
-    //{
-    //  _logger.LogException(ex);
-    //  return Errors.DatabaseErrors.OperationCanceled(ex.Message);
-    //}
     catch (Exception ex)
     {
       _logger.LogException(ex);
@@ -144,21 +124,6 @@ public class DbContextDapper : IDbContextDapper
 
       return await ((FbConnection)connection).BeginTransactionAsync(cancellationToken);
     }
-    //catch (FbException ex)
-    //{
-    //  _logger.LogException(ex);
-    //  return Errors.DatabaseErrors.DatabaseConnectionError($"Firebird error: {ex.Message} (ErrorCode: {ex.ErrorCode})");
-    //}
-    //catch (InvalidOperationException ex)
-    //{
-    //  _logger.LogException(ex);
-    //  return Errors.DatabaseErrors.InvalidOperation(ex.Message);
-    //}
-    //catch (OperationCanceledException ex)
-    //{
-    //  _logger.LogException(ex);
-    //  return Errors.DatabaseErrors.OperationCanceled(ex.Message);
-    //}
     catch (Exception ex)
     {
       _logger.LogException(ex);

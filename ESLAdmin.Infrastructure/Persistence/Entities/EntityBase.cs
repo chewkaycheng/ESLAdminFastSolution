@@ -1,4 +1,4 @@
-﻿namespace ESLAdmin.Domain
+﻿namespace ESLAdmin.Infrastructure.Persistence.Entities
 {
   //------------------------------------------------------------------------------
   //

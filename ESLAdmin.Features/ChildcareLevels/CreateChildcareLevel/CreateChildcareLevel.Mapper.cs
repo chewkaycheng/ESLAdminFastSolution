@@ -3,7 +3,7 @@ using ESLAdmin.Infrastructure.Persistence;
 using ESLAdmin.Infrastructure.Persistence.Constants;
 using FastEndpoints;
 
-namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
+namespace ESLAdmin.Features.ChildcareLevels;
 
 //------------------------------------------------------------------------------
 //

@@ -16,7 +16,7 @@ namespace ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 //------------------------------------------------------------------------------
 public class RepositoryManager : IRepositoryManager
 {
-  private readonly Lazy<IChildcareLevelRepository> _childcareLevelRepository;
+  //private readonly Lazy<IChildcareLevelRepository> _childcareLevelRepository;
   private readonly Lazy<IIdentityRepository>
     _identityRespository;
 
@@ -34,11 +34,11 @@ public class RepositoryManager : IRepositoryManager
     RoleManager<IdentityRole> roleManager,
     UserDbContext dbContext)
   {
-    _childcareLevelRepository = new Lazy<IChildcareLevelRepository>(
-      () => new ChildcareLevelRepository(
-        dbContextDapper,
-        logger,
-        messageLogger));
+    //_childcareLevelRepository = new Lazy<IChildcareLevelRepository>(
+    //  () => new ChildcareLevelRepository(
+    //    dbContextDapper,
+    //    logger,
+    //    messageLogger));
 
     _identityRespository = new Lazy<IIdentityRepository>(
       () => new IdentityRepository(
@@ -56,8 +56,8 @@ public class RepositoryManager : IRepositoryManager
   //                       ChildcareLevelRepository
   //
   //------------------------------------------------------------------------------
-  public IChildcareLevelRepository ChildcareLevelRepository =>
-    _childcareLevelRepository.Value;
+  //public IChildcareLevelRepository ChildcareLevelRepository =>
+  //  _childcareLevelRepository.Value;
 
   //------------------------------------------------------------------------------
   //

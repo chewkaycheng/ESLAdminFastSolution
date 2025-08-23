@@ -1,4 +1,5 @@
 ﻿using FluentValidation.Results;
+using ErrorOr;
 
 namespace ESLAdmin.Common.CustomErrors;
 
@@ -33,5 +34,12 @@ public static class ErrorUtils
       }
     }
     return list;
+  }
+
+  public static List<ValidationFailure> CreateFailureList(
+    List<Error> errors)
+  {
+    return errors.Select(e => new ValidationFailure(
+      e.Code, e.Description)).ToList();
   }
 }
