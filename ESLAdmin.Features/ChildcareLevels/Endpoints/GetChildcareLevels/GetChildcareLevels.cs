@@ -16,20 +16,13 @@ public class GetChildcareLevelsEndpoint :
     Results<Ok<IEnumerable<GetChildcareLevelResponse>>, ProblemDetails, InternalServerError>,
     GetChildcareLevelMapper>
 {
-  private readonly IRepositoryManager _manager;
-  private readonly IMessageLogger _messageLogger;
-
   //------------------------------------------------------------------------------
   //
   //                        GetChildcareLevelEndpoint
   //
   //------------------------------------------------------------------------------
-  public GetChildcareLevelsEndpoint(
-    IRepositoryManager manager,
-    IMessageLogger messageLogger)
+  public GetChildcareLevelsEndpoint()
   {
-    _manager = manager;
-    _messageLogger = messageLogger;
   }
 
   //------------------------------------------------------------------------------

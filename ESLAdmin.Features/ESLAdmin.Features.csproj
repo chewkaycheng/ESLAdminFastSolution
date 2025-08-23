@@ -38,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="IdentityRoles\Entities\" />
+    <Folder Include="Identity\Endpoints\IdentityUsers\" />
   </ItemGroup>
 
 </Project>

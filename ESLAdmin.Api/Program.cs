@@ -2,7 +2,7 @@ global using FastEndpoints;
 using ESLAdmin.Api.Configuration;
 using ESLAdmin.Api.Extensions;
 using ESLAdmin.Common.Configuration;
-using ESLAdmin.Infrastructure.Middleware;
+using ESLAdmin.Features.Identity.Middleware;
 using ESLAdmin.Logging.Extensions;
 using FastEndpoints.Swagger;
 using Microsoft.Extensions.Options;

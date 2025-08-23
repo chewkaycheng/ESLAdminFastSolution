@@ -2,10 +2,7 @@
 using ESLAdmin.Features.Repositories;
 using ESLAdmin.Infrastructure.Persistence.DatabaseContexts;
 using ESLAdmin.Infrastructure.Persistence.DatabaseContexts.Interfaces;
-using ESLAdmin.Infrastructure.Persistence.Entities;
 using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
-using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
-using ESLAdmin.Infrastructure.Services;
 using ESLAdmin.Logging;
 using FastEndpoints.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -19,7 +16,10 @@ using Microsoft.OpenApi.Models;
 using System.Diagnostics;
 using System.Text;
 using ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Repositories;
-using ESLAdmin.Infrastructure.Persistence.Repositories;
+using ESLAdmin.Features.Identity.Entities;
+using ESLAdmin.Features.Identity.Infrastructure.Persistence.Contexts;
+using ESLAdmin.Features.Identity.Infrastructure.Persistence.Repository;
+using ESLAdmin.Features.Identity.Services;
 
 namespace ESLAdmin.Api.Extensions;
 
@@ -119,8 +119,8 @@ public static class ServiceExtensions
   public static void ConfigureRepositoryManager(
     this IServiceCollection services)
   {
-    services.AddScoped<IRepositoryManager, RepositoryManager>();
-    //services.AddScoped<IIdentityRepository, IdentityRepository>();
+    //services.AddScoped<IRepositoryManager, RepositoryManager>();
+    services.AddScoped<IIdentityRepository, IdentityRepository>();
     services.AddScoped<IChildcareLevelRepository, ChildcareLevelRepository>();
   }
 

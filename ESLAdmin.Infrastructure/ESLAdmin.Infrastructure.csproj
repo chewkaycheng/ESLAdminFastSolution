@@ -29,4 +29,9 @@
     <ProjectReference Include="..\ESLAdmin.Logging\ESLAdmin.Logging.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Middleware\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+
 </Project>

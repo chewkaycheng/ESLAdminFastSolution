@@ -1,0 +1,95 @@
+﻿using ErrorOr;
+using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
+using ESLAdmin.Logging;
+using FastEndpoints;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Logging;
+
+namespace ESLAdmin.Features.Identity.Endpoints.IdentityUsers.RegisterUser;
+
+//------------------------------------------------------------------------------
+//
+//                       class RegisterUserEndpoint
+//
+//-------------------------------------------------------------------------------
+public class RegisterUserEndpoint : Endpoint<
+  RegisterUserRequest,
+  Results<Ok<Success>,
+    ProblemDetails,
+    InternalServerError>,
+  RegisterUserMapper>
+{
+  private readonly ILogger<RegisterUserEndpoint> _logger;
+
+  //------------------------------------------------------------------------------
+  //
+  //                       RegisterUserEndpoint
+  //
+  //-------------------------------------------------------------------------------
+  public RegisterUserEndpoint(
+    ILogger<RegisterUserEndpoint> logger)
+  {
+    _logger = logger;
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       Configure
+  //
+  //-------------------------------------------------------------------------------
+  public override void Configure()
+  {
+    Post("/api/register");
+    AllowAnonymous();
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       ExecuteAsync
+  //
+  //-------------------------------------------------------------------------------
+  public override async
+    Task<Results<Ok<Success>,
+      ProblemDetails,
+      InternalServerError>>
+    ExecuteAsync(
+      RegisterUserRequest request,
+      CancellationToken cancellationToken)
+  {
+    DebugLogFunctionEntry(request);
+
+    var command = new RegisterUserCommand
+    {
+      UserName = request.UserName,
+      FirstName = request.FirstName,
+      LastName = request.LastName,
+      Email = request.Email,
+      Password = request.Password,
+      PhoneNumber = request.PhoneNumber,
+      Roles = request.Roles,
+      Mapper = Map
+    };
+
+    var result = await command.ExecuteAsync(cancellationToken);
+
+    if (result.Result is NoContent)
+    {
+      HttpContext.Response.Headers.Append("location", $"/api/users/{request.Email}");
+    }
+
+    _logger.LogFunctionExit();
+
+    return result;
+  }
+
+  private void DebugLogFunctionEntry(RegisterUserRequest request)
+  {
+    if (_logger.IsEnabled(LogLevel.Debug))
+    {
+      var roleLog = request.Roles != null ? string.Join(", ", request.Roles) : "None";
+      var context = $"\n=>Request: \n    Username: '{request.UserName}', FirstName: '{request.FirstName}', LastName: '{request.LastName}', Email: '{request.Email}'\n    Password: '[Hidden]', PhoneNumber: '{request.PhoneNumber}', Roles: '{roleLog}'";
+      _logger.LogFunctionEntry(context);
+    }
+  }
+}

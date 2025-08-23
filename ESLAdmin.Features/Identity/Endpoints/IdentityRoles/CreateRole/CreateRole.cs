@@ -1,28 +1,31 @@
-﻿using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
-using ESLAdmin.Logging.Interface;
-using FastEndpoints;
+﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Features.ChildcareLevels.Endpoints.GetChildcareLevel;
+namespace ESLAdmin.Features.Identity.Endpoints.IdentityRoles.CreateRole;
 
 //------------------------------------------------------------------------------
 //
-//                        class GetChildcareLevelEndpoint
+//                        class CreateRoleEndpoint
 //
 //------------------------------------------------------------------------------
-public class GetChildcareLevelEndpoint :
+public class CreateRoleEndpoint :
   Endpoint<
-    GetChildcareLevelRequest,
-    Results<Ok<GetChildcareLevelResponse>, ProblemDetails, InternalServerError>,
-    GetChildcareLevelMapper>
+    CreateRoleRequest,
+    Results<Ok<CreateRoleResponse>, ProblemDetails, InternalServerError>,
+    CreateRoleMapper>
 {
+  private readonly ILogger<CreateRoleEndpoint> _logger;
+
   //------------------------------------------------------------------------------
   //
-  //                        GetChildcareLevelEndpoint
+  //                        CreateRoleEndpoint
   //
   //------------------------------------------------------------------------------
-  public GetChildcareLevelEndpoint()
+  public CreateRoleEndpoint(
+    ILogger<CreateRoleEndpoint> logger)
   {
+    _logger = logger;
   }
 
   //------------------------------------------------------------------------------
@@ -32,7 +35,7 @@ public class GetChildcareLevelEndpoint :
   //------------------------------------------------------------------------------
   public override void Configure()
   {
-    Get("/api/childcarelevels/{id}");
+    Post("/api/roles");
     AllowAnonymous();
   }
 
@@ -41,15 +44,9 @@ public class GetChildcareLevelEndpoint :
   //                        ExecuteAsync
   //
   //------------------------------------------------------------------------------
-  public override async Task<Results<Ok<GetChildcareLevelResponse>, ProblemDetails, InternalServerError>> ExecuteAsync(
-    GetChildcareLevelRequest request, CancellationToken c)
+  public override async Task<Results<Ok<CreateRoleResponse>, ProblemDetails, InternalServerError>> ExecuteAsync(
+    CreateRoleRequest request, CancellationToken c)
   {
-    var command = new GetChildcareLevelCommand
-    {
-      Id = request.Id,
-      Mapper = Map
-    };
-
-    return await command.ExecuteAsync(c);
+    return await Map.ToCommand(request, Map).ExecuteAsync();
   }
 }

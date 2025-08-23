@@ -17,8 +17,8 @@ namespace ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 public class RepositoryManager : IRepositoryManager
 {
   //private readonly Lazy<IChildcareLevelRepository> _childcareLevelRepository;
-  private readonly Lazy<IIdentityRepository>
-    _identityRespository;
+  //private readonly Lazy<IIdentityRepository>
+    //_identityRespository;
 
   //------------------------------------------------------------------------------
   //
@@ -26,13 +26,14 @@ public class RepositoryManager : IRepositoryManager
   //
   //------------------------------------------------------------------------------
   public RepositoryManager(
-    IDbContextDapper dbContextDapper,
-    IMessageLogger messageLogger,
-    ILogger<RepositoryManager> logger,
-    UserManager<User> userManager,
-    SignInManager<User> signInManager,
-    RoleManager<IdentityRole> roleManager,
-    UserDbContext dbContext)
+    //IDbContextDapper dbContextDapper,
+    //IMessageLogger messageLogger,
+    //ILogger<RepositoryManager> logger,
+    //UserManager<User> userManager,
+    //SignInManager<User> signInManager,
+    //RoleManager<IdentityRole> roleManager,
+    //UserDbContext dbContext
+    )
   {
     //_childcareLevelRepository = new Lazy<IChildcareLevelRepository>(
     //  () => new ChildcareLevelRepository(
@@ -40,15 +41,15 @@ public class RepositoryManager : IRepositoryManager
     //    logger,
     //    messageLogger));
 
-    _identityRespository = new Lazy<IIdentityRepository>(
-      () => new IdentityRepository(
-        logger,
-        messageLogger,
-        userManager,
-        signInManager,
-        roleManager,
-        dbContext,
-        dbContextDapper));
+    //_identityRespository = new Lazy<IIdentityRepository>(
+    //  () => new IdentityRepository(
+    //    logger,
+    //    messageLogger,
+    //    userManager,
+    //    signInManager,
+    //    roleManager,
+    //    dbContext,
+    //    dbContextDapper));
   }
 
   //------------------------------------------------------------------------------
@@ -64,8 +65,8 @@ public class RepositoryManager : IRepositoryManager
   //                       AuthenticationRepository
   //
   //------------------------------------------------------------------------------
-  public IIdentityRepository IdentityRepository =>
-    _identityRespository.Value;
+  //public IIdentityRepository IdentityRepository =>
+    //_identityRespository.Value;
 }
 
 
