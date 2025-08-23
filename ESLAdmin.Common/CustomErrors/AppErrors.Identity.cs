@@ -129,9 +129,13 @@ public static partial class AppErrors
         code: "Identity.AddToRoleFailed",
         description: $"AddToRole failed for user: '{email}', role: '{roleName}'.");
 
-      if (errors != null && errors.Any())
+      if (errors != null)
       {
-        AddMetadata(error.Metadata, errors);
+        var errorList = errors.ToList(); // Materialize to avoid multiple enumerations
+        if (errorList.Count == 0)
+        {
+          AddMetadata(error.Metadata, errorList);
+        }
       }
       return error;
     }
@@ -588,7 +592,7 @@ public static partial class AppErrors
     //                       Unauthorized
     //
     //-------------------------------------------------------------------------------
-    public static ErrorOr.Error Unauthorized() =>
+    public static Error Unauthorized() =>
         Error.Unauthorized(
           code: "Identity.Unauthorized",
           description: "User is not authorized.");
@@ -598,17 +602,17 @@ public static partial class AppErrors
     //                       PasswordTooShort
     //
     //-------------------------------------------------------------------------------
-    public static ErrorOr.Error PasswordTooShort() =>
+    public static Error PasswordTooShort() =>
         Error.Unauthorized(
           code: "Identity.PasswordTooShort",
-          description: $"Password must be at least {_apiSettings.Identity.Password.RequiredLength} characters.");
+          description: $"Password must be at least {_apiSettings!.Identity.Password.RequiredLength} characters.");
 
     //-------------------------------------------------------------------------------
     //
     //                       PasswordRequiresNonAlphanumeric
     //
     //-------------------------------------------------------------------------------
-    public static ErrorOr.Error PasswordRequiresNonAlphanumeric() =>
+    public static Error PasswordRequiresNonAlphanumeric() =>
         Error.Unauthorized(
           code: "Identity.PasswordRequiresNonAlphanumeric",
           description: "Password must contain at least one non-alphanumeric character (e.g., !, @, #).");
@@ -618,7 +622,7 @@ public static partial class AppErrors
     //                       PasswordRequiresDigit
     //
     //-------------------------------------------------------------------------------
-    public static ErrorOr.Error PasswordRequiresDigit() =>
+    public static Error PasswordRequiresDigit() =>
         Error.Unauthorized(
           code: "Identity.PasswordRequiresDigit",
           description: "Password must contain at least one digit (0-9).");
@@ -628,7 +632,7 @@ public static partial class AppErrors
     //                       PasswordRequiresLower
     //
     //-------------------------------------------------------------------------------
-    public static ErrorOr.Error PasswordRequiresLower() =>
+    public static Error PasswordRequiresLower() =>
         Error.Unauthorized(
           code: "Identity.PasswordRequiresLower",
           description: "Password must contain at least one lowercase letter (a-z).");
@@ -638,7 +642,7 @@ public static partial class AppErrors
     //                       PasswordRequiresUpper
     //
     //-------------------------------------------------------------------------------
-    public static ErrorOr.Error PasswordRequiresUpper() =>
+    public static Error PasswordRequiresUpper() =>
         Error.Unauthorized(
           code: "Identity.PasswordRequiresUpper",
           description: "Password must contain at least one uppercase letter (A-Z).");
@@ -648,7 +652,7 @@ public static partial class AppErrors
     //                       PasswordRequiresUniqueChars
     //
     //-------------------------------------------------------------------------------
-    public static ErrorOr.Error PasswordRequiresUniqueChars() =>
+    public static Error PasswordRequiresUniqueChars() =>
         Error.Unauthorized(
           code: "Identity.PasswordRequiresUniqueChars",
           description: "Password must contain at least one non-alphanumeric character (e.g., !, @, #).");
@@ -658,7 +662,7 @@ public static partial class AppErrors
     //                       AddToRolesError
     //
     //-------------------------------------------------------------------------------
-    public static ErrorOr.Error AddToRolesError() =>
+    public static Error AddToRolesError() =>
         Error.Unauthorized(
           code: "Identity.AddToRolesError",
           description: "Failed to add roles: Invalid user or roles.");

@@ -1,4 +1,4 @@
-﻿namespace ESLAdmin.Infrastructure.Persistence.Constants;
+﻿namespace ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Constants;
 
 //------------------------------------------------------------------------------
 //

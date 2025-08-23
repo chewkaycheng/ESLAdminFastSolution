@@ -1,4 +1,4 @@
-﻿namespace ESLAdmin.Infrastructure.Persistence.Constants;
+﻿namespace ESLAdmin.Features.Identity.Infrastructure.Persistence.Constants;
 
 //------------------------------------------------------------------------------
 //

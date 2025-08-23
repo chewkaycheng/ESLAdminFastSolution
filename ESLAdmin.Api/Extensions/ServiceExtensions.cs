@@ -227,10 +227,10 @@ public static class ServiceExtensions
           o.Audience = audience;
           o.TokenValidationParameters = new TokenValidationParameters
           {
-            ValidateIssuer = (bool)jwtSettings.TokenValidation.ValidateIssuer,
-            ValidateAudience = (bool)jwtSettings.TokenValidation.ValidateAudience,
-            ValidateLifetime = (bool) jwtSettings.TokenValidation.ValidateLifetime,
-            ValidateIssuerSigningKey = (bool) jwtSettings.TokenValidation.ValidateIssuerSigningKey,
+            ValidateIssuer = (bool)jwtSettings.TokenValidation.ValidateIssuer!,
+            ValidateAudience = (bool)jwtSettings.TokenValidation.ValidateAudience!,
+            ValidateLifetime = (bool) jwtSettings.TokenValidation.ValidateLifetime!,
+            ValidateIssuerSigningKey = (bool) jwtSettings.TokenValidation.ValidateIssuerSigningKey!,
             ValidIssuer = issuer,
             ValidAudience = audience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))

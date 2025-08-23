@@ -1,6 +1,6 @@
 ﻿using FluentValidation.Results;
 
-namespace ESLAdmin.Features.Exceptions;
+namespace ESLAdmin.Common.Exceptions;
 
 //------------------------------------------------------------------------------
 //
@@ -8,7 +8,7 @@ namespace ESLAdmin.Features.Exceptions;
 //
 //------------------------------------------------------------------------------
 
-public class APIErrors
+public class ApiErrors
 {
-  public List<ValidationFailure> Errors { get; set; }
+  public required List<ValidationFailure> Errors { get; set; }
 }

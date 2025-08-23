@@ -68,11 +68,3 @@ app.UseAuthorization();
 app.UseFastEndpointsMiddleware();
 
 app.Run();
-
-public class ClsJwtSettings
-{
-  public string Key { get; init; }
-  public string Secret { get; init; }
-  public string Audience { get; init; }
-
-}
