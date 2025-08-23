@@ -28,36 +28,31 @@ public class GetChildcareLevelHandler : ICommandHandler<
   }
 
   public async Task<Results<Ok<GetChildcareLevelResponse>, ProblemDetails, InternalServerError>>
-  ExecuteAsync(
-    GetChildcareLevelCommand command,
-    CancellationToken cancellationToken)
+    ExecuteAsync(
+      GetChildcareLevelCommand command,
+      CancellationToken cancellationToken)
   {
-    try
+    var parameters = command.Mapper.ToParameters(command.Id);
+    var childcareLevelResult = await _repository
+      .GetChildcareLevelAsync(parameters);
+    if (childcareLevelResult.IsError)
     {
-      var parameters = command.Mapper.ToParameters(command.Id);
-      var childcareLevelResult = await _repository
-        .GetChildcareLevelAsync(parameters);
-      if (childcareLevelResult.IsError)
-      {
-        return TypedResults.InternalServerError();
-      }
-
-      var childcareLevel = childcareLevelResult.Value;
-      if (childcareLevel == null)
-      {
-        return new ProblemDetails(ErrorUtils.CreateFailureList(
-          "NotFound",
-          $"The childcare level with id: {command.Id} is not found."
-          ), StatusCodes.Status404NotFound);
-      }
-
-      var childcareLevelResponse = command.Mapper.FromEntity(childcareLevel);
-      return TypedResults.Ok(childcareLevelResponse);
+      var errors = childcareLevelResult.Errors;
+      return new ProblemDetails(
+        ErrorUtils.CreateFailureList(errors),
+        StatusCodes.Status500InternalServerError);
     }
-    catch (Exception ex)
+
+    var childcareLevel = childcareLevelResult.Value;
+    if (childcareLevel == null)
     {
-      _messageLogger.LogDatabaseException(nameof(ExecuteAsync), ex);
-      return TypedResults.InternalServerError();
+      return new ProblemDetails(ErrorUtils.CreateFailureList(
+        "NotFound",
+        $"The childcare level with id: {command.Id} is not found."
+      ), StatusCodes.Status404NotFound);
     }
+
+    var childcareLevelResponse = command.Mapper.FromEntity(childcareLevel);
+    return TypedResults.Ok(childcareLevelResponse);
   }
 }

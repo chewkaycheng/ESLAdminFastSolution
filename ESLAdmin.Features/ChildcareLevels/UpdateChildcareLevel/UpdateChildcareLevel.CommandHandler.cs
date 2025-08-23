@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using ESLAdmin.Common.CustomErrors;
 using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
@@ -12,8 +13,8 @@ using Microsoft.Extensions.Logging;
 namespace ESLAdmin.Features.ChildcareLevels.UpdateChildcareLevel;
 
 public class UpdateChildcareLevelCommandHandler : ICommandHandler<
-    UpdateChildcareLevelCommand,
-    Results<Ok<UpdateChildcareLevelResponse>, ProblemDetails, InternalServerError>>
+  UpdateChildcareLevelCommand,
+  Results<Ok<UpdateChildcareLevelResponse>, ProblemDetails, InternalServerError>>
 {
   private readonly IChildcareLevelRepository _repository;
   private readonly ILogger<CreateChildcareLevelCommandHandler> _logger;
@@ -21,8 +22,8 @@ public class UpdateChildcareLevelCommandHandler : ICommandHandler<
 
   public UpdateChildcareLevelCommandHandler(
     IChildcareLevelRepository repository,
-      ILogger<CreateChildcareLevelCommandHandler> logger,
-      IMessageLogger messageLogger)
+    ILogger<CreateChildcareLevelCommandHandler> logger,
+    IMessageLogger messageLogger)
   {
     _repository = repository;
     _logger = logger;
@@ -34,89 +35,82 @@ public class UpdateChildcareLevelCommandHandler : ICommandHandler<
       UpdateChildcareLevelCommand command,
       CancellationToken cancellationToken)
   {
-    try
+    DynamicParameters parameters = command.Mapper.ToParameters(command);
+    var result = await _repository
+      .UpdateChildcareLevelAsync(
+        parameters);
+    if (result.IsError)
     {
-      DynamicParameters parameters = command.Mapper.ToParameters(command);
-      var result = await _repository
-              .UpdateChildcareLevelAsync(
-                 parameters);
-      if (result.IsError)
-      {
-        var error = result.Errors.First();
-        if (error.Code != "Database.StoredProcedureError")
-        {
-          return TypedResults.InternalServerError();
-        }
-      }
-      OperationResult operationResult = command.Mapper.FromParameters(parameters);
-
-      if (operationResult.DbApiError == 0)
-      {
-        if (operationResult.Guid == null)
-        {
-          _logger.LogError("Guid Id for UpdateChildcareLevel is null");
-          return TypedResults.InternalServerError();
-        }
-
-        UpdateChildcareLevelResponse response = new UpdateChildcareLevelResponse();
-        response.ChildcareLevelId = command.ChildcareLevelId;
-        response.Guid = operationResult.Guid;
-        return TypedResults.Ok(response);
-      }
-
-      int statusCode;
-      var validationFailures = new List<ValidationFailure>();
-      switch (operationResult.DbApiError)
-      {
-        case 100:
-          {
-            validationFailures.AddRange(new ValidationFailure
-            {
-              PropertyName = "ConcurrencyConflict",
-              ErrorMessage = $"Another record with the childcare level name: {command.ChildcareLevelName} already exists."
-            });
-            statusCode = StatusCodes.Status409Conflict;
-            break;
-          }
-        case 200:
-          {
-            validationFailures.AddRange(new ValidationFailure
-            {
-              PropertyName = "ConcurrencyConflict",
-              ErrorMessage = $"The record has been altered by another user."
-            });
-            statusCode = StatusCodes.Status409Conflict;
-            break;
-          }
-        case 300:
-          {
-            validationFailures.AddRange(new ValidationFailure
-            {
-              PropertyName = "NotFound",
-              ErrorMessage = $"The record has does not exist."
-            });
-            statusCode = StatusCodes.Status404NotFound;
-            break;
-          }
-        case 500:
-        default:
-          {
-            validationFailures.AddRange(new ValidationFailure
-            {
-              PropertyName = "NotProcessed",
-              ErrorMessage = $"The maximum capacity has been reached."
-            });
-            statusCode = StatusCodes.Status422UnprocessableEntity;
-            break;
-          }
-      }
-      return new ProblemDetails(validationFailures, statusCode);
+      var errors = result.Errors;
+      return new ProblemDetails(
+        ErrorUtils.CreateFailureList(errors),
+        StatusCodes.Status500InternalServerError);
     }
-    catch (Exception ex)
+
+    OperationResult operationResult = command.Mapper.FromParameters(parameters);
+    if (operationResult.DbApiError == 0)
     {
-      _logger.LogException(ex);
+      if (operationResult.Guid == null)
+      {
+        _logger.LogError("Guid Id for UpdateChildcareLevel is null");
+        return TypedResults.InternalServerError();
+      }
 
-      return TypedResults.InternalServerError();
+      UpdateChildcareLevelResponse response = new UpdateChildcareLevelResponse
+      {
+        ChildcareLevelId = command.ChildcareLevelId,
+        Guid = operationResult.Guid
+      };
+      return TypedResults.Ok(response);
     }
+
+    int statusCode;
+    var validationFailures = new List<ValidationFailure>();
+    switch (operationResult.DbApiError)
+    {
+      case 100:
+      {
+        validationFailures.AddRange(new ValidationFailure
+        {
+          PropertyName = "ConcurrencyConflict",
+          ErrorMessage = $"Another record with the childcare level name: {command.ChildcareLevelName} already exists."
+        });
+        statusCode = StatusCodes.Status409Conflict;
+        break;
+      }
+      case 200:
+      {
+        validationFailures.AddRange(new ValidationFailure
+        {
+          PropertyName = "ConcurrencyConflict",
+          ErrorMessage = $"The record has been altered by another user."
+        });
+        statusCode = StatusCodes.Status409Conflict;
+        break;
+      }
+      case 300:
+      {
+        validationFailures.AddRange(new ValidationFailure
+        {
+          PropertyName = "NotFound",
+          ErrorMessage = $"The record has does not exist."
+        });
+        statusCode = StatusCodes.Status404NotFound;
+        break;
+      }
+      case 500:
+      default:
+      {
+        validationFailures.AddRange(new ValidationFailure
+        {
+          PropertyName = "NotProcessed",
+          ErrorMessage = $"The maximum capacity has been reached."
+        });
+        statusCode = StatusCodes.Status422UnprocessableEntity;
+        break;
+      }
+    }
+
+    return new ProblemDetails(validationFailures, statusCode);
   }
 }

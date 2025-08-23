@@ -1,4 +1,5 @@
-﻿using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
+﻿using ESLAdmin.Common.CustomErrors;
+using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
 using FastEndpoints;
@@ -29,34 +30,27 @@ public class GetChildcareLevelsCommandHandler : ICommandHandler<
   }
 
   public async Task<Results<Ok<IEnumerable<GetChildcareLevelResponse>>, ProblemDetails, InternalServerError>>
-  ExecuteAsync(
-    GetChildcareLevelsCommand command,
-    CancellationToken cancellationToken)
+    ExecuteAsync(
+      GetChildcareLevelsCommand command,
+      CancellationToken cancellationToken)
   {
-    try
+    var childcareLevelsResult =
+      await _repository
+        .GetChildcareLevelsAsync();
+
+    if (childcareLevelsResult.IsError)
     {
-      var childcareLevelsResult = 
-        await _repository
-          .GetChildcareLevelsAsync();
-      
-      if (childcareLevelsResult.IsError)
-      {
-        return TypedResults.InternalServerError();
-      }
-
-      var childcareLevels = childcareLevelsResult.Value;
-      IEnumerable<GetChildcareLevelResponse> childcareLevelsResponse =
-        childcareLevels.Select(
-          childcareLevel => command.Mapper.FromEntity(
-            childcareLevel)).ToList();
-
-      return TypedResults.Ok(childcareLevelsResponse);
+      var errors = childcareLevelsResult.Errors;
+      return new ProblemDetails(
+        ErrorUtils.CreateFailureList(errors),
+        StatusCodes.Status500InternalServerError);
     }
-    catch (Exception ex)
-    {
-      _logger.LogException(ex);
 
-      return TypedResults.InternalServerError();
-    }
+    var childcareLevels = childcareLevelsResult.Value;
+    IEnumerable<GetChildcareLevelResponse> childcareLevelsResponse =
+      childcareLevels.Select(childcareLevel => command.Mapper.FromEntity(
+        childcareLevel)).ToList();
+
+    return TypedResults.Ok(childcareLevelsResponse);
   }
 }
