@@ -1,7 +1,7 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace ESLAdmin.Features.Endpoints.ChildcareLevels
+namespace ESLAdmin.Features.ChildcareLevels.GetChildcareLevel
 {
   public class GetChildcareLevelCommand : ICommand<Results<Ok<GetChildcareLevelResponse>,
     ProblemDetails,

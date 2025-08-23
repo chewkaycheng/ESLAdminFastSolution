@@ -1,4 +1,4 @@
-﻿namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
+﻿namespace ESLAdmin.Features.ChildcareLevels.GetChildcareLevel;
 
 //------------------------------------------------------------------------------
 //

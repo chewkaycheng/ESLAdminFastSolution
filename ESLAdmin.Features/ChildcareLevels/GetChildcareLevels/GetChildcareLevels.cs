@@ -1,5 +1,4 @@
-﻿using ESLAdmin.Features.Endpoints.ChildcareLevels;
-using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
+﻿using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;

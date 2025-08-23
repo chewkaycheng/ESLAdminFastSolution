@@ -1,6 +1,5 @@
 ﻿using Dapper;
-using ESLAdmin.Features.ChildcareLevels;
-using ESLAdmin.Infrastructure.Persistence.Repositories;
+using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
@@ -10,22 +9,22 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
+namespace ESLAdmin.Features.ChildcareLevels.UpdateChildcareLevel;
 
 public class UpdateChildcareLevelCommandHandler : ICommandHandler<
     UpdateChildcareLevelCommand,
     Results<Ok<UpdateChildcareLevelResponse>, ProblemDetails, InternalServerError>>
 {
-  private readonly IRepositoryManager _repositoryManager;
+  private readonly IChildcareLevelRepository _repository;
   private readonly ILogger<CreateChildcareLevelCommandHandler> _logger;
   private readonly IMessageLogger _messageLogger;
 
   public UpdateChildcareLevelCommandHandler(
-      IRepositoryManager repositoryManager,
+    IChildcareLevelRepository repository,
       ILogger<CreateChildcareLevelCommandHandler> logger,
       IMessageLogger messageLogger)
   {
-    _repositoryManager = repositoryManager;
+    _repository = repository;
     _logger = logger;
     _messageLogger = messageLogger;
   }
@@ -38,8 +37,7 @@ public class UpdateChildcareLevelCommandHandler : ICommandHandler<
     try
     {
       DynamicParameters parameters = command.Mapper.ToParameters(command);
-      var result = await _repositoryManager
-              .ChildcareLevelRepository
+      var result = await _repository
               .UpdateChildcareLevelAsync(
                  parameters);
       if (result.IsError)

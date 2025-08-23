@@ -1,5 +1,4 @@
-﻿using ESLAdmin.Features.Endpoints.ChildcareLevels;
-using FastEndpoints;
+﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ESLAdmin.Features.ChildcareLevels.GetChildcareLevel;

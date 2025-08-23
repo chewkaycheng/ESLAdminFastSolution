@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using ESLAdmin.Common.CustomErrors;
-using ESLAdmin.Infrastructure.Persistence.Repositories;
+using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
 using ESLAdmin.Logging.Interface;
@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
+namespace ESLAdmin.Features.ChildcareLevels.DeleteChildcareLevel;
 
 //------------------------------------------------------------------------------
 //
@@ -20,7 +20,7 @@ public class DeleteChildcareLevelCommandHandler :
   ICommandHandler<DeleteChildcareLevelCommand,
     Results<NoContent, ProblemDetails, InternalServerError>>
 {
-  private readonly IRepositoryManager _repositoryManager;
+  private readonly IChildcareLevelRepository _repository;
   private readonly ILogger<DeleteChildcareLevelCommandHandler> _logger;
   private readonly IMessageLogger _messageLogger;
 
@@ -30,11 +30,11 @@ public class DeleteChildcareLevelCommandHandler :
   //
   //------------------------------------------------------------------------------
   public DeleteChildcareLevelCommandHandler(
-      IRepositoryManager repositoryManager,
+    IChildcareLevelRepository repository,
       ILogger<DeleteChildcareLevelCommandHandler> logger,
       IMessageLogger messageLogger)
   {
-    _repositoryManager = repositoryManager;
+    _repository = repository;
     _logger = logger;
     _messageLogger = messageLogger;
   }
@@ -53,8 +53,7 @@ public class DeleteChildcareLevelCommandHandler :
     try
     {
       DynamicParameters parameters = command.Mapper.ToParameters(command.Id);
-      var result = await _repositoryManager
-              .ChildcareLevelRepository
+      var result = await _repository
               .DeleteChildcareLevelAsync(
                 parameters);
 

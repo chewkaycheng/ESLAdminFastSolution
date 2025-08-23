@@ -1,10 +1,9 @@
 ﻿using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
-using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace ESLAdmin.Features.Endpoints.ChildcareLevels
+namespace ESLAdmin.Features.ChildcareLevels.DeleteChildcareLevel
 {
   public class DeleteChildcareLevelEndpoint : Endpoint<
   DeleteChildcareLevelRequest,

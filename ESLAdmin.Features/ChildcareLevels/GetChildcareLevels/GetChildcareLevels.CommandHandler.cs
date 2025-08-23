@@ -1,5 +1,4 @@
-﻿using ESLAdmin.Features.Endpoints.ChildcareLevels;
-using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
+﻿using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
 using FastEndpoints;

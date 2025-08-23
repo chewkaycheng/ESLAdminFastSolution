@@ -3,7 +3,7 @@ using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace ESLAdmin.Features.Endpoints.ChildcareLevels;
+namespace ESLAdmin.Features.ChildcareLevels.GetChildcareLevel;
 
 //------------------------------------------------------------------------------
 //
