@@ -5,7 +5,7 @@ using ESLAdmin.Common.Configuration;
 using ESLAdmin.Common.CustomErrors;
 using ESLAdmin.Features.Identity.Endpoints.IdentityRoles;
 using ESLAdmin.Features.Identity.Entities;
-using ESLAdmin.Features.Identity.Infrastructure.Persistence.Repository;
+using ESLAdmin.Features.Identity.Infrastructure.Persistence.Repositories;
 using ESLAdmin.Infrastructure.Persistence.Entities;
 using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;

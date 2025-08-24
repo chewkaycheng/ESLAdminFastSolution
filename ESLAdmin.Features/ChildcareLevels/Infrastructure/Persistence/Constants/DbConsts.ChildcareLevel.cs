@@ -1,4 +1,6 @@
-﻿namespace ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Constants;
+﻿using ESLAdmin.Infrastructure.Persistence.Constants;
+
+namespace ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Constants;
 
 //------------------------------------------------------------------------------
 //
@@ -14,7 +16,7 @@ public static class DbConstsChildcareLevel
   public const string PARAM_INITUSER = "pinituser";
   public const string PARAM_USERCODE = "pusercode";
   public const string PARAM_GUID = "pguid";
-
+  
   public const string CHILDCARELEVELID = "childcarelevelid";
   public const string CHILDCARELEVELNAME = "childcarelevelname";
   public const string MAXCAPACITY = "maxcapacity";

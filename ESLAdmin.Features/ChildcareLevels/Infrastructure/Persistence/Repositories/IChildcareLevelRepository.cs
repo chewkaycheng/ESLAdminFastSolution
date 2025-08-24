@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using ErrorOr;
-using ESLAdmin.Features.ChildcareLevels.Entities;
+using ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Entities;
 
 namespace ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Repositories
 {

@@ -1,13 +1,17 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace ESLAdmin.Features.ChildcareLevels.Endpoints.GetChildcareLevel
+namespace ESLAdmin.Features.ChildcareLevels.Endpoints.GetChildcareLevel;
+
+//------------------------------------------------------------------------------
+//
+//                        class GetChildcareLevelCommand
+//
+//------------------------------------------------------------------------------
+public class GetChildcareLevelCommand : ICommand<Results<Ok<GetChildcareLevelResponse>,
+  ProblemDetails,
+  InternalServerError>>
 {
-  public class GetChildcareLevelCommand : ICommand<Results<Ok<GetChildcareLevelResponse>,
-    ProblemDetails,
-    InternalServerError>>
-  {
-    public long Id { get; set; }
-    public required GetChildcareLevelMapper Mapper { get; set; }
-  }
+  public long Id { get; set; }
+  public required GetChildcareLevelMapper Mapper { get; set; }
 }

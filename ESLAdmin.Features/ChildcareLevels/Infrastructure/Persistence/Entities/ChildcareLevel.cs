@@ -1,6 +1,6 @@
 ﻿using ESLAdmin.Infrastructure.Persistence.Entities;
 
-namespace ESLAdmin.Features.ChildcareLevels.Entities;
+namespace ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Entities;
 
 //------------------------------------------------------------------------------
 //

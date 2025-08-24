@@ -58,20 +58,30 @@ public partial class RepositoryBase<ReadT, WriteT> :
     CommandType commandType = CommandType.StoredProcedure,
     CancellationToken cancellationToken = default)
   {
-    _logger.LogFunctionEntry();
-    var connectionResult = await _dbContextDapper.GetConnectionAsync();
-    if (connectionResult.IsError)
+    try
     {
-      return connectionResult.Errors;
-    }
-    using IDbConnection connection = connectionResult.Value;
+      _logger.LogFunctionEntry();
+      var connectionResult = await _dbContextDapper.GetConnectionAsync();
+      if (connectionResult.IsError)
+      {
+        return connectionResult.Errors;
+      }
+      using IDbConnection connection = connectionResult.Value;
 
-    var result = await connection.QueryAsync<ReadT>(
-          sql,
-          parameters,
-          commandType: commandType);
-    _logger.LogFunctionExit();
-    return ErrorOrFactory.From(result);
+      var result = await connection.QueryAsync<ReadT>(
+        sql,
+        parameters,
+        commandType: commandType);
+      _logger.LogFunctionExit();
+      return ErrorOrFactory.From(result);
+
+    }
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return DatabaseExceptionHandler
+        .HandleException(ex, _logger);
+    }
   }
 
   //------------------------------------------------------------------------------
@@ -108,16 +118,25 @@ public partial class RepositoryBase<ReadT, WriteT> :
     DynamicParameters? parameters,
     CommandType commandType = CommandType.StoredProcedure)
   {
-    var connectionResult = await _dbContextDapper.GetConnectionAsync();
-    if (connectionResult.IsError)
+    try
     {
-      return connectionResult.Errors;
+      var connectionResult = await _dbContextDapper.GetConnectionAsync();
+      if (connectionResult.IsError)
+      {
+        return connectionResult.Errors;
+      }
+      using IDbConnection connection = connectionResult.Value;
+      return await connection.QueryFirstOrDefaultAsync<ReadT>(
+        sql,
+        parameters,
+        commandType: commandType);
     }
-    using IDbConnection connection = connectionResult.Value;
-    return await connection.QueryFirstOrDefaultAsync<ReadT>(
-          sql,
-          parameters,
-          commandType: commandType);
+    catch (Exception ex)
+    {
+      _logger.LogException(ex);
+      return DatabaseExceptionHandler
+        .HandleException(ex, _logger);
+    }
   }
 
   //------------------------------------------------------------------------------
@@ -157,8 +176,7 @@ public partial class RepositoryBase<ReadT, WriteT> :
       {
         transaction.Commit();
 
-        _messageLogger.LogDatabaseExecSuccess(
-          nameof(DapExecWithTrans),
+        _logger.LogDatabaseExecSuccess(
           sql,
           _dbContextDapper.SerializeDynamicParameters(parameters));
 
@@ -168,8 +186,7 @@ public partial class RepositoryBase<ReadT, WriteT> :
       {
         transaction.Rollback();
 
-        _messageLogger.LogDatabaseExecSuccess(
-          nameof(DapExecWithTrans),
+        _logger.LogDatabaseExecSuccess(
           sql,
           _dbContextDapper.SerializeDynamicParameters(parameters));
 
@@ -178,8 +195,7 @@ public partial class RepositoryBase<ReadT, WriteT> :
     }
     catch (Exception ex)
     {
-      _messageLogger.LogDatabaseException(
-        nameof(DapExecWithTrans),
+      _logger.LogDatabaseException(
         sql,
         _dbContextDapper.SerializeDynamicParameters(parameters),
         ex);
@@ -220,6 +236,7 @@ public partial class RepositoryBase<ReadT, WriteT> :
         connectionResult.FirstError.Description);
       return connectionResult.Errors;
     }
+
     using IDbConnection connection = connectionResult.Value;
 
     var transactionResult = await _dbContextDapper.GetTransactionAsync(connection);
@@ -236,10 +253,10 @@ public partial class RepositoryBase<ReadT, WriteT> :
     try
     {
       await connection.ExecuteAsync(
-              sql,
-              parameters,
-              transaction,
-              commandType: commandType);
+        sql,
+        parameters,
+        transaction,
+        commandType: commandType);
 
       var dbApiError = parameters.Get<int>(
         DbConstsOperationResult.DBAPIERROR
@@ -274,7 +291,8 @@ public partial class RepositoryBase<ReadT, WriteT> :
         _dbContextDapper.SerializeDynamicParameters(parameters),
         ex);
 
-      return AppErrors.CommonErrors.Exception(ex.Message);
+      return DatabaseExceptionHandler
+        .HandleException(ex, _logger);
     }
   }
 }

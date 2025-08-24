@@ -1,5 +1,5 @@
 ﻿using ESLAdmin.Features.Identity.Endpoints.IdentityRoles.GetRole;
-using ESLAdmin.Features.Identity.Infrastructure.Persistence.Repository;
+using ESLAdmin.Features.Identity.Infrastructure.Persistence.Repositories;
 using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 using FastEndpoints;
 using FluentValidation.Results;

@@ -1,4 +1,4 @@
-﻿using ESLAdmin.Features.Identity.Infrastructure.Persistence.Repository;
+﻿using ESLAdmin.Features.Identity.Infrastructure.Persistence.Repositories;
 using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
 using Microsoft.Extensions.Logging;
 

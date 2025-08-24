@@ -1,7 +1,7 @@
 ﻿using Dapper;
 using ErrorOr;
-using ESLAdmin.Features.ChildcareLevels.Entities;
 using ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Constants;
+using ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Entities;
 using ESLAdmin.Features.Repositories;
 using ESLAdmin.Infrastructure.Persistence.Constants;
 using ESLAdmin.Infrastructure.Persistence.DatabaseContexts.Interfaces;
@@ -26,9 +26,8 @@ public class ChildcareLevelRepository :
   //------------------------------------------------------------------------------
   public ChildcareLevelRepository(
     IDbContextDapper dbContextDapper,
-    ILogger<ChildcareLevelRepository> logger,
-    IMessageLogger messageLogger)
-    : base(dbContextDapper, logger, messageLogger)
+    ILogger<ChildcareLevelRepository> logger)
+    : base(dbContextDapper, logger)
   {
   }
 

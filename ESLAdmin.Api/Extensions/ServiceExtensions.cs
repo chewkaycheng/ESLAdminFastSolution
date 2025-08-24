@@ -18,8 +18,9 @@ using System.Text;
 using ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Repositories;
 using ESLAdmin.Features.Identity.Entities;
 using ESLAdmin.Features.Identity.Infrastructure.Persistence.Contexts;
-using ESLAdmin.Features.Identity.Infrastructure.Persistence.Repository;
+using ESLAdmin.Features.Identity.Infrastructure.Persistence.Repositories;
 using ESLAdmin.Features.Identity.Services;
+using ESLAdmin.Features.ClassLevels.Infrastructure.Persistence.Repositories;
 
 namespace ESLAdmin.Api.Extensions;
 
@@ -122,6 +123,7 @@ public static class ServiceExtensions
     //services.AddScoped<IRepositoryManager, RepositoryManager>();
     services.AddScoped<IIdentityRepository, IdentityRepository>();
     services.AddScoped<IChildcareLevelRepository, ChildcareLevelRepository>();
+    services.AddScoped<IClassLevelRepository, ClassLevelRepository>();
   }
 
   // =================================================

@@ -17,7 +17,7 @@ public partial class RepositoryBase<ReadT, WriteT> :
 {
   protected IDbContextDapper _dbContextDapper;
   //protected IDbContextEF? _dbContextEF;
-  protected IMessageLogger _messageLogger;
+  //protected IMessageLogger _messageLogger;
   protected ILogger _logger;
 
   //------------------------------------------------------------------------------
@@ -27,11 +27,10 @@ public partial class RepositoryBase<ReadT, WriteT> :
   //------------------------------------------------------------------------------
   public RepositoryBase(
     IDbContextDapper dbContextDapper,
-    ILogger logger,
-    IMessageLogger messageLogger)
+    ILogger logger)
   {
     _dbContextDapper = dbContextDapper;
     _logger = logger;
-    _messageLogger = messageLogger;
+    //_messageLogger = messageLogger;
   }
 }

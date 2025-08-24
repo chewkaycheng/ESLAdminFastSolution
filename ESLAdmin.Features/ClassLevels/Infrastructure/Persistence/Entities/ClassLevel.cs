@@ -1,6 +1,6 @@
 ﻿using ESLAdmin.Infrastructure.Persistence.Entities;
 
-namespace ESLAdmin.Domain.Entities;
+namespace ESLAdmin.Features.ClassLevels.Infrastructure.Persistence.Entities;
 
 //------------------------------------------------------------------------------
 //
@@ -10,6 +10,7 @@ namespace ESLAdmin.Domain.Entities;
 public class ClassLevel : EntityBase
 {
   public long ClassLevelId { get; set; } = 0;
+  public string ClassLevelName { get; set; } = string.Empty; 
   public int DisplayOrder { get; set; } = 0;
   public int DisplayColor { get; set; } = 0;
 }

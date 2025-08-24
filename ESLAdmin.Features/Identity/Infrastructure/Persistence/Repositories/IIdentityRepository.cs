@@ -1,9 +1,8 @@
 ﻿using ErrorOr;
 using ESLAdmin.Features.Identity.Entities;
-using ESLAdmin.Infrastructure.Persistence.Entities;
 using Microsoft.AspNetCore.Identity;
 
-namespace ESLAdmin.Features.Identity.Infrastructure.Persistence.Repository;
+namespace ESLAdmin.Features.Identity.Infrastructure.Persistence.Repositories;
 
 public interface IIdentityRepository
 {
