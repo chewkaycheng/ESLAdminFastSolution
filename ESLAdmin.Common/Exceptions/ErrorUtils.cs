@@ -2,11 +2,10 @@
 {
   public static class ErrorUtils
   {
-    public static int MapHttpReturnCode(int DbApiError)
+    public static int MapHttpReturnCode(int dbApiError)
     {
-      switch (DbApiError)
+      switch (dbApiError)
       {
-
         case 100:
           return 409;
         case 200:
@@ -17,9 +16,7 @@
           return 422;
         default:
           return 200;
-
       }
-
     }
   }
 }
