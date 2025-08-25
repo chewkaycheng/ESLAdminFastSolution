@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using ESLAdmin.Common.CustomErrors;
-using ESLAdmin.Features.ClassLevels.Endpoints.UpdateClassLevel;
 using ESLAdmin.Features.Common.Infrastructure.Persistence.Repositories.Interfaces;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;

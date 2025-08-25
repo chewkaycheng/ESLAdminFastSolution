@@ -78,7 +78,7 @@ public class CreateChildcareLevelEndpoint : Endpoint<
   {
     if (_logger.IsEnabled(LogLevel.Debug))
     {
-      var context = $"\n=>Request: \n    ChildcareLevelName: '{request.ChildcareLevelName}', DisplayOrder: '{request.DisplayOrder}', MaxCapacity: '{request.MaxCapacity}', InitUser: '{request.InitUser}'";
+      var context = $"\n=>Request: \n    ChildcareLevelName: '{request.ChildcareLevelName}', \n    DisplayOrder: '{request.DisplayOrder}', \n    MaxCapacity: '{request.MaxCapacity}', \n    InitUser: '{request.InitUser}'";
       _logger.LogFunctionEntry(context);
     }
   }

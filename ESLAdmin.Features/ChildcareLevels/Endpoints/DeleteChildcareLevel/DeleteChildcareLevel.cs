@@ -1,14 +1,22 @@
-﻿using ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Repositories;
+﻿using ErrorOr;
+using ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Repositories;
 using ESLAdmin.Logging.Interface;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ESLAdmin.Features.ChildcareLevels.Endpoints.DeleteChildcareLevel
 {
+  //------------------------------------------------------------------------------
+  //
+  //                        class DeleteChildcareLevelEndpoint
+  //
+  //------------------------------------------------------------------------------
   public class DeleteChildcareLevelEndpoint : Endpoint<
-  DeleteChildcareLevelRequest,
-  Results<NoContent, ProblemDetails, InternalServerError>,
-  DeleteChildcareLevelMapper>
+    DeleteChildcareLevelRequest,
+    Results<Ok<Success>, 
+      ProblemDetails, 
+      InternalServerError>,
+    DeleteChildcareLevelMapper>
   {
     private readonly IChildcareLevelRepository _repository;
     private readonly IMessageLogger _messageLogger;
@@ -42,8 +50,12 @@ namespace ESLAdmin.Features.ChildcareLevels.Endpoints.DeleteChildcareLevel
     //                           ExecuteAsync
     //
     //------------------------------------------------------------------------------
-    public override async Task<Results<NoContent, ProblemDetails, InternalServerError>> ExecuteAsync(
-      DeleteChildcareLevelRequest request, CancellationToken cancellationToken)
+    public override async Task<Results<Ok<Success>, 
+      ProblemDetails, 
+      InternalServerError>> 
+        ExecuteAsync(
+          DeleteChildcareLevelRequest request, 
+          CancellationToken cancellationToken)
     {
       return await new DeleteChildcareLevelCommand
       {

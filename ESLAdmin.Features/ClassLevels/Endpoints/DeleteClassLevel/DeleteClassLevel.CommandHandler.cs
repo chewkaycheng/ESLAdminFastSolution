@@ -1,51 +1,55 @@
 ﻿using Dapper;
 using ErrorOr;
 using ESLAdmin.Common.CustomErrors;
-using ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Repositories;
+using ESLAdmin.Features.Common.Infrastructure.Persistence.Repositories.Interfaces;
 using ESLAdmin.Logging;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Features.ChildcareLevels.Endpoints.DeleteChildcareLevel;
+namespace ESLAdmin.Features.ClassLevels.Endpoints.DeleteClassLevel;
 
 //------------------------------------------------------------------------------
 //
-//                    class DeleteChildcareLevelCommandHandler
+//                    class DeleteClassLevelCommandHandler
 //
 //------------------------------------------------------------------------------
-public class DeleteChildcareLevelCommandHandler :
-  ChildcareLevelCommandHandlerBase<DeleteChildcareLevelCommandHandler>, 
-  ICommandHandler<DeleteChildcareLevelCommand,
-    Results<Ok<Success>, ProblemDetails, InternalServerError>>
+public class DeleteClassLevelCommandHandler :
+  ClassLevelCommandHandlerBase<DeleteClassLevelCommandHandler>,
+  ICommandHandler<DeleteClassLevelCommand,
+    Results<Ok<Success>,
+      ProblemDetails,
+      InternalServerError>>
 {
   //------------------------------------------------------------------------------
   //
-  //                    DeleteChildcareLevelCommandHandler
+  //                    DeleteClassLevelCommandHandler
   //
   //------------------------------------------------------------------------------
-  public DeleteChildcareLevelCommandHandler(
-    IChildcareLevelRepository repository,
-    ILogger<DeleteChildcareLevelCommandHandler> logger) :
+  public DeleteClassLevelCommandHandler(
+  IClassLevelRepository repository,
+    ILogger<DeleteClassLevelCommandHandler> logger) : 
     base(repository, logger)
   {
   }
 
   //------------------------------------------------------------------------------
   //
-  //                    DeleteChildcareLevelCommand
+  //                    ExecuteAsync
   //
   //------------------------------------------------------------------------------
-  public async Task<Results<Ok<Success>, ProblemDetails, InternalServerError>>
-    ExecuteAsync(
-      DeleteChildcareLevelCommand command,
-      CancellationToken cancellationToken)
+  public async Task<Results<Ok<Success>, 
+    ProblemDetails, 
+    InternalServerError>> 
+      ExecuteAsync(
+        DeleteClassLevelCommand command, 
+        CancellationToken ct)
   {
-    _logger.LogFunctionEntry($"\n=>ChildcareLevelId: {command.Id}");
+    _logger.LogFunctionEntry($"\n=>ClassLevelId: '{command.Id}'");
     DynamicParameters parameters = command.Mapper.ToParameters(command.Id);
-    var result = await _repository
-      .DeleteChildcareLevelAsync(
+    var result = await _repository.
+      DeleteClassLevelAsync(
         parameters);
 
     if (result.IsError)
@@ -65,8 +69,8 @@ public class DeleteChildcareLevelCommandHandler :
 
     _logger.LogFunctionExit();
     return new ProblemDetails(ErrorUtils.CreateFailureList(
-        "ConcurrencyConflict",
-        $"Cannot delete Childcare level. It is being used by {operationResult.ReferenceTable}."),
+        "Database.ConcurrencyConflict",
+        $"Cannot delete Class level. It is being used by {operationResult.ReferenceTable}."),
       StatusCodes.Status409Conflict);
   }
 }

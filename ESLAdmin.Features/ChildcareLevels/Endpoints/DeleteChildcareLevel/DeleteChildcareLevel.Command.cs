@@ -1,4 +1,5 @@
-﻿using FastEndpoints;
+﻿using ErrorOr;
+using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ESLAdmin.Features.ChildcareLevels.Endpoints.DeleteChildcareLevel;
@@ -9,7 +10,7 @@ namespace ESLAdmin.Features.ChildcareLevels.Endpoints.DeleteChildcareLevel;
 //
 //------------------------------------------------------------------------------
 public class DeleteChildcareLevelCommand :
-  ICommand<Results<NoContent, ProblemDetails, InternalServerError>>
+  ICommand<Results<Ok<Success>, ProblemDetails, InternalServerError>>
 {
   public long Id { get; set; }
   public required DeleteChildcareLevelMapper Mapper { get; set; }
