@@ -32,11 +32,9 @@ public class CreateChildcareLevelCommandHandler :
 
     if (result.IsError)
     {
-      var error = result.Errors.First();
       return new ProblemDetails(
         ErrorUtils.CreateFailureList(
-          error.Code,
-          error.Description),
+          result.Errors),
         StatusCodes.Status500InternalServerError);
     }
 

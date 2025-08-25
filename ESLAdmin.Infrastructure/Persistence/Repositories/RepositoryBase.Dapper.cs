@@ -279,7 +279,8 @@ public partial class RepositoryBase<ReadT, WriteT> :
           _dbContextDapper.SerializeDynamicParameters(parameters));
 
         await ((FbTransaction)transaction).RollbackAsync();
-        return AppErrors.DatabaseErrors.StoredProcedureError(sql, dbApiError);
+        //return AppErrors.DatabaseErrors.StoredProcedureError(sql, dbApiError);
+        return false;
       }
     }
     catch (Exception ex)

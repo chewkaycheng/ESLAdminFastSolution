@@ -1,4 +1,11 @@
 ﻿using ESLAdmin.Common.Configuration;
+using ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Repositories;
+using ESLAdmin.Features.Common.Infrastructure.Persistence.Repositories;
+using ESLAdmin.Features.Common.Infrastructure.Persistence.Repositories.Interfaces;
+using ESLAdmin.Features.Identity.Entities;
+using ESLAdmin.Features.Identity.Infrastructure.Persistence.Contexts;
+using ESLAdmin.Features.Identity.Infrastructure.Persistence.Repositories;
+using ESLAdmin.Features.Identity.Services;
 using ESLAdmin.Features.Repositories;
 using ESLAdmin.Infrastructure.Persistence.DatabaseContexts;
 using ESLAdmin.Infrastructure.Persistence.DatabaseContexts.Interfaces;
@@ -15,13 +22,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Diagnostics;
 using System.Text;
-using ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Repositories;
-using ESLAdmin.Features.Identity.Entities;
-using ESLAdmin.Features.Identity.Infrastructure.Persistence.Contexts;
-using ESLAdmin.Features.Identity.Infrastructure.Persistence.Repositories;
-using ESLAdmin.Features.Identity.Services;
-using ESLAdmin.Features.Common.Infrastructure.Persistence.Repositories;
-using ESLAdmin.Features.Common.Infrastructure.Persistence.Repositories.Interfaces;
+using System.Text.Json;
 
 namespace ESLAdmin.Api.Extensions;
 
@@ -93,6 +94,7 @@ public static class ServiceExtensions
     {
       options.Assemblies = new[] { typeof(
         ESLAdmin.Features.FeatureAssemblyMarker).Assembly};
+      
     });
   }
 
@@ -289,6 +291,7 @@ public static class ServiceExtensions
     app.UseFastEndpoints(c =>
     {
       c.Errors.UseProblemDetails();
+      c.Serializer.Options.PropertyNamingPolicy = null;
       c.Endpoints.Configurator =
         ep =>
         {

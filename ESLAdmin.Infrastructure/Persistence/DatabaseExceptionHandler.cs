@@ -33,7 +33,8 @@ public static class DatabaseExceptionHandler
         .InvalidArgumentException(ane.Message),
       DbUpdateException dbu => AppErrors.DatabaseExceptions.DatabaseException(
         ex.InnerException?.Message ?? ex.Message),
-      FbException fbe => ParseAndCreate(fbe.Message, fbe.ErrorCode),
+      FbException fbe => AppErrors.DatabaseExceptions.DatabaseException(
+      $"Firebird errors:  {fbe.Message.Replace("\r\n", " - ")}  ErrorCode: {fbe.ErrorCode}"),
       ObjectDisposedException ode => 
         AppErrors.DatabaseExceptions.DatabaseException(
           $"Internal server error: Resource unavailable. {ode.Message}"),
@@ -44,11 +45,4 @@ public static class DatabaseExceptionHandler
       Exception exception => AppErrors.CommonErrors.Exception(exception.Message)
     };
   }
-  private static Error ParseAndCreate(string message, int errorCode)
-  {
-    var messageLines = message.Split(new[] { "\r\n" }, StringSplitOptions.None);
-    return AppErrors.DatabaseExceptions.DatabaseException(
-      $"Firebird errors:  {string.Join(", ", messageLines)}  (ErrorCode: {errorCode})");
-  }
-  
 }

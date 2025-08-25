@@ -1,6 +1,4 @@
 ﻿using Dapper;
-using ESLAdmin.Features.ChildcareLevels.Endpoints.UpdateChildcareLevel;
-using ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Constants;
 using ESLAdmin.Features.ClassLevels.Infrastructure.Persistence.Constants;
 using ESLAdmin.Infrastructure.Persistence;
 using ESLAdmin.Infrastructure.Persistence.Constants;
@@ -25,6 +23,10 @@ public class UpdateClassLevelMapper : Mapper<
     parameters.AddInt64InputParam(
       DbConstsClassLevel.PARAM_CLASSLEVELID,
       command.ClassLevelId);
+    parameters.AddStringInputParam(
+      DbConstsClassLevel.PARAM_CLASSLEVELNAME,
+      command.ClassLevelName,
+      32);
     parameters.AddStringInputParam(
       DbConstsClassLevel.PARAM_DISPLAYCOLOR,
       command.ClassLevelName,
