@@ -17,11 +17,19 @@ public static partial class AppErrors
     //                       DatabaseException
     //
     //-------------------------------------------------------------------------------
-    public static Error DatabaseException(string message) =>
+    public static Error DatabaseException(
+      string message) =>
         Error.Failure(
           "Database.Exception.DatabaseError",
           message);
 
+    public class ErrorResult
+    {
+      public string Name { get; set; }
+      public string Reason { get; set; }
+      public object Details { get; set; }
+    }
+    
     //-------------------------------------------------------------------------------
     //
     //                       ObjectDisposedException

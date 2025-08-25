@@ -1,34 +1,37 @@
 ﻿using Dapper;
 using ESLAdmin.Common.CustomErrors;
-using ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Repositories;
+using ESLAdmin.Features.Common.Infrastructure.Persistence.Repositories.Interfaces;
 using FastEndpoints;
-using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace ESLAdmin.Features.ChildcareLevels.Endpoints.UpdateChildcareLevel;
+namespace ESLAdmin.Features.ClassLevels.Endpoints.UpdateClassLevel;
 
-public class UpdateChildcareLevelCommandHandler : 
-  ChildcareLevelCommandHandlerBase<UpdateChildcareLevelCommandHandler>,
-  ICommandHandler<UpdateChildcareLevelCommand,
-    Results<Ok<UpdateChildcareLevelResponse>, ProblemDetails, InternalServerError>>
+public class UpdateClassLevelCommandHandler :
+  ClassLevelCommandHandlerBase<UpdateClassLevelCommandHandler>,
+  ICommandHandler<UpdateClassLevelCommand,
+    Results<Ok<UpdateClassLevelResponse>,
+      ProblemDetails,
+      InternalServerError>>
 {
-  public UpdateChildcareLevelCommandHandler(
-    IChildcareLevelRepository repository,
-    ILogger<UpdateChildcareLevelCommandHandler> logger) :
+  public UpdateClassLevelCommandHandler(
+    IClassLevelRepository repository, 
+    ILogger<UpdateClassLevelCommandHandler> logger) : 
     base(repository, logger)
   {
   }
 
-  public async Task<Results<Ok<UpdateChildcareLevelResponse>, ProblemDetails, InternalServerError>>
-    ExecuteAsync(
-      UpdateChildcareLevelCommand command,
-      CancellationToken cancellationToken)
+  public async Task<Results<Ok<UpdateClassLevelResponse>, 
+    ProblemDetails, 
+    InternalServerError>> 
+      ExecuteAsync(
+        UpdateClassLevelCommand command, 
+        CancellationToken ct)
   {
     DynamicParameters parameters = command.Mapper.ToParameters(command);
     var result = await _repository
-      .UpdateChildcareLevelAsync(
+      .UpdateClassLevelAsync(
         parameters);
     if (result.IsError)
     {
@@ -43,17 +46,17 @@ public class UpdateChildcareLevelCommandHandler :
     {
       if (operationResult.Guid == null)
       {
-        _logger.LogError("Guid Id for UpdateChildcareLevel is null");
+        _logger.LogError("Guid Id for UpdateClassLevel is null");
         return new ProblemDetails(
           ErrorUtils.CreateFailureList(
             "GuidNull",
-            "Guid for for UpdateChildcareLevel is null"),
+            "Guid for for UpdateClassLevel is null"),
           StatusCodes.Status500InternalServerError);
       }
 
-      UpdateChildcareLevelResponse response = new UpdateChildcareLevelResponse
+      UpdateClassLevelResponse response = new UpdateClassLevelResponse
       {
-        ChildcareLevelId = command.ChildcareLevelId,
+        ClassLevelId = command.ClassLevelId,
         Guid = operationResult.Guid
       };
       return TypedResults.Ok(response);

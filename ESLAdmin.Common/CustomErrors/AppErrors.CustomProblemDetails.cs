@@ -92,5 +92,35 @@ public static partial class AppErrors
         "There is a concurrency failure in the operation.",
         StatusCodes.Status409Conflict);
     }
+
+    public static ProblemDetails OperationResultFailure(
+      int dbApiError,
+      string fieldName)
+    {
+      return dbApiError switch
+      {
+        100 => new ProblemDetails(ErrorUtils.CreateFailureList(
+            "ConcurrencyConflict",
+             $"Duplicated value for field: {fieldName}."),
+          StatusCodes.Status409Conflict),
+        200 => new ProblemDetails(ErrorUtils.CreateFailureList(
+            "ConcurrencyConflict",
+            $"The record has been altered by another user."),
+          StatusCodes.Status409Conflict),
+        300 => new ProblemDetails(ErrorUtils.CreateFailureList(
+            "NotFound",
+            $"The record has does not exist."),
+          StatusCodes.Status404NotFound),
+        500 => new ProblemDetails(ErrorUtils.CreateFailureList(
+            "NotProcessed",
+            $"The maximum capacity has been reached."),
+          StatusCodes.Status422UnprocessableEntity),
+        _ => new ProblemDetails(ErrorUtils.CreateFailureList(
+            "NotProcessed",
+            $"The current record cannot be processed."),
+          StatusCodes.Status422UnprocessableEntity)
+
+      };
+    }
   }
 }
