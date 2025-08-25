@@ -39,6 +39,8 @@
 
   <ItemGroup>
     <Folder Include="Identity\Endpoints\IdentityUsers\" />
+    <Folder Include="Students\Endpoints\GetStudents\" />
+    <Folder Include="Students\Infrastructure\Persistence\Repositories\" />
   </ItemGroup>
 
 </Project>
