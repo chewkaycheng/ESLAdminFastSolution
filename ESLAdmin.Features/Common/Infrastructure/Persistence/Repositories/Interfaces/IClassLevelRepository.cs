@@ -1,8 +1,8 @@
 ﻿using Dapper;
 using ErrorOr;
-using ESLAdmin.Features.ClassLevels.Infrastructure.Persistence.Entities;
+using ESLAdmin.Features.Common.Infrastructure.Persistence.Entities;
 
-namespace ESLAdmin.Features.ClassLevels.Infrastructure.Persistence.Repositories;
+namespace ESLAdmin.Features.Common.Infrastructure.Persistence.Repositories.Interfaces;
 
 public interface IClassLevelRepository
 {

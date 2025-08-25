@@ -20,7 +20,8 @@ using ESLAdmin.Features.Identity.Entities;
 using ESLAdmin.Features.Identity.Infrastructure.Persistence.Contexts;
 using ESLAdmin.Features.Identity.Infrastructure.Persistence.Repositories;
 using ESLAdmin.Features.Identity.Services;
-using ESLAdmin.Features.ClassLevels.Infrastructure.Persistence.Repositories;
+using ESLAdmin.Features.Common.Infrastructure.Persistence.Repositories;
+using ESLAdmin.Features.Common.Infrastructure.Persistence.Repositories.Interfaces;
 
 namespace ESLAdmin.Api.Extensions;
 

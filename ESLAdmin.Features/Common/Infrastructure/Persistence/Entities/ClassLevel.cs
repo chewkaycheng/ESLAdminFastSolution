@@ -1,6 +1,6 @@
 ﻿using ESLAdmin.Infrastructure.Persistence.Entities;
 
-namespace ESLAdmin.Features.ClassLevels.Infrastructure.Persistence.Entities;
+namespace ESLAdmin.Features.Common.Infrastructure.Persistence.Entities;
 
 //------------------------------------------------------------------------------
 //
