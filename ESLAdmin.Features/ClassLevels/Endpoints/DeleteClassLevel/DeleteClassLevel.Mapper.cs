@@ -1,5 +1,5 @@
 ﻿using Dapper;
-using ESLAdmin.Features.ClassLevels.Infrastructure.Persistence.Constants;
+using ESLAdmin.Features.Common.Infrastructure.Persistence.Constants;
 using ESLAdmin.Infrastructure.Persistence;
 using ESLAdmin.Infrastructure.Persistence.Constants;
 using FastEndpoints;

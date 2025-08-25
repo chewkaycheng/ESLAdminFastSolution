@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using ErrorOr;
-using ESLAdmin.Features.ClassLevels.Infrastructure.Persistence.Constants;
+using ESLAdmin.Features.Common.Infrastructure.Persistence.Constants;
 using ESLAdmin.Features.Common.Infrastructure.Persistence.Entities;
 using ESLAdmin.Features.Common.Infrastructure.Persistence.Repositories.Interfaces;
 using ESLAdmin.Features.Repositories;

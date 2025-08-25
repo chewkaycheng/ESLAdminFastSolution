@@ -1,4 +1,4 @@
-﻿namespace ESLAdmin.Features.ClassLevels.Infrastructure.Persistence.Constants;
+﻿namespace ESLAdmin.Features.Common.Infrastructure.Persistence.Constants;
 
 public class DbConstsClassLevel
 {
