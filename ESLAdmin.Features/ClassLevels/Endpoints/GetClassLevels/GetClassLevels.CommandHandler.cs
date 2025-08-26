@@ -9,6 +9,11 @@ using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Features.ClassLevels.Endpoints.GetClassLevels;
 
+//------------------------------------------------------------------------------
+//
+//                        class GetClassLevelsCommandHandler
+//
+//------------------------------------------------------------------------------
 public class GetClassLevelsCommandHandler :
   ClassLevelCommandHandlerBase<GetClassLevelsCommandHandler>,
   ICommandHandler<
@@ -17,6 +22,11 @@ public class GetClassLevelsCommandHandler :
       ProblemDetails,
       InternalServerError>>
 {
+  //------------------------------------------------------------------------------
+  //
+  //                        GetClassLevelsCommandHandler
+  //
+  //------------------------------------------------------------------------------
   public GetClassLevelsCommandHandler(
     IClassLevelRepository repository, 
     ILogger<GetClassLevelsCommandHandler> logger) : 
@@ -24,6 +34,11 @@ public class GetClassLevelsCommandHandler :
   {
   }
 
+  //------------------------------------------------------------------------------
+  //
+  //                        ExecuteAsync
+  //
+  //------------------------------------------------------------------------------
   public async Task<Results<Ok<IEnumerable<GetClassLevelResponse>>, 
     ProblemDetails, 
     InternalServerError>> 

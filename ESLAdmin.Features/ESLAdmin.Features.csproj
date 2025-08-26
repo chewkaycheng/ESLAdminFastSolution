@@ -38,6 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Countries\UpdateCountry\" />
     <Folder Include="Identity\Endpoints\IdentityUsers\" />
     <Folder Include="Students\Endpoints\GetStudents\" />
     <Folder Include="Students\Infrastructure\Persistence\Repositories\" />

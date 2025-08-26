@@ -4,6 +4,11 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ESLAdmin.Features.ClassLevels.Endpoints.GetClassLevels;
 
+//------------------------------------------------------------------------------
+//
+//                        class GetClassLevelsCommand
+//
+//------------------------------------------------------------------------------
 public class GetClassLevelsCommand : 
   ICommand<Results<Ok<IEnumerable<GetClassLevelResponse>>,
     ProblemDetails,

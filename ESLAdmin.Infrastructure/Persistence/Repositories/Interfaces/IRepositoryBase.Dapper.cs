@@ -8,6 +8,16 @@ public interface IRepositoryBaseDapper<ReadT, WriteT>
   where ReadT : class
   where WriteT : class
 {
+  Task<ErrorOr<Success>> PersistAsync(
+    string sql,
+    DynamicParameters parameters);
+  
+  Task<ErrorOr<IEnumerable<ReadT>>> GetAllAsync(string sql);
+
+  Task<ErrorOr<ReadT>> GetSingleAsync(
+    string sql,
+    DynamicParameters parameters);
+  
   ErrorOr<IEnumerable<ReadT>> DapQueryMultiple(
       string sql,
       DynamicParameters? parameters,

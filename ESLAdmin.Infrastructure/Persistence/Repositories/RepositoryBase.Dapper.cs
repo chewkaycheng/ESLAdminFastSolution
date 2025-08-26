@@ -296,4 +296,60 @@ public partial class RepositoryBase<ReadT, WriteT> :
         .HandleException(ex, _logger);
     }
   }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       GetAllAsync
+  //
+  //------------------------------------------------------------------------------
+  public async Task<ErrorOr<IEnumerable<ReadT>>> GetAllAsync(string sql)
+  {
+    var result = await DapQueryMultipleAsync(sql, null);
+    if (result.IsError)
+    {
+      return result.Errors;
+    }
+
+    var entity = result.Value;
+    return ErrorOrFactory.From(entity);
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       GetSingleAsync
+  //
+  //------------------------------------------------------------------------------
+  public async Task<ErrorOr<ReadT>> GetSingleAsync(
+    string sql,
+    DynamicParameters parameters)
+  {
+    var result = await DapQuerySingleAsync(
+      sql,
+      parameters);
+    if (result.IsError)
+    {
+      return result.Errors;
+    }
+
+    return result.Value;
+  }
+
+  //------------------------------------------------------------------------------
+  //
+  //                       CreateAsync
+  //
+  //------------------------------------------------------------------------------
+  public async Task<ErrorOr<Success>> PersistAsync(
+    string sql,
+    DynamicParameters parameters)
+  {
+    var result = await DapExecWithTransAsync(sql, parameters);
+    if (result.IsError)
+    {
+      return result.Errors;
+    }
+
+    return new Success();
+  }
+  
 }

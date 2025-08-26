@@ -73,7 +73,7 @@ public static class DbConstsStudents
   public const string CHILDCARE_LEVEL_GUID = "childcarelevelguid";
   public const string CLASSLEVEL_DISPAY_ORDER = "classleveldisplayorder";
   public const string CLASSLEVEL_DISPLAY_COLOR = "classleveldisplaycolor";
-  public const string CLASSLEVEL_STARTED_DISPLAY_ORDER = "classlevelstarteddisplayorder"
+  public const string CLASSLEVEL_STARTED_DISPLAY_ORDER = "classlevelstarteddisplayorder";
   public const string CLASSLEVEL_STARTED_DISPLAY_COLOR = "classleveldisplaycolor";
   public const string COMMENTS = "comments";
   public const string FEES_PAID = "feespaid";
@@ -81,46 +81,9 @@ public static class DbConstsStudents
   public const string DBAPIERROR = "dbapierror";
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  public const string SP_STUDENTS_GETLIST = "students_getlist";
+  public const string SP_STUDENT_ADD = "student_add";
+  public const string SP_STUDENT_UPD = "student_upd";
+  public const string SP_STUDENT_DEL = "student_del";
 }
 

@@ -2,6 +2,7 @@
 using ESLAdmin.Features.ChildcareLevels.Infrastructure.Persistence.Repositories;
 using ESLAdmin.Features.Common.Infrastructure.Persistence.Repositories;
 using ESLAdmin.Features.Common.Infrastructure.Persistence.Repositories.Interfaces;
+using ESLAdmin.Features.Countries.Infrastructure.Persistence.Repositories;
 using ESLAdmin.Features.Identity.Entities;
 using ESLAdmin.Features.Identity.Infrastructure.Persistence.Contexts;
 using ESLAdmin.Features.Identity.Infrastructure.Persistence.Repositories;
@@ -127,6 +128,7 @@ public static class ServiceExtensions
     services.AddScoped<IIdentityRepository, IdentityRepository>();
     services.AddScoped<IChildcareLevelRepository, ChildcareLevelRepository>();
     services.AddScoped<IClassLevelRepository, ClassLevelRepository>();
+    services.AddScoped<ICountryRepository, CountryRepository>();
   }
 
   // =================================================
