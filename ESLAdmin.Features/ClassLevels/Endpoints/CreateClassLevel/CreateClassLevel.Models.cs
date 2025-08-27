@@ -1,5 +1,4 @@
-﻿using ESLAdmin.Features.ChildcareLevels.Endpoints.CreateChildcareLevel;
-using FastEndpoints;
+﻿using FastEndpoints;
 using FluentValidation;
 
 namespace ESLAdmin.Features.ClassLevels.Endpoints.CreateClassLevel;

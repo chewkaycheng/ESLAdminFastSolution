@@ -1,47 +1,47 @@
 ﻿using Dapper;
 using ESLAdmin.Common.CustomErrors;
-using ESLAdmin.Features.Common.Infrastructure.Persistence.Repositories.Interfaces;
+using ESLAdmin.Features.ClassLevels.Endpoints.CreateClassLevel;
+using ESLAdmin.Features.Countries.Infrastructure.Persistence.Repositories;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
+namespace ESLAdmin.Features.Countries.CreateCountry;
 
-namespace ESLAdmin.Features.ClassLevels.Endpoints.CreateClassLevel;
-
-public class CreateClassLevelCommandHandler :
-  ClassLevelCommandHandlerBase<CreateClassLevelCommandHandler>,
-  ICommandHandler<CreateClassLevelCommand,
-    Results<Ok<CreateClassLevelResponse>,
+public class CreateCountryCommandHandler :
+  CountryCommandHandlerBase<CreateCountryCommandHandler>,
+  ICommandHandler<CreateCountryCommand,
+    Results<Ok<CreateCountryResponse>,
       ProblemDetails,
       InternalServerError>>
 {
-  public CreateClassLevelCommandHandler(
-    IClassLevelRepository repository, 
-    ILogger<CreateClassLevelCommandHandler> logger) : 
+  public CreateCountryCommandHandler(
+    ICountryRepository repository, 
+    ILogger<CreateCountryCommandHandler> logger) : 
     base(repository, logger)
   {
   }
 
-  public async Task<Results<Ok<CreateClassLevelResponse>, 
+  public async Task<Results<Ok<CreateCountryResponse>, 
     ProblemDetails, 
     InternalServerError>> 
       ExecuteAsync(
-        CreateClassLevelCommand command, 
+        CreateCountryCommand command, 
         CancellationToken ct)
   {
     DynamicParameters parameters = command
       .Mapper
       .ToParameters(command);
     var result = await _repository
-      .CreateClassLevelAsync(
-        parameters);
+      .CreateCountryAsync(
+      parameters);
 
     if (result.IsError)
     {
       return new ProblemDetails(
         ErrorUtils.CreateFailureList(
-          result.Errors), 
+          result.Errors),
         StatusCodes.Status500InternalServerError
       );
     }
@@ -51,20 +51,24 @@ public class CreateClassLevelCommandHandler :
     {
       if (operationResult.Guid == null)
       {
-        _logger.LogError("Guid Id for CreateClassLevel is null");
+        _logger.LogError("Guid Id for CreateCountry is null");
         return new ProblemDetails(
           ErrorUtils.CreateFailureList(
             "GuidNull",
-            "Guid for for CreateClassLevel is null"),
+            "Guid for for CreateCountry is null"),
           StatusCodes.Status500InternalServerError);
       }
 
-      CreateClassLevelResponse response = command.Mapper.ToResponse(parameters);
+      CreateCountryResponse response = command
+        .Mapper
+        .ToResponse(parameters);
       return TypedResults.Ok(response);
     }
 
-    return AppErrors.ProblemDetailsFactory.OperationResultFailure(
-      operationResult.DbApiError,
-      operationResult.DupFieldName!);
+    return AppErrors
+      .ProblemDetailsFactory
+      .OperationResultFailure(
+        operationResult.DbApiError,
+        operationResult.DupFieldName!);
   }
 }

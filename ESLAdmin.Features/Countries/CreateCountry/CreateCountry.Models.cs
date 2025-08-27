@@ -1,47 +1,43 @@
 ﻿using FastEndpoints;
 using FluentValidation;
 
-namespace ESLAdmin.Features.Countries.UpdateCountry;
+namespace ESLAdmin.Features.Countries.CreateCountry;
 
 //------------------------------------------------------------------------------
 //
-//                           class UpdateCountryRequest
+//                           class CreateCountryRequest
 //
 //------------------------------------------------------------------------------
-public class UpdateCountryRequest
+public class CreateCountryRequest
 {
-  public long CountryId { get; set; }
   public string CountryName { get; set; } = string.Empty;
   public string LanguageName {  get; set; } = string.Empty;
-  public long UserCode { get; set; }
-  public string Guid { get; set; } = string.Empty;
+  public long InitUser {  get; set; }
 }
 
 //------------------------------------------------------------------------------
 //
-//                           class UpdateCountryResponse
+//                           class CreateCountryResponse
 //
 //------------------------------------------------------------------------------
-public class UpdateCountryResponse
+public class CreateCountryResponse
 {
   public long CountryId { get; set; }
-  public string Guid { get; set; } = string.Empty;
+  public required string Guid { get; set; }
 }
 
 //------------------------------------------------------------------------------
 //
-//                           class CreateClassLevelValidator
+//                           class CreateCountryValidator
 //
 //------------------------------------------------------------------------------
-public class UpdateCountryValidator : Validator<UpdateCountryRequest>
+public class CreateCountryValidator : Validator<CreateCountryRequest>
 {
-  public UpdateCountryValidator()
+  public CreateCountryValidator()
   {
     RuleFor(x => x.CountryName)
       .NotEmpty().WithMessage("Country name is required.");
     RuleFor(x => x.LanguageName)
      .NotEmpty().WithMessage("Language name is required.");
-    RuleFor(x => x.Guid)
-     .NotEmpty().WithMessage("Guid is required");
   }
 }
