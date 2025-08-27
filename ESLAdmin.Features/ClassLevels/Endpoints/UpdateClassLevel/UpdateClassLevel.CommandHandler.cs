@@ -64,6 +64,6 @@ public class UpdateClassLevelCommandHandler :
 
     return AppErrors.ProblemDetailsFactory.OperationResultFailure(
       operationResult.DbApiError,
-      operationResult.DupFieldName);
+      operationResult.DupFieldName!);
   }
 }

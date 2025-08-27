@@ -23,20 +23,20 @@ public class UpdateCountryMapper : Mapper<
   //                           ToParameters
   //
   //------------------------------------------------------------------------------
-  public DynamicParameters ToParameters(UpdateClassLevelCommand command)
+  public DynamicParameters ToParameters(UpdateCountryCommand command)
   {
     DynamicParameters parameters = new DynamicParameters();
 
     parameters.AddInt64InputParam(
       DbConstsCountry.PARAM_COUNTRY_ID,
-      command.ClassLevelId);
+      command.CountryId);
     parameters.AddStringInputParam(
       DbConstsCountry.PARAM_COUNTRY_NAME,
-      command.ClassLevelName,
+      command.CountryName,
       32);
     parameters.AddStringInputParam(
       DbConstsCountry.PARAM_LANGUAGE_NAME,
-      command.ClassLevelName,
+      command.LanguageName,
       32);
     parameters.AddInt64InputParam(
       DbConstsCountry.PARAM_USERCODE,
