@@ -1,18 +1,19 @@
 ﻿using Dapper;
 using ESLAdmin.Features.Common.Infrastructure.Persistence.Constants;
+using ESLAdmin.Features.Countries.Infrastructure.Persistence.Constants;
 using ESLAdmin.Infrastructure.Persistence;
 using ESLAdmin.Infrastructure.Persistence.Constants;
 using FastEndpoints;
 
-namespace ESLAdmin.Features.ClassLevels.Endpoints.DeleteClassLevel;
+namespace ESLAdmin.Features.Countries.DeleteCountry;
 
 //------------------------------------------------------------------------------
 //
-//                        class DeleteClassLevelMapper
+//                        class DeleteCountryMapper
 //
 //------------------------------------------------------------------------------
-public class DeleteClassLevelMapper : Mapper<long, 
-  OperationResult, 
+public class DeleteCountryMapper : Mapper<long,
+  OperationResult,
   DynamicParameters>
 {
   //------------------------------------------------------------------------------
@@ -24,7 +25,7 @@ public class DeleteClassLevelMapper : Mapper<long,
   {
     DynamicParameters parameters = new DynamicParameters();
     parameters.AddInt64InputParam(
-      DbConstsClassLevel.PARAM_CLASSLEVELID,
+      DbConstsCountry.PARAM_COUNTRY_ID,
       id);
 
     // Output parameters

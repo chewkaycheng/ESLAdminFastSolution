@@ -1,27 +1,28 @@
 ﻿using ErrorOr;
+using ESLAdmin.Features.ClassLevels.Endpoints.DeleteClassLevel;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace ESLAdmin.Features.ClassLevels.Endpoints.DeleteClassLevel;
+namespace ESLAdmin.Features.Countries.DeleteCountry;
 
 //------------------------------------------------------------------------------
 //
-//                          class DeleteClassLevelEndpoint
+//                          class DeleteCountryEndpoint
 //
 //------------------------------------------------------------------------------
-public class DeleteClassLevelEndpoint : Endpoint<
-  DeleteClassLevelRequest,
+public class DeleteCountryEndpoint : Endpoint<
+  DeleteCountryRequest,
   Results<Ok<Success>,
     ProblemDetails,
     InternalServerError>,
-  DeleteClassLevelMapper>
+  DeleteCountryMapper>
 {
   //------------------------------------------------------------------------------
   //
-  //                          DeleteClassLevelEndpoint
+  //                          DeleteCountryEndpoint
   //
   //------------------------------------------------------------------------------
-  public DeleteClassLevelEndpoint()
+  public DeleteCountryEndpoint()
   {
   }
 
@@ -32,7 +33,7 @@ public class DeleteClassLevelEndpoint : Endpoint<
   //------------------------------------------------------------------------------
   public override void Configure()
   {
-    Delete("/api/classlevels/{id}");
+    Delete("/api/countries/{id}");
     AllowAnonymous();
   }
 
@@ -45,10 +46,10 @@ public class DeleteClassLevelEndpoint : Endpoint<
     ProblemDetails,
     InternalServerError>>
       ExecuteAsync(
-        DeleteClassLevelRequest request,
+        DeleteCountryRequest request,
         CancellationToken cancellationToken)
   {
-    return await new DeleteClassLevelCommand
+    return await new DeleteCountryCommand
     {
       Id = request.Id,
       Mapper = Map
