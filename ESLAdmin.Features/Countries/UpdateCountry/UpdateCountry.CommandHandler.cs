@@ -9,6 +9,11 @@ using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Features.Countries.UpdateCountry;
 
+//------------------------------------------------------------------------------
+//
+//                           class UpdateCountryCommandHandler
+//
+//------------------------------------------------------------------------------
 public class UpdateCountryCommandHandler :
   CountryCommandHandlerBase<UpdateCountryCommandHandler>,
   ICommandHandler<UpdateCountryCommand,
@@ -16,6 +21,11 @@ public class UpdateCountryCommandHandler :
         ProblemDetails,
         InternalServerError>>
 {
+  //------------------------------------------------------------------------------
+  //
+  //                           UpdateCountryCommandHandler
+  //
+  //------------------------------------------------------------------------------
   public UpdateCountryCommandHandler(
     ICountryRepository repository,
     ILogger<UpdateCountryCommandHandler> logger) : 
@@ -23,8 +33,13 @@ public class UpdateCountryCommandHandler :
   {
   }
 
+  //------------------------------------------------------------------------------
+  //
+  //                           ExecuteAsync
+  //
+  //------------------------------------------------------------------------------
   public async Task<Results<Ok<UpdateCountryResponse>, 
-    ProblemDetails, 
+  ProblemDetails, 
     InternalServerError>> 
       ExecuteAsync(
         UpdateCountryCommand command, 
