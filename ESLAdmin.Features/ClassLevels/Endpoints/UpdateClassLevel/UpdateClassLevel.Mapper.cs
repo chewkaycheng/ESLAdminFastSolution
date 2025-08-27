@@ -8,7 +8,7 @@ namespace ESLAdmin.Features.ClassLevels.Endpoints.UpdateClassLevel;
 
 //------------------------------------------------------------------------------
 //
-//                           ToEntity
+//                           UpdateClassLevelMapper
 //
 //------------------------------------------------------------------------------
 public class UpdateClassLevelMapper : Mapper<
@@ -16,6 +16,11 @@ public class UpdateClassLevelMapper : Mapper<
   OperationResult,
   DynamicParameters>
 {
+  //------------------------------------------------------------------------------
+  //
+  //                           ToParameters
+  //
+  //------------------------------------------------------------------------------
   public DynamicParameters ToParameters(UpdateClassLevelCommand command)
   {
     DynamicParameters parameters = new DynamicParameters();
