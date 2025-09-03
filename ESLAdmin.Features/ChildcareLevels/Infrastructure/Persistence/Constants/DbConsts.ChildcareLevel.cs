@@ -54,7 +54,7 @@ public static class DbConstsChildcareLevel
       from
         CHILDCARELEVELS 
       where
-        CHILDCARELEVELID = @id 
+        CHILDCARELEVELID = @pchildcarelevelid 
       order by
         CHILDCARELEVELNAME 
       ";

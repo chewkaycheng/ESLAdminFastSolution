@@ -56,15 +56,17 @@ app.UseExceptionHandler(errorApp =>
   errorApp.ConfigureExceptionHandler()
 );
 
+app.UseFastEndpointsMiddleware();
 if (app.Environment.IsDevelopment())
 {
-  app.UseSwagger();
-  app.UseSwaggerUI();
+  //app.UseSwagger();
+  //app.UseSwaggerUI();
+  app.UseSwaggerGen();
 }
 app.UseMiddleware<JwtBlacklistMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseFastEndpointsMiddleware();
+
 
 app.Run();
