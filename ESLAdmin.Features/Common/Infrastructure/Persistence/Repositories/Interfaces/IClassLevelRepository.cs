@@ -6,8 +6,6 @@ namespace ESLAdmin.Features.Common.Infrastructure.Persistence.Repositories.Inter
 
 public interface IClassLevelRepository
 {
-  ErrorOr<IQueryable<ClassLevel>> GetClassLevelsIQueryable();
-
   Task<ErrorOr<IEnumerable<ClassLevel>>> GetClassLevelsAsync();
   
   Task<ErrorOr<ClassLevel?>> GetClassLevelAsync(

@@ -26,16 +26,9 @@ public class ClassLevelRepository :
   //------------------------------------------------------------------------------
   public ClassLevelRepository(
     IDbContextDapper dbContextDapper,
-    ILogger<ClassLevelRepository> logger,
-    DbContextEF? dbContextEF = null) :
-    base(dbContextDapper, logger, dbContextEF)
+    ILogger<ClassLevelRepository> logger) :
+    base(dbContextDapper, logger)
   {
-  }
-  
-  public ErrorOr<IQueryable<ClassLevel>> GetClassLevelsIQueryable()
-  {
-    var classLevels = FindAll(trackChanges: false);
-    return classLevels;
   }
 
   //------------------------------------------------------------------------------

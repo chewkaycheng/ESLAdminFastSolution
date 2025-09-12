@@ -3,12 +3,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ESLAdmin.Infrastructure.Persistence.DatabaseContexts;
 
-public class DbContextEF : DbContext
+public class DbContextEF
 {
-  public DbContextEF(DbContextOptions options)
-    : base(options)
-  {
-  }
-
-  public DbSet<ClassLevel> ClassLevels { get; set; }
 }

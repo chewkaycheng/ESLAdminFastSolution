@@ -17,7 +17,7 @@ public class DbConstsClassLevel
 
   public const string SQL_GETALL =
     @"select 
-        CLASSLEVELID as ID,
+        CLASSLEVELID,
         CLASSLEVELNAME,
         DISPLAYORDER,
         DISPLAYCOLOR,
@@ -34,7 +34,7 @@ public class DbConstsClassLevel
   
   public const string SQL_GETBYID =
     @"select 
-        CLASSLEVELID as ID,
+        CLASSLEVELID,
         CLASSLEVELNAME,
         DISPLAYORDER,
         DISPLAYCOLOR,

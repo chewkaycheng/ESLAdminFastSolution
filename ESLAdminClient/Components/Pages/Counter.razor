@@ -1,0 +1,85 @@
+﻿@page "/counter"
+
+@using ESLAdmin.Features.ClassLevels.Endpoints.GetClassLevel
+@using ESLAdminClient.Services
+@rendermode InteractiveServer
+@inject ClassLevelService Service
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary" @onclick="SetTest">Click me</button>
+<p role="status">Test: @test</p>
+
+<h1>Class Levels</h1>
+
+<div class="rz-border-radius-12 rz-border-1">
+  <RadzenDataGrid @ref="grid"
+                  AllowFiltering="true"
+                  AllowColumnResize="true"
+                  AllowAlternatingRows="false"
+                  FilterMode="FilterMode.Advanced"
+                  AllowSorting="true" 
+                  PageSize="5" 
+                  AllowPaging="true" 
+                  HorizontalScrollBar="true"
+                  PagerHorizontalAlign="HorizontalAlign.Left"
+                  ShowPagingSummary="true"
+                  Data="@classLevels"
+                  LogicalFilterOperator="LogicalFilterOperator.Or"
+                  ColumnWidth="300px"
+                  SelectionMode="DataGridSelectionMode.Single"
+                  @bind-Value=@selectedClassLevel>
+    <Columns>
+      <RadzenDataGridColumn TItem="GetClassLevelResponse" Frozen="true" Width="80px" TextAlign="TextAlign.Center" Property="Id" Title="ID" />
+      <RadzenDataGridColumn TItem="GetClassLevelResponse" Frozen="true" Width="160px" Property="ClassLevelName" Title="Name" />
+      <RadzenDataGridColumn TItem="GetClassLevelResponse" Property="DisplayOrder" Title="Display Order" Width="160px" />
+      <RadzenDataGridColumn TItem="GetClassLevelResponse" Property="DisplayColor" Title="Display Color" Width="160px" />
+    </Columns>
+  </RadzenDataGrid>
+</div>
+
+@code {
+  RadzenDataGrid<GetClassLevelResponse> grid;
+  IQueryable<GetClassLevelResponse> classLevels;
+  GetClassLevelResponse selectedItem;
+  IList<GetClassLevelResponse> selectedClassLevel;
+  void OnRowSelect(GetClassLevelResponse item)
+  {
+    selectedItem = item; // Handle selection (e.g., navigate or update UI)
+    StateHasChanged(); // Refresh if needed
+  }
+  private int currentCount = 0;
+  private string test;
+
+  private void IncrementCount()
+  {
+    currentCount++;
+  }
+
+  private void SetTest()
+  {
+    LoadData();
+  }
+
+  async Task LoadData()
+  {
+    var data = await Service.GetClassLevelAsync();
+    classLevels = data;
+    var f = data.FirstOrDefault();
+    test = data.FirstOrDefault().Id.ToString();
+  }
+
+  protected override async Task OnInitializedAsync()
+  {
+    await base.OnInitializedAsync();
+
+    var data = await Service.GetClassLevelAsync();
+    classLevels = data;
+    selectedClassLevel = new List<GetClassLevelResponse>() { classLevels.FirstOrDefault() };
+  }
+}

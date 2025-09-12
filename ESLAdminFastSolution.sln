@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36212.18
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11010.61 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
@@ -36,6 +36,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		VertSlice.md = VertSlice.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESLAdminClient", "ESLAdminClient\ESLAdminClient.csproj", "{8F1EB77C-63CD-4C10-A111-18197690DAF9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,6 +68,10 @@ Global
 		{B84FCDB6-076F-4183-8B64-CDF48A286B01}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B84FCDB6-076F-4183-8B64-CDF48A286B01}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B84FCDB6-076F-4183-8B64-CDF48A286B01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F1EB77C-63CD-4C10-A111-18197690DAF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F1EB77C-63CD-4C10-A111-18197690DAF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F1EB77C-63CD-4C10-A111-18197690DAF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F1EB77C-63CD-4C10-A111-18197690DAF9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -77,6 +83,7 @@ Global
 		{1846ECBD-4DF0-4BEC-A299-AE64EB406DBA} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{BDDE3FF3-4A8E-4A23-AE2F-C090E3D3F9F4} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{B84FCDB6-076F-4183-8B64-CDF48A286B01} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{8F1EB77C-63CD-4C10-A111-18197690DAF9} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D1789E87-A252-4449-9971-9E0DC73188B7}
