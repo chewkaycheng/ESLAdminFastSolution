@@ -19,6 +19,7 @@
 
 <div class="rz-border-radius-12 rz-border-1">
   <RadzenDataGrid @ref="grid"
+                  GridLines="@GridLines"
                   AllowFiltering="true"
                   AllowColumnResize="true"
                   AllowAlternatingRows="false"
@@ -44,6 +45,7 @@
 </div>
 
 @code {
+  Radzen.DataGridGridLines GridLines = Radzen.DataGridGridLines.Vertical;
   RadzenDataGrid<GetClassLevelResponse> grid;
   IQueryable<GetClassLevelResponse> classLevels;
   GetClassLevelResponse selectedItem;
