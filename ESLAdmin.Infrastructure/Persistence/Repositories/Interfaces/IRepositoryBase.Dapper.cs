@@ -14,7 +14,7 @@ public interface IRepositoryBaseDapper<ReadT, WriteT>
   
   Task<ErrorOr<IEnumerable<ReadT>>> GetAllAsync(string sql);
 
-  Task<ErrorOr<ReadT>> GetSingleAsync(
+  Task<ErrorOr<ReadT?>> GetSingleAsync(
     string sql,
     DynamicParameters parameters);
   

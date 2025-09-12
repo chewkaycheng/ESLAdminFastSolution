@@ -1,14 +1,7 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using ESLAdmin.Common.Configuration;
+﻿using ESLAdmin.Common.Configuration;
 using ESLAdmin.Common.CustomErrors;
-using ESLAdmin.Features.Identity.Endpoints.IdentityRoles;
 using ESLAdmin.Features.Identity.Entities;
 using ESLAdmin.Features.Identity.Infrastructure.Persistence.Repositories;
-using ESLAdmin.Infrastructure.Persistence.Entities;
-using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
-using ESLAdmin.Infrastructure.Persistence.RepositoryManagers;
 using ESLAdmin.Logging;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
@@ -16,6 +9,9 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace ESLAdmin.Features.Identity.Endpoints.IdentityUsers.RefreshJwtToken;
 
@@ -34,6 +30,7 @@ public class RefreshTokenJwtCommandHandler :
     ILogger<RefreshTokenJwtCommandHandler> logger) :
     base(repository, logger)
   {
+    _apiSettings = settings.Value;
   }
 
   //private ProblemDetails InvalidTokenError()

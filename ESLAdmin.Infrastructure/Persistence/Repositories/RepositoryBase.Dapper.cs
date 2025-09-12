@@ -319,7 +319,7 @@ public partial class RepositoryBase<ReadT, WriteT> :
   //                       GetSingleAsync
   //
   //------------------------------------------------------------------------------
-  public async Task<ErrorOr<ReadT>> GetSingleAsync(
+  public async Task<ErrorOr<ReadT?>> GetSingleAsync(
     string sql,
     DynamicParameters parameters)
   {

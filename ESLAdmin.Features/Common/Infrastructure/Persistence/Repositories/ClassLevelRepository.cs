@@ -1,14 +1,15 @@
 ﻿using Dapper;
 using ErrorOr;
 using ESLAdmin.Features.Common.Infrastructure.Persistence.Constants;
-using ESLAdmin.Features.Common.Infrastructure.Persistence.Entities;
 using ESLAdmin.Features.Common.Infrastructure.Persistence.Repositories.Interfaces;
 using ESLAdmin.Features.Repositories;
+using ESLAdmin.Infrastructure.Persistence.DatabaseContexts;
 using ESLAdmin.Infrastructure.Persistence.DatabaseContexts.Interfaces;
+using ESLAdmin.Infrastructure.Persistence.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Features.Common.Infrastructure.Persistence.Repositories;
-
+ 
 //------------------------------------------------------------------------------
 //
 //                        class ClassLevelRepository
@@ -25,11 +26,18 @@ public class ClassLevelRepository :
   //------------------------------------------------------------------------------
   public ClassLevelRepository(
     IDbContextDapper dbContextDapper,
-    ILogger<ClassLevelRepository> logger) :
-    base(dbContextDapper, logger)
+    ILogger<ClassLevelRepository> logger,
+    DbContextEF? dbContextEF = null) :
+    base(dbContextDapper, logger, dbContextEF)
   {
   }
   
+  public ErrorOr<IQueryable<ClassLevel>> GetClassLevelsIQueryable()
+  {
+    var classLevels = FindAll(trackChanges: false);
+    return classLevels;
+  }
+
   //------------------------------------------------------------------------------
   //
   //                        GetClassLevelsAsync

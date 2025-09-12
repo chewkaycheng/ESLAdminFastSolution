@@ -43,9 +43,10 @@ public class CountryRepository :
   public async Task<ErrorOr<Country?>> GetCountryAsync(
     DynamicParameters parameters)
   {
-    return await GetSingleAsync(
+    var country =  await GetSingleAsync(
       DbConstsCountry.SQL_GET_BY_ID, 
       parameters);
+    return country;
   }
 
   public async Task<ErrorOr<Success>> CreateCountryAsync(DynamicParameters parameters)

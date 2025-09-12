@@ -31,6 +31,7 @@ public class LogoutUserCommandHandler :
     ITokenBlacklistService tokenBlacklistService) :
     base(repository, logger)
   {
+    _tokenBlacklistService = tokenBlacklistService;
   }
 
   public async Task<Results<Ok, ProblemDetails, InternalServerError>>

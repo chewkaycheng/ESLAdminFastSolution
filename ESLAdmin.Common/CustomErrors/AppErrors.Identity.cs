@@ -25,7 +25,7 @@ public static partial class AppErrors
   //
   //-------------------------------------------------------------------------------
   public static class IdentityExceptions
-  {
+  { 
     //-------------------------------------------------------------------------------
     //
     //                       InvalidArgumentException

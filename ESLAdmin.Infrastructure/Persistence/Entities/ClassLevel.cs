@@ -1,6 +1,4 @@
-﻿using ESLAdmin.Infrastructure.Persistence.Entities;
-
-namespace ESLAdmin.Features.Common.Infrastructure.Persistence.Entities;
+﻿namespace ESLAdmin.Infrastructure.Persistence.Entities;
 
 //------------------------------------------------------------------------------
 //

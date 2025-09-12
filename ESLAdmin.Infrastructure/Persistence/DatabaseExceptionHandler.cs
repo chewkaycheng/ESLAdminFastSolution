@@ -27,7 +27,6 @@ public static class DatabaseExceptionHandler
 
     return ex switch
     {
-
       ArgumentNullException ane => AppErrors
         .IdentityExceptions
         .InvalidArgumentException(ane.Message),
@@ -38,6 +37,9 @@ public static class DatabaseExceptionHandler
       ObjectDisposedException ode => 
         AppErrors.DatabaseExceptions.DatabaseException(
           $"Internal server error: Resource unavailable. {ode.Message}"),
+      NotSupportedException nse =>
+        AppErrors.DatabaseExceptions.DatabaseException(
+          $"Internal server error: Not supported. {nse.Message}"),
       InvalidOperationException ioe => AppErrors
         .IdentityExceptions
         .InvalidOperationException(ioe.Message),

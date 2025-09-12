@@ -1,7 +1,7 @@
 ﻿using Dapper;
 using ESLAdmin.Features.Common.Infrastructure.Persistence.Constants;
-using ESLAdmin.Features.Common.Infrastructure.Persistence.Entities;
 using ESLAdmin.Infrastructure.Persistence;
+using ESLAdmin.Infrastructure.Persistence.Entities;
 using FastEndpoints;
 
 namespace ESLAdmin.Features.ClassLevels.Endpoints.GetClassLevel;

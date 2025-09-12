@@ -1,11 +1,13 @@
 ﻿using Dapper;
 using ErrorOr;
-using ESLAdmin.Features.Common.Infrastructure.Persistence.Entities;
+using ESLAdmin.Infrastructure.Persistence.Entities;
 
 namespace ESLAdmin.Features.Common.Infrastructure.Persistence.Repositories.Interfaces;
 
 public interface IClassLevelRepository
 {
+  ErrorOr<IQueryable<ClassLevel>> GetClassLevelsIQueryable();
+
   Task<ErrorOr<IEnumerable<ClassLevel>>> GetClassLevelsAsync();
   
   Task<ErrorOr<ClassLevel?>> GetClassLevelAsync(

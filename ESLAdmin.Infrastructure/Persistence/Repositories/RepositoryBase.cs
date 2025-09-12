@@ -1,6 +1,6 @@
-﻿using ESLAdmin.Infrastructure.Persistence.DatabaseContexts.Interfaces;
+﻿using ESLAdmin.Infrastructure.Persistence.DatabaseContexts;
+using ESLAdmin.Infrastructure.Persistence.DatabaseContexts.Interfaces;
 using ESLAdmin.Infrastructure.Persistence.Repositories.Interfaces;
-using ESLAdmin.Logging.Interface;
 using Microsoft.Extensions.Logging;
 
 namespace ESLAdmin.Features.Repositories;
@@ -16,7 +16,7 @@ public partial class RepositoryBase<ReadT, WriteT> :
   where WriteT : class
 {
   protected IDbContextDapper _dbContextDapper;
-  //protected IDbContextEF? _dbContextEF;
+  protected DbContextEF? _dbContextEF;
   //protected IMessageLogger _messageLogger;
   protected ILogger _logger;
 
@@ -27,9 +27,11 @@ public partial class RepositoryBase<ReadT, WriteT> :
   //------------------------------------------------------------------------------
   public RepositoryBase(
     IDbContextDapper dbContextDapper,
-    ILogger logger)
+    ILogger logger,
+    DbContextEF? dbContextEF = null)
   {
     _dbContextDapper = dbContextDapper;
+    _dbContextEF = dbContextEF;
     _logger = logger;
     //_messageLogger = messageLogger;
   }
