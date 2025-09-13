@@ -1,0 +1,24 @@
+﻿@page "/radzentest"
+@rendermode InteractiveServer
+
+@* <RadzenButton Click="@ButtonClicked" Text="@ButtonLabel"></RadzenButton> *@
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+@currentCount;
+
+@code {
+	private int currentCount = 0;
+	string ButtonLabel = "Hi";
+
+
+	private void IncrementCount()
+	{
+		currentCount++;
+	}
+
+
+	void ButtonClicked()
+	{
+		ButtonLabel = "Hi There";
+		Console.WriteLine("TEST");
+	}
+}

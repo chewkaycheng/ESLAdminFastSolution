@@ -8,8 +8,10 @@
   <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
   <link rel="stylesheet" href="@Assets["app.css"]" />
   <link rel="stylesheet" href="@Assets["ESLAdminClient.styles.css"]" />
-  <link href="css/output.css" rel="stylesheet" />
+  
   <link rel="stylesheet" href="_content/Radzen.Blazor/css/material-base.css">
+  <link href="css/output.css" rel="stylesheet" />
+  <RadzenTheme Theme="material" />
   <ImportMap />
   <link rel="icon" type="image/png" href="favicon.png" />
   <HeadOutlet />
@@ -18,7 +20,7 @@
 <body>
   <Routes />
   <script src="_framework/blazor.web.js"></script>
-  <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
+  <script src="_content/Radzen.Blazor/Radzen.Blazor.js?v=@(typeof(Radzen.Colors).Assembly.GetName().Version)"></script>
 </body>
 
 </html>

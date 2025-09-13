@@ -1,5 +1,6 @@
 using ESLAdminClient.Components;
 using ESLAdminClient.Services;
+using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddRadzenComponents();
 builder.Services.AddScoped(sp =>
   new HttpClient
   {
