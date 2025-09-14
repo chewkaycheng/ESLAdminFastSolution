@@ -64,7 +64,7 @@ if (app.Environment.IsDevelopment())
   app.UseSwaggerGen();
 }
 app.UseMiddleware<JwtBlacklistMiddleware>();
-
+app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 
